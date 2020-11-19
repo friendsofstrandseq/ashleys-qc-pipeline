@@ -124,7 +124,8 @@ rule setup_ashleys:
         'ashleys-qc/environment/ashleys_env.yml'
     shell:
         '( cd ashleys-qc &&'
-        'python setup.py install ) &> {log}'
+        'python setup.py install &&'
+        'git checkout develop ) &> {log}'
 
 
 rule install_ashleys:
