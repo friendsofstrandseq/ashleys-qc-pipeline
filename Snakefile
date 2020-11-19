@@ -28,9 +28,8 @@ rule all:
            expand(INPUT_PATH + "{sample_name}.sort.mdup.bam", sample_name=all_files),
            expand(INPUT_PATH + "{sample_name}.sort.mdup.bam.bai", sample_name=all_files),
            expand(OUTPUT_PATH + '{feature_folder}/features.tsv', feature_folder='output'),
-           expand(OUTPUT_PATH + '{feature_folder}/prediction.tsv', feature_folder='output'),
-           expand(INPUT_PATH + 'ashleys_install_success.txt'),
-           expand(INPUT_PATH + 'ashleys_setup_success.txt')
+           expand(OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv', feature_folder='output'),
+           expand(INPUT_PATH + 'ashleys_install_success.txt')
 
 
 rule bwa_strandseq_to_reference_alignment:
@@ -91,50 +90,38 @@ rule generate_features:
     output:
         OUTPUT_PATH + '{feature_folder}/features.tsv'
     conda:
-        'ashleys-qc/environment/ashleys_env.yml' # run snakemake --use-conda
+        'environment/ashleys_env.yml' # run snakemake --use-conda
     params:
         windows = '5000000 2000000 1000000 800000 600000 400000 200000',
         jobs = 23,
         extension = '.sort.mdup.bam'
     shell:
-        './ashleys-qc/bin/ashleys.py features -f {input.path} -w {params.windows} -o {output} -j {params.jobs} --recursive_collect -e {params.extension}'
+        './ashleys-qc/bin/ashleys.py -j {params.jobs} features -f {input.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}'
 
 
 rule predict:
     input:
-        OUTPUT_PATH + '{feature_folder}/features.tsv'
+        ashleys = INPUT_PATH + 'ashleys_install_success.txt',
+        path = OUTPUT_PATH + '{feature_folder}/features.tsv'
     output:
-        OUTPUT_PATH + '{feature_folder}/prediction.tsv'
+        OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv'
     conda:
-        'ashleys_qc/environment/ashleys_env.yml'
+        'environment/ashleys_env.yml'
     params:
-        model = 'ashleys-qc/models/hgsvc_high-qual.pkl'
+        model = 'ashleys-qc/models/svc_default.pkl'
     shell:
-        './ashleys-qc/bin/ashleys.py predict -p {input} -o {output} -m {params.model}'
-
-
-rule setup_ashleys:
-    input:
-        INPUT_PATH + 'ashleys_install_success.txt'
-    output:
-        touch(INPUT_PATH + 'ashleys_setup_success.txt')
-    log:
-        'setup_ashleys.log'
-    conda:
-        'ashleys-qc/environment/ashleys_env.yml'
-    shell:
-        '( cd ashleys-qc &&'
-        'python setup.py install &&'
-        'git checkout develop ) &> {log}'
+        './ashleys-qc/bin/ashleys.py predict -p {input.path} -o {output} -m {params.model}'
 
 
 rule install_ashleys:
     input:
-        INPUT_PATH + 'ashleys_install.txt'
+        'ashleys_install.txt'
     output:
         touch(INPUT_PATH + 'ashleys_install_success.txt')
     log:
         'install_ashleys.log'
     shell:
         '( git clone https://github.com/friendsofstrandseq/ashleys-qc.git &&'
-        'conda env create -f ashleys-qc/environment/ashleys_env.yml) &> {log}'
+	'cd ashleys-qc &&'
+	'python setup.py develop &&'
+	'git checkout develop ) &> {log}'
