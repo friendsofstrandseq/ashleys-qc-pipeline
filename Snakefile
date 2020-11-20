@@ -123,5 +123,4 @@ rule install_ashleys:
     shell:
         '( git clone https://github.com/friendsofstrandseq/ashleys-qc.git &&'
         'cd ashleys-qc &&'
-        'git checkout develop &&'
         'python setup.py install ) &> {log}'
