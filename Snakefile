@@ -29,7 +29,7 @@ rule all:
            expand(INPUT_PATH + "{sample_name}.sort.mdup.bam.bai", sample_name=all_files),
            expand(OUTPUT_PATH + '{feature_folder}/features.tsv', feature_folder='output'),
            expand(OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv', feature_folder='output'),
-           expand(INPUT_PATH + 'ashleys_install_success.txt')
+           expand('ashleys-qc/ashleys_install_success.txt')
 
 
 rule bwa_strandseq_to_reference_alignment:
@@ -85,7 +85,7 @@ rule create_bai_files:
 
 rule generate_features:
     input:
-        ashleys = INPUT_PATH + 'ashleys_install_success.txt',
+        ashleys = 'ashleys-qc/ashleys_install_success.txt',
         path = INPUT_PATH
     output:
         OUTPUT_PATH + '{feature_folder}/features.tsv'
@@ -101,7 +101,7 @@ rule generate_features:
 
 rule predict:
     input:
-        ashleys = INPUT_PATH + 'ashleys_install_success.txt',
+        ashleys = 'ashleys-qc/ashleys_install_success.txt',
         path = OUTPUT_PATH + '{feature_folder}/features.tsv'
     output:
         OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv'
@@ -117,11 +117,11 @@ rule install_ashleys:
     input:
         'ashleys_install.txt'
     output:
-        touch(INPUT_PATH + 'ashleys_install_success.txt')
+        touch('ashleys-qc/ashleys_install_success.txt')
     log:
         'install_ashleys.log'
     shell:
         '( git clone https://github.com/friendsofstrandseq/ashleys-qc.git &&'
-	'cd ashleys-qc &&'
-	'python setup.py develop &&'
-	'git checkout develop ) &> {log}'
+        'cd ashleys-qc &&'
+        'git checkout develop &&'
+        'python setup.py install ) &> {log}'
