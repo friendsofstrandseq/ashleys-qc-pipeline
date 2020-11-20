@@ -86,6 +86,7 @@ rule create_bai_files:
 rule generate_features:
     input:
         ashleys = 'ashleys-qc/ashleys_install_success.txt',
+        bam =  [(INPUT_PATH + "{sample_name}.sort.mdup.bam".format(sample_name=sample_name)) for sample_name in all_files],
         path = INPUT_PATH
     output:
         OUTPUT_PATH + '{feature_folder}/features.tsv'
