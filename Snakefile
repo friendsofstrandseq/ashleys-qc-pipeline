@@ -7,29 +7,40 @@ OUTPUT_PATH = config['OUTPUT_PATH']
 threads = config['cores']
 
 
-def collect_input_data():
+def collect_input_data(collect_path):
     strand_seq_files = set()
-    for f in os.listdir(SRC_PATH):
-        if os.path.isfile(os.path.join(SRC_PATH, f)):
+    for f in os.listdir(collect_path):
+        if os.path.isfile(os.path.join(collect_path, f)):
             # remove _1.fastq.gz endings
-            strand_seq_files.add(f.rsplit('_', 1)[0])
+            strand_seq_files.add(f)#.rsplit('_', 1)[0])
             continue
 
     return strand_seq_files
 
+def collect_input_bam(collect_path):
+    strand_seq_files = set()
+    for f in os.listdir(INPUT_PATH):
+        if os.path.isfile(os.path.join(INPUT_PATH, f)):
+            # remove .bam endings
+            strand_seq_files.add(f.split('.', 1)[0])
+            continue
 
-all_files = collect_input_data()
+    return strand_seq_files
 
+all_files = collect_input_bam(INPUT_PATH)# + 'lansdorp/') # SRC_PATH
+print(all_files)
+window_list = '50_20_10_8_6_4_2' #[5000000, 3000000, 2000000, 1000000, 800000, 600000, 400000, 200000]
 
 rule all:
     input:
-           expand(INPUT_PATH + "{sample_name}.bam", sample_name=all_files),
-           expand(INPUT_PATH + "{sample_name}.sort.bam", sample_name=all_files),
-           expand(INPUT_PATH + "{sample_name}.sort.mdup.bam", sample_name=all_files),
-           expand(INPUT_PATH + "{sample_name}.sort.mdup.bam.bai", sample_name=all_files),
-           expand(OUTPUT_PATH + '{feature_folder}/features.tsv', feature_folder='output'),
-           expand(OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv', feature_folder='output'),
-           expand('ashleys-qc/ashleys_install_success.txt')
+           #expand(INPUT_PATH + "{sample_name}.bam", sample_name=all_files),
+           #expand(INPUT_PATH + "{sample_name}.sort.bam", sample_name=all_files),
+           #expand(INPUT_PATH + "{sample_name}.sort.mdup.bam", sample_name=all_files),
+	   #expand(INPUT_PATH + "{sample_name}.sort.mdup.bam.bai", sample_name=all_files),
+           expand(OUTPUT_PATH + '{feature_folder}/k562_features.tsv', feature_folder=window_list),
+	   #expand(OUTPUT_PATH + '{feature_folder}/{model}/hgsvc_{quality}.tsv', feature_folder=window_list, model=['gb', 'svc'], quality=['high-qual', 'ok-qual', 'clust-qual']),
+           #expand(OUTPUT_PATH + '{feature_folder}/prediction_probabilities.tsv', feature_folder=window_list),
+           #expand('ashleys-qc/ashleys_install_success.txt')
 
 
 rule bwa_strandseq_to_reference_alignment:
@@ -83,17 +94,35 @@ rule create_bai_files:
         'samtools index {input} {output}'
 
 
+rule train_model:
+    input:
+        features = OUTPUT_PATH + '{feature_folder}/features.tsv',
+        annotation = INPUT_PATH + 'annotation/hgsvc/{quality}.txt'
+    output:
+        OUTPUT_PATH + '{feature_folder}/{model}/hgsvc_{quality}.tsv'
+    conda:
+        'environment/ashleys_env.yml'
+    params:
+        model = '--{model}',
+        jobs = 20,
+        json = 'ashleys-qc/models/dict_{model}.json'
+    shell:
+        './ashleys-qc/bin/ashleys.py -j {params.jobs} train -p {input.features} -a {input.annotation} -o {output} {params.model} -js {params.json}'
+
+
 rule generate_features:
     input:
         ashleys = 'ashleys-qc/ashleys_install_success.txt',
-        bam =  [(INPUT_PATH + "{sample_name}.sort.mdup.bam".format(sample_name=sample_name)) for sample_name in all_files],
+        #bam =  [(INPUT_PATH + "{sample_name}".format(sample_name=sample_name)) for sample_name in all_files],
         path = INPUT_PATH
     output:
-        OUTPUT_PATH + '{feature_folder}/features.tsv'
+        OUTPUT_PATH + '{feature_folder}/k562_features.tsv'
     conda:
         'environment/ashleys_env.yml' # run snakemake --use-conda
     params:
         windows = '5000000 2000000 1000000 800000 600000 400000 200000',
+        #windows = '{feature_folder}',
+        #windows = '2000000 1000000 800000 600000 400000',
         jobs = 23,
         extension = '.sort.mdup.bam'
     shell:
