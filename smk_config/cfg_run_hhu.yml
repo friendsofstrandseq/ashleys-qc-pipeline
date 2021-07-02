@@ -1,0 +1,6 @@
+# Run environment config for HHU HPC "HILBERT"
+
+num_cpu_max: 72
+num_cpu_high: 24
+num_cpu_medium: 12
+num_cpu_low: 6

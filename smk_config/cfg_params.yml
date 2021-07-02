@@ -1,0 +1,10 @@
+# KNOWN CONFIG KEYS:
+# debug: bool
+# fastq_extensions: list of str
+# reference_file: full path to reference genome
+# reference_name: short name for reference
+# discard_sseq_aln: int (SAM flag)
+
+debug: True
+
+discard_sseq_aln: 2304

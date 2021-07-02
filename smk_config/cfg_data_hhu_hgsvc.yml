@@ -1,0 +1,13 @@
+
+# DATA CONFIG KEYS:
+# fastq_extensions: list of str [has default]
+# reference_file: full path to reference genome
+# reference_name: short name for reference
+# strandseq_data_root: Strand-seq libraries in subfolders (one sample per folder)
+
+
+reference_file: /gpfs/project/projects/medbioinf/data/references/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta
+reference_name: GRCh38
+
+strandseq_data_root: /gpfs/project/projects/medbioinf/data/hgsvc_strandseq
+
