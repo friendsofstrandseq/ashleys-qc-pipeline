@@ -1,0 +1,7 @@
+# Run environment config for average laptop
+# Set number of usable CPU cores by expected load
+
+num_cpu_max: 8
+num_cpu_high: 8
+num_cpu_medium: 4
+num_cpu_low: 4

@@ -2,7 +2,7 @@
 # DATA CONFIG KEYS:
 # fastq_extensions: list of str [has default]
 # reference_file: full path to reference genome
-# reference_name: short name for reference
+# reference_name: short name for reference (must be contained as-is in reference_file)
 # strandseq_data_root: Strand-seq libraries in subfolders (one sample per folder)
 
 
