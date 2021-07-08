@@ -1,0 +1,11 @@
+# Default runtime profile for average laptop
+
+cores: 8
+keep-going: True
+keep-incomplete: False
+rerun-incomplete: True
+restart-times: 0
+scheduler: ilp
+use-conda: True
+conda-frontend: mamba
+nolock: False
