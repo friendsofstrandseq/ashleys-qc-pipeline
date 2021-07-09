@@ -170,21 +170,23 @@ rule link_strandseq_libraries:
         import os
         os.makedirs(output[0], exist_ok=True)
 
+        LIBS_PER_SAMPLE = int(config.get('libs_per_sample', 96))
+
         sample = wildcards.sample
         if not sample in SSEQ_SAMPLE_IDS:
             raise ValueError(f'Sample value {sample} is invalid')
 
         library_link_pairs = SSEQ_LINK_PAIRS[sample]
-        if len(library_link_pairs) == 0:
-            raise ValueError(f'No libraries for symlinking for sample {sample}')
+        if len(library_link_pairs) != LIBS_PER_SAMPLE * 2:
+            raise ValueError(f'Only {len(library_link_pairs)} libraries for symlinking for sample {sample}')
 
         with open(log[0], 'w') as logfile:
             _ = logfile.write(f'#Linking {len(library_link_pairs)} data source files for sample: {sample}\n')
 
-        for src, trg in library_link_pairs:
-            os.symlink(src, trg)
-            _ = logfile.write(f'SRC\t{src}\n')
-            _ = logfile.write(f'TRG\t{trg}\n')
+            for src, trg in library_link_pairs:
+                os.symlink(src, trg)
+                _ = logfile.write(f'SRC\t{src}\n')
+                _ = logfile.write(f'TRG\t{trg}\n')
     ### END OF RUN BLOCK
 
 
@@ -329,9 +331,9 @@ rule compute_file_checksum:
     wildcard_constraints:
         sample = CONSTRAINT_SSEQ_SAMPLE_IDS
     resources:
-        mem_mb = 16,
+        mem_mb = lambda wildcards, attempt: 92 * attempt,
         runtime_hrs = 0,
-        runtime_min = 15
+        runtime_min = 10
     shell:
         'md5sum {input[0]} | cut -d " " -f 1 > {output[0]}'
             ' && '
