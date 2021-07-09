@@ -67,5 +67,6 @@ rule create_cluster_log_folders:
     output:
         stdout = directory('log/cluster_jobs/stdout'),
         stderr = directory('log/cluster_jobs/stderr')
+    priority: 1000
     shell:
         'mkdir -p {output.stdout} && mkdir -p {output.stderr}'
