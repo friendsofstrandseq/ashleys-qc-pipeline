@@ -146,6 +146,8 @@ if SSEQ_DATA_ROOT is None:
 
 SSEQ_SAMPLE_IDS, SSEQ_SMP_LIB_MAP, SSEQ_LINK_PAIRS = collect_strandseq_libraries(SSEQ_DATA_ROOT)
 
+CONSTRAINT_SSEQ_SAMPLE_IDS = '(' + '|'.join(SSEQ_SAMPLE_IDS) + ')'
+
 
 rule link_strandseq_libraries:
     """
@@ -162,12 +164,19 @@ rule link_strandseq_libraries:
         directory('input/fastq/{sample}')
     log:
         'log/input/fastq/{sample}.links.txt'
+    wildcard_constraints:
+        sample = CONSTRAINT_SSEQ_SAMPLE_IDS
     run:
         import os
         os.makedirs(output[0], exist_ok=True)
 
         sample = wildcards.sample
+        if not sample in SSEQ_SAMPLE_IDS:
+            raise ValueError(f'Sample value {sample} is invalid')
+
         library_link_pairs = SSEQ_LINK_PAIRS[sample]
+        if len(library_link_pairs) == 0:
+            raise ValueError(f'No libraries for symlinking for sample {sample}')
 
         with open(log[0], 'w') as logfile:
             _ = logfile.write(f'#Linking {len(library_link_pairs)} data source files for sample: {sample}\n')
@@ -217,6 +226,8 @@ rule bwa_strandseq_to_reference_alignment:
         mate1 = 'input/fastq/{sample}/{library_id}_1.fastq.gz',
         mate2 = 'input/fastq/{sample}/{library_id}_2.fastq.gz',
         ref_index = 'input/bwa_index/{reference}.bwt'
+    wildcard_constraints:
+        sample = CONSTRAINT_SSEQ_SAMPLE_IDS
     output:
         bam = temp(os.path.join(
             'output',
@@ -315,6 +326,8 @@ rule compute_file_checksum:
     output:
         'output/checksums/{sample}/{library_id}_1.file-chk.md5',
         'output/checksums/{sample}/{library_id}_2.file-chk.md5'
+    wildcard_constraints:
+        sample = CONSTRAINT_SSEQ_SAMPLE_IDS
     resources:
         mem_mb = 16,
         runtime_hrs = 0,
@@ -334,6 +347,7 @@ rule compute_sequence_checksum:
     output:
         'output/checksums/{sample}/{library_id}_{mate}.seq-chk.md5'
     wildcard_constraints:
+        sample = CONSTRAINT_SSEQ_SAMPLE_IDS,
         mate = '(1|2)'
     resources:
         mem_mb = lambda wildcards, attempt: 6144 + 2048 * attempt
