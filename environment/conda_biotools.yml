@@ -1,0 +1,8 @@
+name: biotools
+dependencies:
+  - Python=3.7
+  - pip
+  - bwa=0.7.17
+  - pigz=2.6
+  - sambamba=0.8.0
+  - samtools=1.10
