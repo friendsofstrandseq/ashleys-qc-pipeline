@@ -24,8 +24,8 @@ def find_file_extension(file_name, file_extensions):
 
 def annotate_libraries(mate1, mate2, fastq_ext):
 
-    ext1 = find_file_extension(mate1, fastq_extensions)
-    ext2 = find_file_extension(mate2, fastq_extensions)
+    ext1 = find_file_extension(mate1, fastq_ext)
+    ext2 = find_file_extension(mate2, fastq_ext)
     if not ext1 == ext2:
         raise ValueError(f'File extensions of file pair do not match: {mate1} / {mate2} -> {ext1} / {ext2}')
 
@@ -71,6 +71,8 @@ def collect_strandseq_libraries(root_path):
 
     allowed_chars = re.compile('^[0-9A-Za-z_\-\.]+$')
 
+    LIBS_PER_SAMPLE = int(config.get('libs_per_sample', 96))
+
     debug = bool(config.get('debug', False))
 
     sample_ids = []
@@ -101,7 +103,7 @@ def collect_strandseq_libraries(root_path):
 
         sample_library_ids = []
 
-        for i in range(num_libs, step=2):
+        for i in range(0, num_libs, 2):
             mate1 = sample_libraries[i]
             if allowed_chars.match(mate1) is None:
                 raise ValueError(f'Mate 1 ID contains invalid characters (allowed: [0-9A-Za-z_\-\.]): {mate1}')
@@ -124,10 +126,12 @@ def collect_strandseq_libraries(root_path):
             sample_library_ids.append(lib_id)
         multi_lib_ids = [n for n, c in col.Counter(sample_library_ids).most_common() if c > 1]
         if multi_lib_ids:
-            raise ValueError(f'Library IDs for sample {sample} encountered at least twice: {multi_lib_ids}')
+            raise ValueError(f'Library IDs for sample {sample_id} encountered at least twice: {multi_lib_ids}')
 
         sample_ids.append(sample_id)
-        library_ids[sample_id] = sorted(library_ids)
+        if len(sample_library_ids) % LIBS_PER_SAMPLE != 0:
+            raise ValueError(f'Number of libraries for sample {sample_id} is not a multiple of {LIBS_PER_SAMPLE}: {len(sample_library_ids)}')
+        library_ids[sample_id] = sorted(sample_library_ids)
 
     multi_sample_ids = [n for n, c in col.Counter(sample_ids).most_common() if c > 1]
     if multi_sample_ids:
