@@ -1,6 +1,7 @@
 
 localrules: link_strandseq_libraries,
-            collect_sample_alignments
+            collect_sample_alignments,
+            collect_sample_library_checksums
 
 
 def _keep_file(file_extensions, file_name):
@@ -316,7 +317,7 @@ rule mark_duplicate_reads_strandseq:
         mem_mb = lambda wildcards, attempt: config['num_cpu_low'] * 512 * attempt,
         runtime_hrs = lambda wildcards, attempt: attempt * attempt
     shell:
-        'sambamba markdup -t {threads} --overflow-list-size 600000 {input} {output} &> {log}'
+        'sambamba markdup -t {threads} --overflow-list-size 600000 {input.bam} {output.bam} &> {log}'
             ' && '
         'samtools index {output.bam} &>> {log}'
 
@@ -376,10 +377,7 @@ rule compute_sequence_checksum:
 
 rule collect_sample_library_checksums:
     """
-    This rule is not local b/c it creates quite
-    some I/O by reading all the checksum files.
-
-    Otherwise, convenience rule for housekeeping, i.e.
+    Convenience rule for housekeeping, i.e.
     collect all library checksums per sample
     """
     input:
@@ -410,8 +408,10 @@ rule collect_sample_library_checksums:
         ])
         _ = out_buffer.write(header + '\n')
         sample = wildcards.sample
+        if len(input.file_chk) != len(input.seq_chk):
+            raise ValueError(f'Missing checksum files: {len(input.file_chk)} file MD5 vs {len(input.seq_chk)} sequence MD5')
 
-        for fchk, schk in zip([sorted(input.file_chk), sorted(input.seq_chk)]):
+        for fchk, schk in zip(sorted(input.file_chk), sorted(input.seq_chk)):
             fchk_fname = os.path.basename(fchk)
             lib_id = fchk_fname.rsplit('_', 1)[0]
             mate = 1 if '_1.' in fchk_fname else 2
