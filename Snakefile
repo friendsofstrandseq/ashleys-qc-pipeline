@@ -35,6 +35,15 @@ if not SKIP_DATA_PROCESSING:
 ### Aggregate rules for data (pre-) processing ###
 ##################################################
 
+    rule link_sseq_input:
+        input:
+            'log/cluster_jobs/stderr',
+            expand(
+                'input/fastq/{sample}',
+                sample=SSEQ_SAMPLE_IDS
+            )
+
+
     rule run_sseq_checksums:
         input:
             'log/cluster_jobs/stderr',
