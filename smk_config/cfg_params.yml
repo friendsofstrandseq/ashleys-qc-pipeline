@@ -2,6 +2,6 @@
 # debug: bool
 # discard_sseq_aln: int (SAM flag)
 
-debug: True
+debug: False
 
 discard_sseq_aln: 2304
