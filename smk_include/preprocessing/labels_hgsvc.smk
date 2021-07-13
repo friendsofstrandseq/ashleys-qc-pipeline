@@ -1,3 +1,14 @@
+"""
+This module hard-codes the derivation of Strand-seq library quality labels
+for the HGSVC samples produced by the Korbel lab at EMBL.
+Hence, the rules in this module are NOT generic, and specific for the manually
+generated annotation tables (metadata) located in the 'annotation/' folder of
+the pipeline repository. If you want to derive a different set of labels for training
+a classification model for another project, DO NOT add preprocessing rules to this
+module (nomen est omen); make a new module and add metadata preprocessing rules for
+the respective project annotation to the new module.
+"""
+
 import pathlib
 import re
 

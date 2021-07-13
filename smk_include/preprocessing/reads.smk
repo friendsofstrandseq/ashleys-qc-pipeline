@@ -1,3 +1,30 @@
+"""
+This Snakemake module handles data preprocessing starting from
+(unfiltered) Strand-seq FASTQ files. Because Snakemake inherently
+works on the level of file names for determining an execution path,
+this module hard-codes a minimal set of assumptions about FASTQ file names:
+
+- a file name can be matched by: ^[0-9A-Za-z_\-\.]+$
+- a file name must contain the sample name as component
+- a file name has the mate number (1 or 2) as last component
+--- because the EMBL Strand-seq data have the uninformative word
+--- "sequence" as last component, exactly this one special case is
+--- handled as part of this module.
+- the two mates of a library are consecutive entries in the list of file names after lex-sorting
+
+If you need to modify this module, DO NOT hard-code file name transformations
+in the rules below to match the idiosyncratic naming conventions of
+project data. If you do this, it will most likely break this module for
+other project data. Move this type of preprocessing to a separate module
+and fix file names before using the ASHLEYS QC pipeline. Besides, you would
+also most likely violate three mantras of the Zen of Python:
+
+- Sparse is better than dense.
+- Readability counts.
+- Special cases aren't special enough to break the rules.
+
+"""
+
 
 localrules: link_strandseq_libraries,
             collect_sample_alignments,
@@ -33,7 +60,7 @@ def annotate_libraries(mate1, mate2, fastq_ext):
     lib1 = mate1.split(ext1)[0]
     lib2 = mate2.split(ext2)[0]
 
-    # this is an explicit "fix" for HGSVC b/c of the
+    # this is an explicit "fix" for EMBL data b/c of the
     # unnecessary "sequence" in the name as last static
     # component...
     if 'sequence' in lib1:
@@ -159,7 +186,7 @@ rule link_strandseq_libraries:
     The following assumptions are checked:
     - one sample per folder under the root data path
     - each library ID contains the sample ID
-    - library IDs of pairs/mates are at positions i and i+1 after lex-sorting
+    - library IDs of pairs/mates are at consecutive positions after lex-sorting
     """
     output:
         directory('input/fastq/{sample}')
@@ -353,7 +380,7 @@ rule compute_sequence_checksum:
         sample = CONSTRAINT_SSEQ_SAMPLE_IDS,
         mate = '(1|2)'
     resources:
-        mem_mb = lambda wildcards, attempt: 6144 + 2048 * attempt
+        mem_mb = lambda wildcards, attempt: 8192 * attempt
     run:
         import gzip
         import hashlib
@@ -365,7 +392,7 @@ rule compute_sequence_checksum:
                     continue
                 if ln % 2 == 0:
                     rd = line.strip()
-                    assert rd, f'FASTQ line iter failed in line {lb} for file {input[0]}'
+                    assert rd, f'FASTQ line iter failed in line {ln} for file {input[0]}'
                     reads.append(rd)
         
         reads = b''.join(sorted(reads))
