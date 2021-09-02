@@ -4,7 +4,7 @@
 # reference_file: full path to reference genome
 # reference_name: short name for reference (must be contained as-is in reference_file)
 # strandseq_data_root: Strand-seq libraries in subfolders (one sample per folder)
-# libs_per_sample: number of single-cell libraries per sample [has default: 96]
+# libs_per_plate: number of single-cell libraries per plate [has default: 96]
 
 
 reference_file: /gpfs/project/projects/medbioinf/data/references/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta

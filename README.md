@@ -74,10 +74,21 @@ to see examples for HPC cluster and testing (laptop) environments.
 
 ### Executing your pipeline run
 
-#### Stage 1: check input files
-It is strongly recommended to check if all input samples and files have been properly
-linked by the pipeline before triggering a complete run. Collecting and linking the input
-files takes only a few seconds. Run the pipeline as follows:
+#### Preliminaries: execution environment
+Snakemake pipelines can be executed on a local machine (e.g., a laptop or desktop), or
+on compute clusters distributing the work over several servers. In the latter case,
+it is helpful to use a cluster status script that enables Snakemake to communicate
+with the job scheduling system for more precise monitoring of the job status. This
+pipeline repository does not include such a job status script because these scripts
+are inherently system-specific. If in doubt, contact your local cluster IT support
+and ask them if they happen to provide such a script. You can find more info in the
+[official Snakemake documentation](https://snakemake.readthedocs.io/en/stable/tutorial/additional_features.html?highlight=cluster%20status#using-cluster-status).
+
+#### Stage 1: collect input files
+Before a complete pipeline run is triggered, it is necessary to check if all
+input samples and corresponding library files have been properly identified by
+the pipeline. Collecting and linking the input files takes only a few seconds.
+Run the pipeline as follows:
 
 ```bash
 snakemake -d ./YOUR_PIPELINE_RUN_FOLDER \
@@ -86,8 +97,13 @@ snakemake -d ./YOUR_PIPELINE_RUN_FOLDER \
     link_sseq_input
 ```
 
-You can now check if your Strand-seq FASTQ files have been properly picked up
-by the pipeline. You can find them under the path:
+You can now check that all Strand-seq samples have been properly picked up
+by the pipeline. Note that the pipeline automatically checks that (i) each sample
+has a number N of single-cell libraries where N has to be an integer multiple
+of the config parameter `libs_per_plate` (default: 96); (ii) the names of the FASTQ
+files enable an unambiguous pairing of 1st and 2nd mate per library, i.e. what is
+commonly indicated via the FASTQ suffix `_1` and `_2`. You can glance at the linked
+input files under this path:
 
 ```
 YOUR_PIPELINE_RUN_FOLDER/input/fastq/
@@ -101,6 +117,7 @@ YOUR_PIPELINE_RUN_FOLDER/input/fastq/
 snakemake -d ./YOUR_PIPELINE_RUN_FOLDER \
     --configfiles smk_config/cfg_params.yml YOUR_DATA_CONFIG.yml YOUR_RUN_CONFIG.yml \
     --profile PATH_TO_YOUR_PROFILE \
+    [--cluster-status CLUSTER_STATUS_SCRIPT] \
     run_sseq_checksums \
     run_sseq_alignments
 ```

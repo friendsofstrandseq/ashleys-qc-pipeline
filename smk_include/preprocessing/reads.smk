@@ -99,7 +99,7 @@ def collect_strandseq_libraries(root_path):
 
     allowed_chars = re.compile('^[0-9A-Za-z_\-\.]+$')
 
-    LIBS_PER_SAMPLE = int(config.get('libs_per_sample', 96))
+    LIBS_PER_PLATE = int(config.get('libs_per_plate', 96))
 
     debug = bool(config.get('debug', False))
 
@@ -157,8 +157,8 @@ def collect_strandseq_libraries(root_path):
             raise ValueError(f'Library IDs for sample {sample_id} encountered at least twice: {multi_lib_ids}')
 
         sample_ids.append(sample_id)
-        if len(sample_library_ids) % LIBS_PER_SAMPLE != 0:
-            raise ValueError(f'Number of libraries for sample {sample_id} is not a multiple of {LIBS_PER_SAMPLE}: {len(sample_library_ids)}')
+        if len(sample_library_ids) % LIBS_PER_PLATE != 0:
+            raise ValueError(f'Number of libraries for sample {sample_id} is not a multiple of {LIBS_PER_PLATE}: {len(sample_library_ids)}')
         library_ids[sample_id] = sorted(sample_library_ids)
 
     multi_sample_ids = [n for n, c in col.Counter(sample_ids).most_common() if c > 1]
@@ -198,15 +198,20 @@ rule link_strandseq_libraries:
         import os
         os.makedirs(output[0], exist_ok=True)
 
-        LIBS_PER_SAMPLE = int(config.get('libs_per_sample', 96))
+        LIBS_PER_PLATE = int(config.get('libs_per_plate', 96))
 
         sample = wildcards.sample
         if not sample in SSEQ_SAMPLE_IDS:
             raise ValueError(f'Sample value {sample} is invalid')
 
         library_link_pairs = SSEQ_LINK_PAIRS[sample]
-        if len(library_link_pairs) != LIBS_PER_SAMPLE * 2:
-            raise ValueError(f'Only {len(library_link_pairs)} libraries for symlinking for sample {sample}')
+        if len(library_link_pairs) != LIBS_PER_PLATE * 2:
+            # NB: by construction [collect_strandseq_libraries], we already
+            # know that the number of libraries modulo LIBS_PER_PLATE
+            # should be zero, but we check this here again to be sure
+            # that no one implemented something messing with SSEQ_LINK_PAIRS
+            if len(library_link_pairs) % LIBS_PER_PLATE != 0:
+                raise ValueError(f'Invalid number ({len(library_link_pairs)}) of libraries for symlinking for sample {sample}')
 
         with open(log[0], 'w') as logfile:
             _ = logfile.write(f'#Linking {len(library_link_pairs)} data source files for sample: {sample}\n')
