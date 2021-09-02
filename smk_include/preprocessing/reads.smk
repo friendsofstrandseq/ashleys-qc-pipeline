@@ -472,7 +472,7 @@ rule collect_sample_alignments:
             library_id=SSEQ_SMP_LIB_MAP[wildcards.sample]
         )
     output:
-        'output/alignments/{reference}_{sample}.libraries.txt'
+        'output/alignments/{sample}_{reference}.libraries.txt'
     run:
         if len(input.bam) == 0:
             raise ValueError(f'No alignments collected for {wildcards.reference} and sample {wildcards.sample}')
