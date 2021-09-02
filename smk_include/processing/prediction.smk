@@ -33,10 +33,10 @@ rule predict_strandseq_library_quality:
         setup_ok = 'repositories/ashleys-qc.setup.ok',
         features = 'output/feature_tables/{sample}_{reference}.features.tsv'
     output:
-        table = 'output/library_predictions/{sample}_{reference}.predictions.tsv',
+        table = 'output/library_predictions/{sample}_{reference}.{model}.predictions.tsv',
     conda:
         '../../environment/conda_ashleys.yml'
     params:
-        model_file = os.path.abspath('repositories/ashleys-qc/models/{}.pkl'.format(config['classification_model']))
+        model_file = lambda wildcards: os.path.abspath(f'repositories/ashleys-qc/models/{wildcards.model}.pkl'))
     shell:
         'ashleys.py predict -p {input.features} -o {output.table} -m {params.model_file}'

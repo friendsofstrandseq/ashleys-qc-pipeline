@@ -71,9 +71,10 @@ if not SKIP_DATA_PROCESSING:
         input:
             os.path.join(CLUSTER_LOG_FOLDER, 'stderr'),
             expand(
-                'output/library_predictions/{sample}_{reference}.predictions.tsv',
+                'output/library_predictions/{sample}_{reference}.{model}.predictions.tsv',
                 reference=REFERENCE_GENOME_NAME,  # set in preprocessing::reads.smk
-                sample=SSEQ_SAMPLE_IDS
+                sample=SSEQ_SAMPLE_IDS,
+                model=config['classification_model']
             )
 
 
