@@ -111,16 +111,17 @@ YOUR_PIPELINE_RUN_FOLDER/input/fastq/
 
 #### Stage 2: trigger a complete pipeline run
 
-**TODO** Incomplete - performs only checksum computation and alignments
-
 ```bash
 snakemake -d ./YOUR_PIPELINE_RUN_FOLDER \
     --configfiles smk_config/cfg_params.yml YOUR_DATA_CONFIG.yml YOUR_RUN_CONFIG.yml \
     --profile PATH_TO_YOUR_PROFILE \
     [--cluster-status CLUSTER_STATUS_SCRIPT] \
     run_sseq_checksums \
-    run_sseq_alignments
+    run_sample_predictions
 ```
+
+Note that you can stop the pipeline after the Strand-seq alignments by replacing
+`run_sample_predictions` with `run_sseq_alignments` in the above command.
 
 ## Citation
 If you are using this pipeline (or parts of it) in you own work, please cite the following paper:
