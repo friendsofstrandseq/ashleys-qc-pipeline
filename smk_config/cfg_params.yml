@@ -1,7 +1,10 @@
 # PARAMETER CONFIG KEYS:
 # debug: bool
 # discard_sseq_aln: int (SAM flag)
+# classification_model: which ASHLEYS model to use
 
 debug: False
 
 discard_sseq_aln: 2304
+
+classification_model: svc_stringent

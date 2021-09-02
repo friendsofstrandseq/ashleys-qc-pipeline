@@ -1,6 +1,8 @@
 # Run environment config for HHU HPC "HILBERT"
 # Set number of usable CPU cores by expected load
 
+cluster_log_folder: log/cluster_jobs
+
 num_cpu_max: 72
 num_cpu_high: 24
 num_cpu_medium: 12
