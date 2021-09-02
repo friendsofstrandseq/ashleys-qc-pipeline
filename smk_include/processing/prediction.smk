@@ -37,6 +37,6 @@ rule predict_strandseq_library_quality:
     conda:
         '../../environment/conda_ashleys.yml'
     params:
-        model_file = lambda wildcards: os.path.abspath(f'repositories/ashleys-qc/models/{wildcards.model}.pkl'))
+        model_file = lambda wildcards: os.path.abspath(f'repositories/ashleys-qc/models/{wildcards.model}.pkl')
     shell:
         'ashleys.py predict -p {input.features} -o {output.table} -m {params.model_file}'
