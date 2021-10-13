@@ -221,7 +221,10 @@ rule hgsvc_assign_binary_quality_labels:
         md['label_badQ'] = 0
 
         md.loc[md['sts_score'] == 1, 'label_highQ'] = 1
-        md.loc[(md['sts_score'] == 0.5) & ((md['final'] == 1) | (md['final'] == 0)), 'label_medQ'] = 1
+        # Sep. 2021 update: after feedback from ADS, the "final" column
+        # is considered binding for an sts_score of 0.5 => set as badQ
+        md.loc[(md['sts_score'] == 0.5) & (md['final'] == 1), 'label_medQ'] = 1
+        md.loc[(md['sts_score'] == 0.5) & (md['final'] == 0), 'label_badQ'] = 1
         md.loc[(md['sts_score'] == 0) & (md['good'] < rc_threshold), 'label_badQ'] = 1
 
         # 0 - label all control probes (everything with wgs characteristics)
