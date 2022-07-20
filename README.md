@@ -19,3 +19,7 @@ snakemake --use-conda --cores n
 ```
 
 Specify file directories in config_snakemake.yaml
+
+# TODO 
+- [ ] link predictions/selection to mosaicatcher
+- [ ] handle samples & config in a cleaner way
