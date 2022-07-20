@@ -177,7 +177,6 @@ elif config["hand_selection"] is True:
             "../scripts/utils/generate_exclude_file.py"
 
 
-    # DOCME : mosaic count read orientation ?
     rule mosaic_count:
         """
         rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
