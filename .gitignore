@@ -138,6 +138,7 @@ ashleys-qc/
 .tests/output/
 .tests/output2/
 .tests/data/
+.tests/data2/
 sandbox.zenodo.org
 sandbox.zenodo.org/
 
