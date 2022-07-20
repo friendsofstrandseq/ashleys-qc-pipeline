@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - master
-      - smk_workflow_catalog
-      - pooling-dev
+      - smk_wf_catalog
 
 jobs:
   # WORK
