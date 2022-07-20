@@ -11,8 +11,10 @@ clean selected BAM files. Based on the user wish, the pipeline can (A) identify 
   3. Sorting, Deduplicating and Indexing of BAM files through [Samtools](http://www.htslib.org/) & [sambaba](https://lomereiter.github.io/sambamba/docs/sambamba-view.html)
 
 At this point the pipeline can automatically continue through either:
-  4. A. Generating features and use ashleys-qc model to identify high-quality cells
-  4. B. Run [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher), plot figures and launch jupyter notebook for analysis
+
+  - 4A. Generating features and use ashleys-qc model to identify high-quality cells
+
+  - 4B. Run [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher), plot figures and launch jupyter notebook for analysis
 
 ## Setup
 ```
@@ -30,3 +32,6 @@ snakemake --use-conda --cores n
 ### TODO
 
 
+## Roadmap
+
+- [ ] HTML report (FastQC, mosaic count)
