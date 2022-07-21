@@ -7,14 +7,6 @@ on:
       - smk_wf_catalog
 
 jobs:
-  ##########
-  #TMP
-  build_container:
-    name: Build and push image
-    runs-on: ubuntu-20.04
-    env:
-      IMAGE_NAME: ashleys-qc-pipeline
-
   # WORK
   Formatting:
     runs-on: ubuntu-latest
