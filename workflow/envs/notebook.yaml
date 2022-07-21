@@ -1,0 +1,10 @@
+name: notebook
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - ipysheet
+  - jupyter
+  - ipywidgets
+  - pandas
+  - nbconvert==5.4.1
