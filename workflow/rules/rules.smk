@@ -66,19 +66,6 @@ rule samtools_sort_bam:
     shell:
         "samtools sort -O BAM -o {output} {input} 2>&1 > {log}"
 
-rule samtools_index:
-    input:
-        "{path}/{sample}/all/{cell}.sort.mdup.bam",
-    output:
-        "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-    log:
-        "{path}/{sample}/log/samtools_index/{cell}.log",
-    conda:
-        "../envs/mc_bioinfo_tools.yaml"
-    shell:
-        "samtools index {input} 2>&1 > {log}"
-
-
 rule mark_duplicates:
     input:
         bam="{path}/{sample}/all/{cell}.sort.bam",
@@ -94,6 +81,18 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
+if config["mosaicatcher_pipeline"] is False:
+    rule samtools_index:
+        input:
+            "{path}/{sample}/all/{cell}.sort.mdup.bam",
+        output:
+            "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+        log:
+            "{path}/{sample}/log/samtools_index/{cell}.log",
+        conda:
+            "../envs/mc_bioinfo_tools.yaml"
+        shell:
+            "samtools index {input} 2>&1 > {log}"
 
 ### ASHLEYS AUTOMATED ANALYSIS
 if config["hand_selection"] is False:
@@ -106,17 +105,24 @@ if config["hand_selection"] is False:
         conda:
             "../envs/ashleys.yaml"
         shell:
-            "( git clone https://github.com/friendsofstrandseq/ashleys-qc.git &&"
-            "cd ashleys-qc &&"
-            "python setup.py install ) &> {log}"
+            """
+            FOLDER='ashleys-qc'
+            if [ ! -d "$FOLDER" ] ; then
+                git clone https://github.com/friendsofstrandseq/ashleys-qc.git
+                cd "$FOLDER"
+                python setup.py install 2>&1 > {log}
+            fi
+            """
+
+
 
     rule generate_features:
         input:
-            ashleys="{path}/config/ashleys_install_success.txt",
+            # ashleys="{path}/config/ashleys_install_success.txt",
             bam=expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 zip,
-                path=folder_expand,
+                path=input_bam_location_expand,
                 sample=samples_expand,
                 cell=cell_expand,
             ),
@@ -131,30 +137,31 @@ if config["hand_selection"] is False:
             jobs=23,
             extension=".sort.mdup.bam",
             path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
+            chroms=config["chromosomes"]
         shell:
-            "./ashleys-qc/bin/ashleys.py -j {params.jobs} features -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+            "ashleys -j {params.jobs} features -c {params.chroms} -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
-    # TODO: pkl model to put in model folder
     rule predict:
         input:
             path="{path}/{sample}/predictions/ashleys_features.tsv",
         output:
-            "{path}/{sample}/predictions/predictions.tsv",
+            "{path}/{sample}/predictions/predictions_raw.tsv",
         log:
             "{path}/log/ashleys/{sample}/prediction_ashleys.log",
         conda:
             "../envs/ashleys.yaml"
         params:
-            model="ashleys-qc/models/svc_default.pkl",
+            model_default="workflow/models/svc_default.pkl",
+            model_stringent="workflow/models/svc_stringent.pkl",
         resources:
             mem_mb=get_mem_mb,
             time="10:00:00",
         shell:
-            "./ashleys-qc/bin/ashleys.py predict -p {input.path} -o {output} -m {params.model}"
+            "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
+
 
 ### HAND SELECTION VIA JUPYTER NB
 elif config["hand_selection"] is True:
-
     rule generate_exclude_file_for_mosaic_count:
         """
         rule fct: 
@@ -162,9 +169,9 @@ elif config["hand_selection"] is True:
         output:
         """
         input:
-            ancient("{path}/config/config_df.tsv".format(path=config["folder"])),
+            ancient("{path}/config/config_df_ashleys.tsv".format(path=config["input_bam_location"])),
             # ancient("config/samples.tsv"),
-            bam=config["folder"],
+            bam=config["input_bam_location"],
         output:
             "{path}/config/exclude_file",
         log:
@@ -175,18 +182,17 @@ elif config["hand_selection"] is True:
         #     "../envs/mc_base.yaml"
         script:
             "../scripts/utils/generate_exclude_file.py"
-
-
+            
     rule mosaic_count:
         """
         rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
-        input: For the moment, individual BAM file in the selected folder of the associated sample
+        input: For the moment, individual BAM file in the selected input_bam_location of the associated sample
         output: counts: read counts for the BAM file according defined window ; info file : summary statistics 
         """
         input:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["folder"],
+                path=config["input_bam_location"],
                 sample=samples,
                 cell=cell_per_sample[str(wc.sample)]
                 if wc.sample in cell_per_sample
@@ -194,7 +200,7 @@ elif config["hand_selection"] is True:
             ),
             bai=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-                path=config["folder"],
+                path=config["input_bam_location"],
                 sample=samples,
                 cell=cell_per_sample[str(wc.sample)],
             )
@@ -202,8 +208,8 @@ elif config["hand_selection"] is True:
             else "FOOBAR",
             excl="{path}/config/exclude_file",
         output:
-            counts="{path}/{sample}/counts/{sample}.txt.fixme.gz",
-            info="{path}/{sample}/counts/{sample}.info_raw",
+            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
         log:
             "{path}/log/counts/{sample}/mosaic_count.log",
         conda:
@@ -228,11 +234,11 @@ elif config["hand_selection"] is True:
 
     rule order_mosaic_count_output:
         input:
-            "{path}/{sample}/counts/{sample}.txt.fixme.gz",
+            "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
         output:
-            "{path}/{sample}/counts/{sample}.txt.gz",
+            "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
         log:
-            "{path}/log/counts/{sample}/{sample}.log",
+            "{path}/log/ashleys_counts/{sample}/{sample}.log",
         run:
             df = pd.read_csv(input[0], compression="gzip", sep="\t")
             df = df.sort_values(by=["sample", "cell", "chrom", "start"])
@@ -246,10 +252,10 @@ elif config["hand_selection"] is True:
         output: Generate figure based on couting results
         """
         input:
-            counts="{path}/{sample}/counts/{sample}.txt.gz",
-            info="{path}/{sample}/counts/{sample}.info",
+            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
         output:
-            "{path}/{sample}/plots/counts/CountComplete_{sample}.pdf",
+            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
         log:
             "{path}/log/plot_mosaic_counts/{sample}.log",
         conda:
@@ -265,7 +271,7 @@ elif config["hand_selection"] is True:
     # symlink not possible due to jupyter errors (too many symlink)
     rule cp_pdf_for_jupyter:
         input:  
-            pdf = "{path}/{sample}/plots/counts/CountComplete_{sample}.pdf",
+            pdf = expand("{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf", path=config["input_bam_location"], sample=samples),
         output:
             ".snakemake/scripts/CountComplete_{sample}.pdf"
         shell:
@@ -276,7 +282,7 @@ elif config["hand_selection"] is True:
             # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
             pdf_symlink = ".snakemake/scripts/CountComplete_{sample}.pdf",
         output:
-            path = "{path}/{sample}/predictions/predictions.tsv",
+            path = "{path}/{sample}/predictions/predictions_raw.tsv",
         log:
             "{path}/log/hand_selection/{sample}/prediction_probabilities.log"
         params:
@@ -285,6 +291,35 @@ elif config["hand_selection"] is True:
             "../envs/notebook.yaml"
         notebook:
             "../notebooks/hand_selection.py.ipynb"
+
+
+########################################################
+#                      DEV PART
+########################################################
+
+if config["use_light_data"] is False:
+    rule cp_predictions:
+        input:
+            path = "{path}/{sample}/predictions/predictions_raw.tsv",
+        output:
+            path = "{path}/{sample}/predictions/predictions.tsv",
+        shell:
+            "cp {input.path} {output.path}"
+
+elif config["use_light_data"] is True:
+    rule dev_all_cells_correct:
+        input:
+            path = "{path}/{sample}/predictions/predictions_raw.tsv",
+        output:
+            path = "{path}/{sample}/predictions/predictions.tsv",
+        run:
+            df = pd.read_csv(input.path, sep="\t")
+            df["prediction"] = 1
+            df["probability"] = 1
+            df.to_csv(output.path, sep="\t", index=False)
+        
+
+
 
 
 rule symlink_bam_bai:
@@ -309,7 +344,15 @@ rule remove_unselected:
         predictions = "{path}/{sample}/predictions/predictions.tsv",
         bam = lambda wc: expand(
                 "{path}/{sample}/selected/{cell}.sort.mdup.bam",
-                path=config["folder"],
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)]
+                if wc.sample in cell_per_sample
+                else "FOOBAR",
+            ),
+        bai = lambda wc: expand(
+                "{path}/{sample}/selected/{cell}.sort.mdup.bam.bai",
+                path=config["input_bam_location"],
                 sample=samples,
                 cell=cell_per_sample[str(wc.sample)]
                 if wc.sample in cell_per_sample
@@ -320,7 +363,7 @@ rule remove_unselected:
     log:
         "{path}/log/remove_unselected/{sample}.log"
     params:
-        path = config["folder"]
+        path = config["input_bam_location"]
     conda:
         "../envs/ashleys.yaml"
     script:

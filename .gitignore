@@ -143,7 +143,15 @@ sandbox.zenodo.org
 sandbox.zenodo.org/
 
 # !.tests/external_data/1000G_chr21.vcf.gz
-# !.tests/data/RPE-BM510/all/PE*.bam
+.tests/data_CHR21/RPE-BM510/all/
+.tests/data_CHR21/RPE-BM510/ashleys_counts/
+.tests/data_CHR21/RPE-BM510/fastqc/
+.tests/data_CHR21/RPE-BM510/predictions/
+.tests/data_CHR21/RPE-BM510/selected/
+.tests/data_CHR21/RPE-BM510/log/
+.tests/data_CHR21/config/
+.tests/data_CHR21/config/
+!.tests/data_CHR21/RPE-BM510/fastq/
 # !.tests/data/RPE-BM510/selected/PE*.bam
 
 # Notebooks PDF
