@@ -67,10 +67,10 @@ ________
 
 ### Boolean parameters
 
-| Parameter           | Comment                                                                                                                     | Default |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `containerized`     | Use or not the docker worfklow with pre-installed and compiled all required dependencies generation                         | False   |
-| `dl_external_files` | Allow to retrieve automatically external files (GRCh38 reference genome + 1000G SNV VCF file) required to run the pipeline. | False   |
+| Parameter           | Comment                                                                                                                     | Default | Experimental |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
+| `dl_external_files` | Allow to retrieve automatically external files (GRCh38 reference genome + 1000G SNV VCF file) required to run the pipeline. | False   |              |
+| `hand_selection`    | Allow to identify manually high-quality strand-seq libraries.                                                               | False   | X            |
 
 
 ### External files
@@ -160,4 +160,36 @@ Obviously, all other [snakemake CLI options](https://snakemake.readthedocs.io/en
 ## Roadmap
 
 - [ ] HTML report
+- [ ] Jupyter Notebook hand selection of cells
 - [ ] Zenodo FASTA + index files
+
+### Experimental feature: hand-selection of cells (Jupyter notebook)
+
+If you wish to identify yourself the cells that seem uncorrect according to your expertise, you can use the experimental interactive Jupyter Notebook by passing to the config argument `hand_selection=True`.
+By enabling this feature, the pipeline will run first [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count binning-based function, plot Strand-Seq karyotype figures, and then create a Jupyter Notebook for analysis.
+
+---
+**⚠️ Warning**
+
+If you are running the pipeline remotely and not on your local computer, you need first to open a [SSH tunnel (with Local Forwarding)](https://www.ssh.com/academy/ssh/tunneling/example#local-forwarding) in order to access the Jupyter Notebook webpage. 
+
+---
+
+The following command (that comprise snakemake `--notebook-listen` and `--edit-notebook` arguments, need to be passed to test this feature:
+
+```
+snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT> \
+  --notebook-listen localhost:5500 --edit-notebook <INPUT>/<SAMPLE>/predictions/predictions_raw.tsv
+```
+
+However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)):
+```
+snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT>
+```
+
+---
+**ℹ️ Note**
+
+Singularity execution is not available for this mode of execution at the moment.
+
+---

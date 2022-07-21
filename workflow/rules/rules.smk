@@ -275,7 +275,7 @@ elif config["hand_selection"] is True:
         output:
             ".snakemake/scripts/CountComplete_{sample}.pdf"
         log:
-            "{path}/log/cp_pdf_for_jupyter/{sample}.log"
+            ".snakemake/scripts/log/cp_pdf_for_jupyter/{sample}.log"
         shell:
             "ln -s {input.pdf} {output} > {log} 2>&1"
 
