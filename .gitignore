@@ -144,6 +144,7 @@ sandbox.zenodo.org/
 
 # !.tests/external_data/1000G_chr21.vcf.gz
 .tests/data_CHR21/RPE-BM510/all/
+.tests/data_CHR21/RPE-BM510/._.DS_Store
 .tests/data_CHR21/RPE-BM510/ashleys_counts/
 .tests/data_CHR21/RPE-BM510/fastqc/
 .tests/data_CHR21/RPE-BM510/predictions/
@@ -160,6 +161,8 @@ workflow/notebooks/CountComplete_*
 
 # Hidden files
 .DS_Store
+._.DS_Store
+
 .tests/._.DS_Store
 
 # Config
