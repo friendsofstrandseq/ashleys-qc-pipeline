@@ -4,7 +4,7 @@ min_version("7.4.0")
 
 configfile: "config/config.yaml"
 
-containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.0"
+containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.1"
 
 
 include: "workflow/rules/common.smk"
