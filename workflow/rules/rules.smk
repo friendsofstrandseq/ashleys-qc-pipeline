@@ -182,7 +182,7 @@ elif config["hand_selection"] is True:
         #     "../envs/mc_base.yaml"
         script:
             "../scripts/utils/generate_exclude_file.py"
-            
+
     rule mosaic_count:
         """
         rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
@@ -274,8 +274,10 @@ elif config["hand_selection"] is True:
             pdf = expand("{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf", path=config["input_bam_location"], sample=samples),
         output:
             ".snakemake/scripts/CountComplete_{sample}.pdf"
+        log:
+            "{path}/log/cp_pdf_for_jupyter/{sample}.log"
         shell:
-            "ln -s {input.pdf} {output}"
+            "ln -s {input.pdf} {output} > {log} 2>&1"
 
     rule notebook_hand_selection:
         input:
@@ -303,8 +305,12 @@ if config["use_light_data"] is False:
             path = "{path}/{sample}/predictions/predictions_raw.tsv",
         output:
             path = "{path}/{sample}/predictions/predictions.tsv",
+        log:
+            "{path}/log/cp_predictions/{sample}.log",
+        conda:
+            "../envs/ashleys.yaml"
         shell:
-            "cp {input.path} {output.path}"
+            "cp {input.path} {output.path} > {log} 2>&1"
 
 elif config["use_light_data"] is True:
     rule dev_all_cells_correct:
@@ -312,6 +318,8 @@ elif config["use_light_data"] is True:
             path = "{path}/{sample}/predictions/predictions_raw.tsv",
         output:
             path = "{path}/{sample}/predictions/predictions.tsv",
+        log:
+            "{path}/log/dev_all_cells_correct/{sample}.log",
         run:
             df = pd.read_csv(input.path, sep="\t")
             df["prediction"] = 1
