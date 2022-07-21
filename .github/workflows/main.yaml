@@ -30,7 +30,6 @@ jobs:
         with:
           directory: .
           snakefile: ./Snakefile
-          stagein: "mkdir -p .tests/data"
           args: "--lint"
   # Testing:
   #   runs-on: ubuntu-latest
