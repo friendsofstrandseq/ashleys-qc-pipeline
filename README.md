@@ -34,5 +34,5 @@ snakemake --use-conda --cores n
 
 ## Roadmap
 
-- [ ] HTML report (FastQC, mosaic count)
+- [ ] HTML report
 - [ ] Zenodo FASTA + index files
