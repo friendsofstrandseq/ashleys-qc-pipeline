@@ -139,7 +139,7 @@ if config["hand_selection"] is False:
             path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
             chroms=config["chromosomes"]
         shell:
-            "ashleys -j {params.jobs} features -c {params.chroms} -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+            "ashleys -j {params.jobs} features -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
     rule predict:
         input:
