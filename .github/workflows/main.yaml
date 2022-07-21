@@ -15,7 +15,7 @@ jobs:
     env:
       IMAGE_NAME: ashleys-qc-pipeline
 
-    if: github.ref == 'refs/heads/master'
+    # if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
 
