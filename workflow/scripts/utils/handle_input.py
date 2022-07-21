@@ -23,7 +23,7 @@ class HandleInput:
         folder = "all" if bam is True else "fastq"
         complete_df_list = list()
         # print(thisdir)
-        for sample in [e for e in os.listdir(thisdir) if e not in ["config", "log"]]:
+        for sample in [e for e in os.listdir(thisdir) if e not in ["config", "log", ".DS_Store", "._.DS_Store"]]:
             # print("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
             l_files_all = [f for f in os.listdir("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder)) if f.endswith(ext)]
             df = pd.DataFrame([{"File" : f} for f in l_files_all])
