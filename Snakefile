@@ -1,8 +1,11 @@
 from snakemake.utils import min_version
 
-min_version("7.4.1")
+min_version("7.4.0")
 
 configfile: "config/config.yaml"
+
+containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.0"
+
 
 include: "workflow/rules/common.smk"
 include: "workflow/rules/rules.smk"
