@@ -154,13 +154,64 @@ Obviously, all other [snakemake CLI options](https://snakemake.readthedocs.io/en
 
 ## Output
 
-### TODO
+### FastQC files
 
+---
+File path: `<FOLDER>/<SAMPLE>/fastqc/<CELL>.[1|2].[html|zip]`
+
+---
+
+You will be able to find all QC analysis of raw FastQ files in the path above.
+
+![fastqc](docs/images/fastqc.png)
+
+
+
+### ashleys-qc prediction
+
+---
+File path: `<FOLDER>/<SAMPLE>/predictions/predictions.tsv`
+
+---
+
+Ashleys predictions can be found at the path above.
+
+Predictions table are composed of 3 columns: the cell name, the binary prediction (1: Selected, 0: Unselected) and the associated probability of the SVC model (normal model with a binary cutoff of 0.5). 
+
+
+
+
+| cell                         | prediction | probability |
+| ---------------------------- | ---------- | ----------- |
+| BM510x3PE20405.sort.mdup.bam | 0          | 0           |
+| BM510x3PE20413.sort.mdup.bam | 0          | 0.43        |
+| BM510x3PE20409.sort.mdup.bam | 0          | 0.32        |
+| BM510x3PE20414.sort.mdup.bam | 1          | 0.85        |
+| BM510x3PE20412.sort.mdup.bam | 0          | 0.29        |
+| BM510x3PE20418.sort.mdup.bam | 1          | 0.84        |
+| BM510x3PE20401.sort.mdup.bam | 1          | 0.87        |
+| BM510x3PE20408.sort.mdup.bam | 1          | 0.88        |
+| BM510x3PE20410.sort.mdup.bam | 1          | 0.93        |
+| BM510x3PE20407.sort.mdup.bam | 1          | 0.89        |
+| BM510x3PE20402.sort.mdup.bam | 1          | 0.95        |
+| BM510x3PE20411.sort.mdup.bam | 1          | 0.91        |
+| BM510x3PE20404.sort.mdup.bam | 1          | 0.89        |
+| BM510x3PE20416.sort.mdup.bam | 1          | 0.84        |
+| BM510x3PE20406.sort.mdup.bam | 1          | 0.91        |
+| BM510x3PE20417.sort.mdup.bam | 1          | 0.93        |
+| BM510x3PE20403.sort.mdup.bam | 1          | 0.91        |
+| BM510x3PE20415.sort.mdup.bam | 1          | 0.9         |
+| BM510x3PE20419.sort.mdup.bam | 1          | 0.91        |
+
+
+### BAM selected folder 
+
+Selected libraries BAM files can be retrieved at the path above and can be used as an input for the [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline.git). 
 
 ## Roadmap
 
+- [X] Jupyter Notebook hand selection of cells
 - [ ] HTML report
-- [ ] Jupyter Notebook hand selection of cells
 - [ ] Zenodo FASTA + index files
 
 ### Experimental feature: hand-selection of cells (Jupyter notebook)
@@ -171,7 +222,7 @@ By enabling this feature, the pipeline will run first [mosaicatcher](https://git
 ---
 **⚠️ Warning**
 
-If you are running the pipeline remotely and not on your local computer, you need first to open a [SSH tunnel (with Local Forwarding)](https://www.ssh.com/academy/ssh/tunneling/example#local-forwarding) in order to access the Jupyter Notebook webpage. 
+If you are running the pipeline remotely and not on your local computer, you need first to open a [SSH tunnel (with Local Forwarding to port 5500)](https://www.ssh.com/academy/ssh/tunneling/example#local-forwarding) in order to access the Jupyter Notebook webpage. 
 
 ---
 
@@ -181,6 +232,23 @@ The following command (that comprise snakemake `--notebook-listen` and `--edit-n
 snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT> \
   --notebook-listen localhost:5500 --edit-notebook <INPUT>/<SAMPLE>/predictions/predictions_raw.tsv
 ```
+
+
+Then, you can accessing Jupyter Noteboin your favorite web browser through the following :
+```
+http://localhost:5500
+```
+
+You will need to open the following untitled with the following pattern : `tmp[XXX].hand_selection.py.ipynb` and follow the instructions inside it.
+
+![nb0](docs/images/nb_0.png)
+
+![nb1](docs/images/nb_1.png)
+
+![nb2](docs/images/nb_2.png)
+
+
+
 
 However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)):
 ```
