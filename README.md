@@ -31,7 +31,7 @@ conda create -n snakemake -c conda-forge -c bioconda "snakemake>=7.4.1" && conda
 git clone https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
 ```
 5. Download reference data for running your own analysis
-```s
+```
 snakemake --cores 1 --config dl_external_files=True
 ```
 6. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
