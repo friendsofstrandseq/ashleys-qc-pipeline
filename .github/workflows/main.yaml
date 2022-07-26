@@ -29,7 +29,7 @@ jobs:
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
-          snakefile: ./Snakefile
+          snakefile: ./workflow/Snakefile
           args: "--lint"
   # Testing:
   #   runs-on: ubuntu-latest
