@@ -3,8 +3,6 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
-
-
 # TODO: Adapt according reference
 rule dl_external_data:
     """
@@ -18,9 +16,9 @@ rule dl_external_data:
             keep_local=True,
         ),
     output:
-        touch("config_output/dl_external_data.ok"),
+        touch("sandbox.zenodo.org/config/dl_external_data.ok"),
     log:
-        touch("log/config_output/dl_external_data.ok"),
+        touch("sandbox.zenodo.org/log/config_output/dl_external_data.log"),
 
 
 # TODO: Adapt according reference
@@ -36,6 +34,6 @@ rule dl_external_data_index:
             keep_local=True,
         ),
     output:
-        touch("config_output/dl_external_data_index.ok"),
+        touch("sandbox.zenodo.org/config/dl_external_data_index.ok"),
     log:
-        touch("log/config_output/dl_external_data_index.ok"),
+        touch("sandbox.zenodo.org/log/config_output/dl_external_data_index.log"),
