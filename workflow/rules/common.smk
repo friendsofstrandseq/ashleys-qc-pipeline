@@ -1,6 +1,8 @@
 import pandas as pd
 import os, sys
 
+
+
 # MOVED OUTSIDE A SCRIPT TO PREVENT PATH ISSUES
 class HandleInput:
     def __init__(self, input_path, output_path, check_sm_tag=False, bam=True):
