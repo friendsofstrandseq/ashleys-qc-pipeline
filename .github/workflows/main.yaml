@@ -29,7 +29,7 @@ jobs:
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
-          snakefile: ./Snakefile
+          snakefile: ./workflow/Snakefile
           # stagein: "mamba env remove -n snakemake && mamba create -y -n snakemake -c conda-forge -c bioconda unzip snakemake pandas pysam tqdm imagemagick && source activate snakemake && ls -l && pwd"
           args: "--lint --config ashleys_pipeline=True"
   Testing:
