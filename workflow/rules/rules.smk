@@ -36,6 +36,7 @@ rule bwa_strandseq_to_reference_alignment:
     input:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
+        ref="{ref}".format(ref=config["reference"]),
         ref_index="{ref}.ann".format(ref=config["reference"]),
     output:
         bam="{path}/{sample}/all/{cell}.bam",
@@ -53,7 +54,7 @@ rule bwa_strandseq_to_reference_alignment:
     shell:
         "bwa mem -t {threads}"
         ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
-        " -v 2 {input.ref_index} {input.mate1} {input.mate2} 2> {log.bwa} | "
+        " -v 2 {input.ref} {input.mate1} {input.mate2} 2> {log.bwa} | "
         " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
 
 
