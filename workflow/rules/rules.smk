@@ -26,7 +26,7 @@ rule bwa_index:
     params:
         algorithm="bwtsw",
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
         time="10:00:00",
     wrapper:
         "v1.7.0/bio/bwa/index"
@@ -36,21 +36,25 @@ rule bwa_strandseq_to_reference_alignment:
     input:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
-        ref_index=config["reference"],
+        ref="{ref}".format(ref=config["reference"]),
+        ref_index="{ref}.ann".format(ref=config["reference"]),
     output:
-        bam=temp("{path}/{sample}/all/{cell}.bam"),
+        bam="{path}/{sample}/all/{cell}.bam",
     log:
         bwa="{path}/{sample}/log/{cell}.bwa.log",
         samtools="{path}/{sample}/log/{cell}.samtools.log",
     threads: 6
     params:
         idx_prefix=lambda wildcards, input: input.ref_index.rsplit(".", 1)[0],
+    resources:
+        mem_mb=get_mem_mb_heavy,
+        time="10:00:00",
     conda:
         "../envs/mc_bioinfo_tools.yaml"
     shell:
         "bwa mem -t {threads}"
         ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
-        " -v 2 {input.ref_index} {input.mate1} {input.mate2} 2> {log.bwa} | "
+        " -v 2 {input.ref} {input.mate1} {input.mate2} 2> {log.bwa} | "
         " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
 
 
@@ -61,6 +65,9 @@ rule samtools_sort_bam:
         temp("{path}/{sample}/all/{cell}.sort.bam"),
     log:
         "{path}/{sample}/log/samtools_sort/{cell}.log",
+    resources:
+        mem_mb=get_mem_mb,
+        time="10:00:00",
     conda:
         "../envs/mc_bioinfo_tools.yaml"
     shell:
@@ -97,25 +104,6 @@ if config["mosaicatcher_pipeline"] is False:
 ### ASHLEYS AUTOMATED ANALYSIS
 if config["hand_selection"] is False:
 
-    rule install_ashleys:
-        output:
-            touch("{path}/config/ashleys_install_success.txt"),
-        log:
-            "{path}/log/config/install_ashleys.log",
-        conda:
-            "../envs/ashleys.yaml"
-        shell:
-            """
-            FOLDER='ashleys-qc'
-            if [ ! -d "$FOLDER" ] ; then
-                git clone https://github.com/friendsofstrandseq/ashleys-qc.git
-                cd "$FOLDER"
-                python setup.py install 2>&1 > {log}
-            fi
-            """
-
-
-
     rule generate_features:
         input:
             # ashleys="{path}/config/ashleys_install_success.txt",
@@ -137,7 +125,9 @@ if config["hand_selection"] is False:
             jobs=23,
             extension=".sort.mdup.bam",
             path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
-            chroms=config["chromosomes"]
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time="10:00:00",
         shell:
             "ashleys -j {params.jobs} features -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
@@ -145,21 +135,23 @@ if config["hand_selection"] is False:
         input:
             path="{path}/{sample}/predictions/ashleys_features.tsv",
         output:
-            "{path}/{sample}/predictions/predictions_raw.tsv",
+            "{path}/{sample}/cell_selection/labels_raw.tsv",
         log:
             "{path}/log/ashleys/{sample}/prediction_ashleys.log",
         conda:
             "../envs/ashleys.yaml"
         params:
-            model_default="workflow/models/svc_default.pkl",
-            model_stringent="workflow/models/svc_stringent.pkl",
+            model_default="./workflow/ashleys_models/svc_default.pkl",
+            model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
         resources:
             mem_mb=get_mem_mb,
             time="10:00:00",
         shell:
             "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
 
-
+########################################################
+#                      DEV PART
+########################################################
 ### HAND SELECTION VIA JUPYTER NB
 elif config["hand_selection"] is True:
     rule generate_exclude_file_for_mosaic_count:
@@ -264,9 +256,9 @@ elif config["hand_selection"] is True:
             mem_mb=get_mem_mb,
         shell:
             """
-            LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+            LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
             """
-    
+
     # PDF must be in the jupyter directory
     # symlink not possible due to jupyter errors (too many symlink)
     rule cp_pdf_for_jupyter:
@@ -275,7 +267,7 @@ elif config["hand_selection"] is True:
         output:
             ".snakemake/scripts/CountComplete_{sample}.pdf"
         log:
-            ".snakemake/scripts/log/cp_pdf_for_jupyter/{sample}.log"
+            "{path}/log/cp_pdf_for_jupyter/{sample}.log"
         shell:
             "ln -s {input.pdf} {output} > {log} 2>&1"
 
@@ -295,16 +287,12 @@ elif config["hand_selection"] is True:
             "../notebooks/hand_selection.py.ipynb"
 
 
-########################################################
-#                      DEV PART
-########################################################
-
 if config["use_light_data"] is False:
     rule cp_predictions:
         input:
-            path = "{path}/{sample}/predictions/predictions_raw.tsv",
+            path = "{path}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path = "{path}/{sample}/predictions/predictions.tsv",
+            path = "{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/cp_predictions/{sample}.log",
         conda:
@@ -312,67 +300,19 @@ if config["use_light_data"] is False:
         shell:
             "cp {input.path} {output.path} > {log} 2>&1"
 
+# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
 elif config["use_light_data"] is True:
     rule dev_all_cells_correct:
         input:
-            path = "{path}/{sample}/predictions/predictions_raw.tsv",
+            path = "{path}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path = "{path}/{sample}/predictions/predictions.tsv",
+            path = "{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/dev_all_cells_correct/{sample}.log",
         run:
             df = pd.read_csv(input.path, sep="\t")
             df["prediction"] = 1
             df["probability"] = 1
+            df.loc[df["cell"].str.contains("05"), "prediction"] = 0
+            df.loc[df["cell"].str.contains("12"), "prediction"] = 0
             df.to_csv(output.path, sep="\t", index=False)
-        
-
-
-
-
-rule symlink_bam_bai:
-    input:
-        bam = "{path}/{sample}/all/{cell}.sort.mdup.bam",
-        bai = "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-    output: 
-        bam = "{path}/{sample}/selected/{cell}.sort.mdup.bam",
-        bai = "{path}/{sample}/selected/{cell}.sort.mdup.bam.bai",
-    log:
-        "{path}/log/symlink/{sample}/{cell}.log"
-    conda:
-        "../envs/ashleys.yaml"
-    shell:
-        """
-        ln -s {input.bam} {output.bam} && touch -h {output.bam} > {log} 2>&1
-        ln -s {input.bai} {output.bai} && touch -h {output.bai} > {log} 2>&1
-        """
-
-rule remove_unselected:
-    input:
-        predictions = "{path}/{sample}/predictions/predictions.tsv",
-        bam = lambda wc: expand(
-                "{path}/{sample}/selected/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=samples,
-                cell=cell_per_sample[str(wc.sample)]
-                if wc.sample in cell_per_sample
-                else "FOOBAR",
-            ),
-        bai = lambda wc: expand(
-                "{path}/{sample}/selected/{cell}.sort.mdup.bam.bai",
-                path=config["input_bam_location"],
-                sample=samples,
-                cell=cell_per_sample[str(wc.sample)]
-                if wc.sample in cell_per_sample
-                else "FOOBAR",
-            ),
-    output:
-        "{path}/config/{sample}_selected_cells.ok"
-    log:
-        "{path}/log/remove_unselected/{sample}.log"
-    params:
-        path = config["input_bam_location"]
-    conda:
-        "../envs/ashleys.yaml"
-    script:
-        "../scripts/utils/rm_unselected_cells.py"

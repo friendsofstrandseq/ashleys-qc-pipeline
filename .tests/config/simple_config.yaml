@@ -1,0 +1,24 @@
+## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
+input_bam_location: ".tests/data_CHR21"
+# Reference genome used by BWA to map FASTQ files
+reference: .tests/external_data/chr21.fna
+# Enable / Disable download of external files (1000G SNV & Fasta ref genome)
+dl_external_files: False
+# Overwrite ASHLEYS PREDICTIONS
+use_light_data: True
+
+############################################################################
+#                          EXPERIMENTAL PARAMETERS
+############################################################################
+# Boolean parameters
+## Is the pipeline called used as a submodule in mosaicatcher-pipeline?
+mosaicatcher_pipeline: False
+## Enable/Disable hand selection through Jupyter Notebook
+hand_selection: False
+
+# Window size used by mosaic binning algorithm
+window: 100000
+
+# Chromosomes list to process
+chromosomes:
+  - chr21

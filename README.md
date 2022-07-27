@@ -42,7 +42,6 @@ snakemake --cores 6 --config input_bam_location=<PATH>/ashleys-qc-pipeline/.test
 ```
 snakemake --cores 6 --config input_bam_location=<PATH> --use-conda --use-singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60 
 ```
-## Parameters
 
 
 # Parameters
