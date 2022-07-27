@@ -141,8 +141,8 @@ if config["hand_selection"] is False:
         conda:
             "../envs/ashleys.yaml"
         params:
-            model_default="./workflow/ashleys_models/svc_default.pkl",
-            model_stringent="./workflow/models/svc_stringent.pkl",
+            model_default="workflow/ashleys_models/svc_default.pkl",
+            model_stringent="workflow/models/svc_stringent.pkl",
         resources:
             mem_mb=get_mem_mb,
             time="10:00:00",
