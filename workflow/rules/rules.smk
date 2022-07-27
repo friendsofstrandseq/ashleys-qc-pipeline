@@ -36,7 +36,7 @@ rule bwa_strandseq_to_reference_alignment:
     input:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
-        ref_index=config["reference"],
+        ref_index="{ref}.ann".format(ref=config["reference"]),
     output:
         bam="{path}/{sample}/all/{cell}.bam",
     log:
@@ -313,7 +313,8 @@ elif config["use_light_data"] is True:
             df = pd.read_csv(input.path, sep="\t")
             df["prediction"] = 1
             df["probability"] = 1
-            df.loc[df["cell"].str.contains("9"), "prediction"] = 0
+            df.loc[df["cell"].str.contains("05"), "prediction"] = 0
+            df.loc[df["cell"].str.contains("12"), "prediction"] = 0
             df.to_csv(output.path, sep="\t", index=False)
  ########################################################       
 
