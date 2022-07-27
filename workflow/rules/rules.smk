@@ -153,140 +153,138 @@ if config["hand_selection"] is False:
 #                      DEV PART
 ########################################################
 ### HAND SELECTION VIA JUPYTER NB
-# elif config["hand_selection"] is True:
-#     rule generate_exclude_file_for_mosaic_count:
-#         """
-#         rule fct: 
-#         input:
-#         output:
-#         """
-#         input:
-#             ancient("{path}/config/config_df_ashleys.tsv".format(path=config["input_bam_location"])),
-#             # ancient("config/samples.tsv"),
-#             bam=config["input_bam_location"],
-#         output:
-#             "{path}/config/exclude_file",
-#         log:
-#             "{path}/log/config/exclude_file.log",
-#         params:
-#             chroms=config["chromosomes"],
-#         # conda:
-#         #     "../envs/mc_base.yaml"
-#         script:
-#             "../scripts/utils/generate_exclude_file.py"
-# 
-#     rule mosaic_count:
-#         """
-#         rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
-#         input: For the moment, individual BAM file in the selected input_bam_location of the associated sample
-#         output: counts: read counts for the BAM file according defined window ; info file : summary statistics 
-#         """
-#         input:
-#             bam=lambda wc: expand(
-#                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
-#                 path=config["input_bam_location"],
-#                 sample=samples,
-#                 cell=cell_per_sample[str(wc.sample)]
-#                 if wc.sample in cell_per_sample
-#                 else "FOOBAR",
-#             ),
-#             bai=lambda wc: expand(
-#                 "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-#                 path=config["input_bam_location"],
-#                 sample=samples,
-#                 cell=cell_per_sample[str(wc.sample)],
-#             )
-#             if wc.sample in cell_per_sample
-#             else "FOOBAR",
-#             excl="{path}/config/exclude_file",
-#         output:
-#             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-#             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-#         log:
-#             "{path}/log/counts/{sample}/mosaic_count.log",
-#         conda:
-#             "../envs/mc_bioinfo_tools.yaml"
-#         params:
-#             window=config["window"],
-#         resources:
-#             mem_mb=get_mem_mb,
-#         shell:
-#             """
-#             mosaicatcher count \
-#                 --verbose \
-#                 --do-not-blacklist-hmm \
-#                 -o {output.counts} \
-#                 -i {output.info} \
-#                 -x {input.excl} \
-#                 -w {params.window} \
-#                 {input.bam} \
-#             > {log} 2>&1
-#             """
-# 
-# 
-#     rule order_mosaic_count_output:
-#         input:
-#             "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-#         output:
-#             "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-#         log:
-#             "{path}/log/ashleys_counts/{sample}/{sample}.log",
-#         run:
-#             df = pd.read_csv(input[0], compression="gzip", sep="\t")
-#             df = df.sort_values(by=["sample", "cell", "chrom", "start"])
-#             df.to_csv(output[0], index=False, compression="gzip", sep="\t")
-# 
-# 
-#     rule plot_mosaic_counts:
-#         """
-#         rule fct: Plot function of read counts for each bam file
-#         input: mosaic count outputs (counts & info)
-#         output: Generate figure based on couting results
-#         """
-#         input:
-#             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-#             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-#         output:
-#             "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-#         log:
-#             "{path}/log/plot_mosaic_counts/{sample}.log",
-#         conda:
-#             "../envs/rtools.yaml"
-#         resources:
-#             mem_mb=get_mem_mb,
-#         shell:
-#             """
-#             LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
-#             """
-# 
-#     # PDF must be in the jupyter directory
-#     # symlink not possible due to jupyter errors (too many symlink)
-#     rule cp_pdf_for_jupyter:
-#         input:  
-#             pdf = expand("{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf", path=config["input_bam_location"], sample=samples),
-#         output:
-#             ".snakemake/scripts/CountComplete_{sample}.pdf"
-#         log:
-#             "{path}/log/cp_pdf_for_jupyter/{sample}.log"
-#         shell:
-#             "ln -s {input.pdf} {output} > {log} 2>&1"
-# 
-#     rule notebook_hand_selection:
-#         input:
-#             # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
-#             pdf_symlink = ".snakemake/scripts/CountComplete_{sample}.pdf",
-#         output:
-#             path = "{path}/{sample}/predictions/predictions_raw.tsv",
-#         log:
-#             "{path}/log/hand_selection/{sample}/prediction_probabilities.log"
-#         params:
-#             cell_per_sample = cell_per_sample
-#         conda:
-#             "../envs/notebook.yaml"
-#         notebook:
-#             "../notebooks/hand_selection.py.ipynb"
+elif config["hand_selection"] is True:
+    rule generate_exclude_file_for_mosaic_count:
+        """
+        rule fct: 
+        input:
+        output:
+        """
+        input:
+            ancient("{path}/config/config_df_ashleys.tsv".format(path=config["input_bam_location"])),
+            # ancient("config/samples.tsv"),
+            bam=config["input_bam_location"],
+        output:
+            "{path}/config/exclude_file",
+        log:
+            "{path}/log/config/exclude_file.log",
+        params:
+            chroms=config["chromosomes"],
+        # conda:
+        #     "../envs/mc_base.yaml"
+        script:
+            "../scripts/utils/generate_exclude_file.py"
+
+    rule mosaic_count:
+        """
+        rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
+        input: For the moment, individual BAM file in the selected input_bam_location of the associated sample
+        output: counts: read counts for the BAM file according defined window ; info file : summary statistics 
+        """
+        input:
+            bam=lambda wc: expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam",
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)]
+                if wc.sample in cell_per_sample
+                else "FOOBAR",
+            ),
+            bai=lambda wc: expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)],
+            )
+            if wc.sample in cell_per_sample
+            else "FOOBAR",
+            excl="{path}/config/exclude_file",
+        output:
+            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+        log:
+            "{path}/log/counts/{sample}/mosaic_count.log",
+        conda:
+            "../envs/mc_bioinfo_tools.yaml"
+        params:
+            window=config["window"],
+        resources:
+            mem_mb=get_mem_mb,
+        shell:
+            """
+            mosaicatcher count \
+                --verbose \
+                --do-not-blacklist-hmm \
+                -o {output.counts} \
+                -i {output.info} \
+                -x {input.excl} \
+                -w {params.window} \
+                {input.bam} \
+            > {log} 2>&1
+            """
 
 
+    rule order_mosaic_count_output:
+        input:
+            "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
+        output:
+            "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
+        log:
+            "{path}/log/ashleys_counts/{sample}/{sample}.log",
+        run:
+            df = pd.read_csv(input[0], compression="gzip", sep="\t")
+            df = df.sort_values(by=["sample", "cell", "chrom", "start"])
+            df.to_csv(output[0], index=False, compression="gzip", sep="\t")
+
+
+    rule plot_mosaic_counts:
+        """
+        rule fct: Plot function of read counts for each bam file
+        input: mosaic count outputs (counts & info)
+        output: Generate figure based on couting results
+        """
+        input:
+            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+        output:
+            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+        log:
+            "{path}/log/plot_mosaic_counts/{sample}.log",
+        conda:
+            "../envs/rtools.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        shell:
+            """
+            LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+            """
+
+    # PDF must be in the jupyter directory
+    # symlink not possible due to jupyter errors (too many symlink)
+    rule cp_pdf_for_jupyter:
+        input:  
+            pdf = expand("{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf", path=config["input_bam_location"], sample=samples),
+        output:
+            ".snakemake/scripts/CountComplete_{sample}.pdf"
+        log:
+            "{path}/log/cp_pdf_for_jupyter/{sample}.log"
+        shell:
+            "ln -s {input.pdf} {output} > {log} 2>&1"
+
+    rule notebook_hand_selection:
+        input:
+            # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
+            pdf_symlink = ".snakemake/scripts/CountComplete_{sample}.pdf",
+        output:
+            path = "{path}/{sample}/predictions/predictions_raw.tsv",
+        log:
+            "{path}/log/hand_selection/{sample}/prediction_probabilities.log"
+        params:
+            cell_per_sample = cell_per_sample
+        conda:
+            "../envs/notebook.yaml"
+        notebook:
+            "../notebooks/hand_selection.py.ipynb"
 
 
 if config["use_light_data"] is False:
@@ -302,6 +300,7 @@ if config["use_light_data"] is False:
         shell:
             "cp {input.path} {output.path} > {log} 2>&1"
 
+# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
 elif config["use_light_data"] is True:
     rule dev_all_cells_correct:
         input:
@@ -317,54 +316,3 @@ elif config["use_light_data"] is True:
             df.loc[df["cell"].str.contains("05"), "prediction"] = 0
             df.loc[df["cell"].str.contains("12"), "prediction"] = 0
             df.to_csv(output.path, sep="\t", index=False)
- ########################################################       
-
-
-
-
-# rule symlink_bam_bai:
-#     input:
-#         bam = "{path}/{sample}/all/{cell}.sort.mdup.bam",
-#         bai = "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-#     output: 
-#         bam = "{path}/{sample}/selected/{cell}.sort.mdup.bam",
-#         bai = "{path}/{sample}/selected/{cell}.sort.mdup.bam.bai",
-#     log:
-#         "{path}/log/symlink/{sample}/{cell}.log"
-#     conda:
-#         "../envs/ashleys.yaml"
-#     shell:
-#         """
-#         ln -s {input.bam} {output.bam} && touch -h {output.bam} > {log} 2>&1
-#         ln -s {input.bai} {output.bai} && touch -h {output.bai} > {log} 2>&1
-#         """
-
-# rule remove_unselected:
-#     input:
-#         predictions = "{path}/{sample}/predictions/predictions.tsv",
-#         bam = lambda wc: expand(
-#                 "{path}/{sample}/selected/{cell}.sort.mdup.bam",
-#                 path=config["input_bam_location"],
-#                 sample=samples,
-#                 cell=cell_per_sample[str(wc.sample)]
-#                 if wc.sample in cell_per_sample
-#                 else "FOOBAR",
-#             ),
-#         bai = lambda wc: expand(
-#                 "{path}/{sample}/selected/{cell}.sort.mdup.bam.bai",
-#                 path=config["input_bam_location"],
-#                 sample=samples,
-#                 cell=cell_per_sample[str(wc.sample)]
-#                 if wc.sample in cell_per_sample
-#                 else "FOOBAR",
-#             ),
-#     output:
-#         "{path}/config/{sample}_selected_cells.ok"
-#     log:
-#         "{path}/log/remove_unselected/{sample}.log"
-#     params:
-#         path = config["input_bam_location"]
-#     conda:
-#         "../envs/ashleys.yaml"
-#     script:
-#         "../scripts/utils/rm_unselected_cells.py"
