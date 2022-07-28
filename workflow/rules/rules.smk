@@ -261,19 +261,20 @@ elif config["hand_selection"] is True:
 
 
 # symlink not possible due to jupyter errors (too many symlink)
-rule cp_pdf_for_jupyter:
-    input:
-        pdf=expand(
-            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-            path=config["input_bam_location"],
-            sample=samples,
-        ),
-    output:
-        ".snakemake/scripts/CountComplete_{sample}.pdf",
-    log:
-        "{path}/log/cp_pdf_for_jupyter/{sample}.log",
-    shell:
-        "ln -s {input.pdf} {output} > {log} 2>&1"
+# FIXME : linting 
+# rule cp_pdf_for_jupyter:
+#     input:
+#         pdf=expand(
+#             "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+#             path=config["input_bam_location"],
+#             sample=samples,
+#         ),
+#     output:
+#         ".snakemake/scripts/CountComplete_{sample}.pdf",
+#     log:
+#         "{path}/log/cp_pdf_for_jupyter/{sample}.log",
+#     shell:
+#         "ln -s {input.pdf} {output} > {log} 2>&1"
 
 
 rule notebook_hand_selection:
