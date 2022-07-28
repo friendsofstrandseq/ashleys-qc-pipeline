@@ -3,7 +3,7 @@ name: ashleys-qc-pipeline workflow checks
 on:
   push:
     branches:
-      - master
+      - main
       - smk_wf_catalog
 
 jobs:
