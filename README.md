@@ -1,6 +1,7 @@
+![logo](docs/images/logo.png)
+
 [![Workflow checks](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml/badge.svg)](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml)
 [![Snakemake](https://img.shields.io/badge/snakemake-≥7.4.0-brightgreen.svg)](https://snakemake.github.io)
-
 
 _____________
 Strand-Seq Quality Control Pipeline based on ashleys-qc
