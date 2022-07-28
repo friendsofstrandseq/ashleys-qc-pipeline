@@ -261,7 +261,7 @@ elif config["hand_selection"] is True:
 
 
 # symlink not possible due to jupyter errors (too many symlink)
-# FIXME : linting 
+# FIXME : linting
 # rule cp_pdf_for_jupyter:
 #     input:
 #         pdf=expand(
