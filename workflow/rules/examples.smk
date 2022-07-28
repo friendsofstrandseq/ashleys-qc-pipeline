@@ -3,6 +3,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
+
 # TODO: Adapt according reference
 rule dl_external_data:
     """
