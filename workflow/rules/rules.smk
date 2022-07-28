@@ -2,7 +2,12 @@ rule fastqc:
     input:
         "{path}/{sample}/fastq/{cell}.{pair}.fastq.gz",
     output:
-        html="{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+        html=report(
+            "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+            category="FastQC",
+            subcategory="{sample}",
+            labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
+            ),
         zip="{path}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
     params:
         "--quiet",
