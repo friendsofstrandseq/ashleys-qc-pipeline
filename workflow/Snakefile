@@ -2,7 +2,9 @@ from snakemake.utils import min_version
 
 min_version("7.4.0")
 
+
 configfile: "config/config.yaml"
+
 
 # containerized: "docker://weber8thomas/ashleys-qc-pipeline:latest"
 
@@ -11,12 +13,17 @@ include: "rules/common.smk"
 include: "rules/rules.smk"
 include: "rules/examples.smk"
 
+
 if config["dl_external_files"] is True:
+
     rule all:
         input:
             rules.dl_external_data.output,
-            rules.dl_external_data_index.output
+            rules.dl_external_data_index.output,
+
+
 else:
+
     rule all:
         input:
-            get_final_output()
+            get_final_output(),

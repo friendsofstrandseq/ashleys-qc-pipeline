@@ -7,7 +7,7 @@ rule fastqc:
             category="FastQC",
             subcategory="{sample}",
             labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
-            ),
+        ),
         zip="{path}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
     params:
         "--quiet",
@@ -78,6 +78,7 @@ rule samtools_sort_bam:
     shell:
         "samtools sort -O BAM -o {output} {input} 2>&1 > {log}"
 
+
 rule mark_duplicates:
     input:
         bam="{path}/{sample}/all/{cell}.sort.bam",
@@ -93,7 +94,9 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
+
 if config["mosaicatcher_pipeline"] is False:
+
     rule samtools_index:
         input:
             "{path}/{sample}/all/{cell}.sort.mdup.bam",
@@ -105,8 +108,10 @@ if config["mosaicatcher_pipeline"] is False:
             "../envs/mc_bioinfo_tools.yaml"
         shell:
             "samtools index {input} 2>&1 > {log}"
-
 ### ASHLEYS AUTOMATED ANALYSIS
+
+
+
 if config["hand_selection"] is False:
 
     rule generate_features:
@@ -124,7 +129,7 @@ if config["hand_selection"] is False:
         log:
             "{path}/log/ashleys/{sample}/features.log",
         conda:
-            "../envs/ashleys.yaml" 
+            "../envs/ashleys.yaml"
         params:
             windows="5000000 2000000 1000000 800000 600000 400000 200000",
             jobs=23,
@@ -153,20 +158,22 @@ if config["hand_selection"] is False:
             time="10:00:00",
         shell:
             "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
-
 ########################################################
+
+
+
 #                      DEV PART
 ########################################################
 ### HAND SELECTION VIA JUPYTER NB
 elif config["hand_selection"] is True:
+
     rule generate_exclude_file_for_mosaic_count:
-        """
-        rule fct: 
         input:
-        output:
-        """
-        input:
-            ancient("{path}/config/config_df_ashleys.tsv".format(path=config["input_bam_location"])),
+            ancient(
+                "{path}/config/config_df_ashleys.tsv".format(
+                    path=config["input_bam_location"]
+                )
+            ),
             # ancient("config/samples.tsv"),
             bam=config["input_bam_location"],
         output:
@@ -175,17 +182,10 @@ elif config["hand_selection"] is True:
             "{path}/log/config/exclude_file.log",
         params:
             chroms=config["chromosomes"],
-        # conda:
-        #     "../envs/mc_base.yaml"
         script:
             "../scripts/utils/generate_exclude_file.py"
 
     rule mosaic_count:
-        """
-        rule fct: Call mosaic count C++ function to count reads in each BAM file according defined window
-        input: For the moment, individual BAM file in the selected input_bam_location of the associated sample
-        output: counts: read counts for the BAM file according defined window ; info file : summary statistics 
-        """
         input:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
@@ -228,7 +228,6 @@ elif config["hand_selection"] is True:
             > {log} 2>&1
             """
 
-
     rule order_mosaic_count_output:
         input:
             "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
@@ -241,13 +240,7 @@ elif config["hand_selection"] is True:
             df = df.sort_values(by=["sample", "cell", "chrom", "start"])
             df.to_csv(output[0], index=False, compression="gzip", sep="\t")
 
-
     rule plot_mosaic_counts:
-        """
-        rule fct: Plot function of read counts for each bam file
-        input: mosaic count outputs (counts & info)
-        output: Generate figure based on couting results
-        """
         input:
             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
@@ -263,55 +256,66 @@ elif config["hand_selection"] is True:
             """
             LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
             """
+# PDF must be in the jupyter directory
 
-    # PDF must be in the jupyter directory
-    # symlink not possible due to jupyter errors (too many symlink)
-    rule cp_pdf_for_jupyter:
-        input:  
-            pdf = expand("{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf", path=config["input_bam_location"], sample=samples),
-        output:
-            ".snakemake/scripts/CountComplete_{sample}.pdf"
-        log:
-            "{path}/log/cp_pdf_for_jupyter/{sample}.log"
-        shell:
-            "ln -s {input.pdf} {output} > {log} 2>&1"
 
-    rule notebook_hand_selection:
-        input:
-            # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
-            pdf_symlink = ".snakemake/scripts/CountComplete_{sample}.pdf",
-        output:
-            path = "{path}/{sample}/predictions/predictions_raw.tsv",
-        log:
-            "{path}/log/hand_selection/{sample}/prediction_probabilities.log"
-        params:
-            cell_per_sample = cell_per_sample
-        conda:
-            "../envs/notebook.yaml"
-        notebook:
-            "../notebooks/hand_selection.py.ipynb"
+
+# symlink not possible due to jupyter errors (too many symlink)
+rule cp_pdf_for_jupyter:
+    input:
+        pdf=expand(
+            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+            path=config["input_bam_location"],
+            sample=samples,
+        ),
+    output:
+        ".snakemake/scripts/CountComplete_{sample}.pdf",
+    log:
+        "{path}/log/cp_pdf_for_jupyter/{sample}.log",
+    shell:
+        "ln -s {input.pdf} {output} > {log} 2>&1"
+
+
+rule notebook_hand_selection:
+    input:
+        # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
+        pdf_symlink=".snakemake/scripts/CountComplete_{sample}.pdf",
+    output:
+        path="{path}/{sample}/predictions/predictions_raw.tsv",
+    log:
+        "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
+    params:
+        cell_per_sample=cell_per_sample,
+    conda:
+        "../envs/notebook.yaml"
+    notebook:
+        "../notebooks/hand_selection.py.ipynb"
 
 
 if config["use_light_data"] is False:
+
     rule cp_predictions:
         input:
-            path = "{path}/{sample}/cell_selection/labels_raw.tsv",
+            path="{path}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path = "{path}/{sample}/cell_selection/labels.tsv",
+            path="{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/cp_predictions/{sample}.log",
         conda:
             "../envs/ashleys.yaml"
         shell:
             "cp {input.path} {output.path} > {log} 2>&1"
-
 # BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
+
+
+
 elif config["use_light_data"] is True:
+
     rule dev_all_cells_correct:
         input:
-            path = "{path}/{sample}/cell_selection/labels_raw.tsv",
+            path="{path}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path = "{path}/{sample}/cell_selection/labels.tsv",
+            path="{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/dev_all_cells_correct/{sample}.log",
         run:
