@@ -6,7 +6,7 @@ min_version("7.4.0")
 configfile: "config/config.yaml"
 
 
-# containerized: "docker://weber8thomas/ashleys-qc-pipeline:latest"
+containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.2.0"
 
 
 include: "rules/common.smk"
