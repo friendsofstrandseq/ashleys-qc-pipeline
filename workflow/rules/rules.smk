@@ -21,6 +21,7 @@ rule fastqc:
         "v1.7.0/bio/fastqc"
 
 
+
 rule bwa_index:
     input:
         config["reference"],
