@@ -180,6 +180,8 @@ elif config["hand_selection"] is True:
             "{path}/config/exclude_file",
         log:
             "{path}/log/config/exclude_file.log",
+        conda:
+            "../envs/mc_base.yaml"
         params:
             chroms=config["chromosomes"],
         script:
