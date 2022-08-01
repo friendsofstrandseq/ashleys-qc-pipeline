@@ -254,43 +254,22 @@ elif config["hand_selection"] is True:
             mem_mb=get_mem_mb,
         shell:
             """
-            LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+            LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
             """
-# PDF must be in the jupyter directory
 
-
-
-# symlink not possible due to jupyter errors (too many symlink)
-# FIXME : linting
-# rule cp_pdf_for_jupyter:
-#     input:
-#         pdf=expand(
-#             "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-#             path=config["input_bam_location"],
-#             sample=samples,
-#         ),
-#     output:
-#         ".snakemake/scripts/CountComplete_{sample}.pdf",
-#     log:
-#         "{path}/log/cp_pdf_for_jupyter/{sample}.log",
-#     shell:
-#         "ln -s {input.pdf} {output} > {log} 2>&1"
-
-
-rule notebook_hand_selection:
-    input:
-        # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
-        pdf_symlink=".snakemake/scripts/CountComplete_{sample}.pdf",
-    output:
-        path="{path}/{sample}/predictions/predictions_raw.tsv",
-    log:
-        "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
-    params:
-        cell_per_sample=cell_per_sample,
-    conda:
-        "../envs/notebook.yaml"
-    notebook:
-        "../notebooks/hand_selection.py.ipynb"
+    rule notebook_hand_selection:
+        input:
+            pdf_raw="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+        output:
+            path="{path}/{sample}/cell_selection/labels_raw.tsv",
+        log:
+            "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
+        params:
+            cell_per_sample=cell_per_sample,
+        conda:
+            "../envs/notebook.yaml"
+        notebook:
+            "../notebooks/hand_selection.py.ipynb"
 
 
 if config["use_light_data"] is False:
