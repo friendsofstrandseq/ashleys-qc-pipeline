@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - smk_wf_catalog
+      - dev
 
 jobs:
   # WORK
