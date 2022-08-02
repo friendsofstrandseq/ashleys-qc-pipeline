@@ -17,12 +17,12 @@ jobs:
     env:
       IMAGE_NAME: ashleys-qc-pipeline
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set output
         id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build Image
         id: build-image
