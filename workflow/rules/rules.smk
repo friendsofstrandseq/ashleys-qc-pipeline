@@ -166,13 +166,12 @@ elif config["hand_selection"] is True:
                     path=config["input_bam_location"]
                 )
             ),
-            bam=lambda wc: expand(
+            bam=expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=samples,
-                cell=cell_per_sample[str(wc.sample)]
-                if wc.sample in cell_per_sample
-                else "FOOBAR",
+                zip,
+                path=input_bam_location_expand,
+                sample=samples_expand,
+                cell=cell_expand,
             ),
         output:
             "{path}/config/exclude_file",
@@ -182,7 +181,6 @@ elif config["hand_selection"] is True:
             "../envs/mc_base.yaml"
         params:
             chroms=config["chromosomes"],
-            sample=lambda wc: str(wc.sample)
         script:
             "../scripts/utils/generate_exclude_file.py"
 
