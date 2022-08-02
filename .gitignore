@@ -129,6 +129,9 @@ dmypy.json
 
 ashleys-qc/
 .snakemake/
+.fontconfig/
+.java/
+test*
 
 # Pyre type checker
 .pyre/

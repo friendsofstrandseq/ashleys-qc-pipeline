@@ -29,7 +29,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.vars.outputs.tag }}
+          tags: 1.2.1
           dockerfiles: |
             ./github-actions-runner/Dockerfile_complete
 

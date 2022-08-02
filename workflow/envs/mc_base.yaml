@@ -5,8 +5,4 @@ channels:
 dependencies:
   - pandas
   - pysam
-  - tqdm
-  - perl
-  - pypdf2
-  - parmap
   - samtools
