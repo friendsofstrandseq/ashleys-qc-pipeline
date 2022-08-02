@@ -21,7 +21,6 @@ rule fastqc:
         "v1.7.0/bio/fastqc"
 
 
-
 rule bwa_index:
     input:
         config["reference"],
@@ -263,6 +262,7 @@ elif config["hand_selection"] is True:
     rule notebook_hand_selection:
         input:
             pdf_raw="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
         output:
             path="{path}/{sample}/cell_selection/labels_raw.tsv",
         log:
@@ -301,10 +301,5 @@ elif config["use_light_data"] is True:
             path="{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/dev_all_cells_correct/{sample}.log",
-        run:
-            df = pd.read_csv(input.path, sep="\t")
-            df["prediction"] = 1
-            df["probability"] = 1
-            df.loc[df["cell"].str.contains("05"), "prediction"] = 0
-            df.loc[df["cell"].str.contains("12"), "prediction"] = 0
-            df.to_csv(output.path, sep="\t", index=False)
+        script:
+            "../scripts/utils/dev_all_cells_correct.py"

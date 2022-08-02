@@ -3,8 +3,8 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - ipysheet
   - jupyter
+  - ipysheet
   - ipywidgets
-  - pandas
   - nbconvert==5.4.1
+  - pandas
