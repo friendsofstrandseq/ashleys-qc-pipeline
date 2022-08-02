@@ -20,27 +20,27 @@ sequencing data. The starting point are single-cell FASTQ files from Strand-seq 
 
 1. Install [Singularity](https://www.sylabs.io/guides/3.0/user-guide/) 
 2. To prevent conda channel errors
-```
+```bash
 conda config --set channel_priority strict
 ```
 3. Install snakemake through conda
-```
+```bash
 conda create -n snakemake -c conda-forge -c bioconda "snakemake>=7.4.1" && conda activate snakemake
 ```
 4. Clone the repository 
-``` 
+``` bash
 git clone https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
 ```
 5. Download reference data for running your own analysis
-```
+```bash
 snakemake --cores 1 --config dl_external_files=True
 ```
 6. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
-```
+```bash
 snakemake --cores 6 --config input_bam_location=<PATH>/ashleys-qc-pipeline/.tests/data_CHR21 --use-conda --use-singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60 
 ```
 7. Run your own analysis (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
-```
+```bash
 snakemake --cores 6 --config input_bam_location=<PATH> --use-conda --use-singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60 
 ```
 
@@ -211,35 +211,57 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 ## Roadmap
 
 - [X] Jupyter Notebook hand selection of cells
-- [ ] HTML report
-- [ ] Zenodo FASTA + index files
+- [X] HTML report
+- [ ] Multiple FASTA reference
 
-### Experimental feature: hand-selection of cells (Jupyter notebook)
+### Experimental feature: hand-selection of cells via Jupyter notebook
 
 If you wish to identify yourself the cells that seem uncorrect according to your expertise, you can use the experimental interactive Jupyter Notebook by passing to the config argument `hand_selection=True`.
-By enabling this feature, the pipeline will run first [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count binning-based function, plot Strand-Seq karyotype figures, and then create a Jupyter Notebook for analysis.
+By enabling this feature, the pipeline will run :
+* [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count binning-based function
+* plot Strand-Seq karyotype figures
+* fire a Jupyter Notebook for analysis.
 
 ---
 **⚠️ Warning**
 
-If you are running the pipeline remotely and not on your local computer, you need first to open a [SSH tunnel (with Local Forwarding to port 5500)](https://www.ssh.com/academy/ssh/tunneling/example#local-forwarding) in order to access the Jupyter Notebook webpage. 
+If you are running the pipeline remotely and not on your local computer, you need first to open a [SSH tunnel (with Local Forwarding to port 5500)](https://www.ssh.com/academy/ssh/tunneling/example#local-forwarding) in order to access the Jupyter Notebook webpage.
 
 ---
 
-The following command (that comprise snakemake `--notebook-listen` and `--edit-notebook` arguments, need to be passed to test this feature:
+The following command, including snakemake `--notebook-listen` (allow to chose the port oppened: arbitrary selected to 5500) and `--edit-notebook` (fire a jupyter server that allow graphical interaction instead of directly run the complete notebook) arguments, need to be passed to test this feature:
 
-```
+```bash
 snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT> \
-  --notebook-listen localhost:5500 --edit-notebook <INPUT>/<SAMPLE>/predictions/predictions_raw.tsv
+  --notebook-listen localhost:5500 --edit-notebook <INPUT>/<SAMPLE>/cell_selection/labels_raw.tsv
 ```
 
 
-Then, you can accessing Jupyter Noteboin your favorite web browser through the following :
+Then, you can accessing Jupyter Notebook with your favorite web browser through the following URL:
 ```
 http://localhost:5500
 ```
 
 You will need to open the following untitled with the following pattern : `tmp[XXX].hand_selection.py.ipynb` and follow the instructions inside it.
+
+Instructions listed in the notebook are also listed here: 
+
+____
+#### *Jupyter Notebook instructions*
+
+1. Run first the top cell (enable to use snakemake arguments) 
+2. Follow the different cells
+   1. Symlink PDF plots to jupyter nb directory
+   2. Enable jupyter widgets
+   3. Display Mosaic Count PDF inside Jupyter Notebook
+   4. Display graphical table to allow you to unselect low-quality libraries (that will be not processed in the remaining analysis)
+        *Please <ins>do not</ins> RE-select cells that were automatically unselected cells (corresponding to low-coverage by [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count program and not possible to process by the pipeline)*
+   1. Export to pandas dataframe
+   2. Save & clean data
+3. File > Close and Halt
+4. Click on Quit (top right)
+5. Close the webpage
+____
 
 ![nb0](docs/images/nb_0.png)
 
@@ -247,11 +269,22 @@ You will need to open the following untitled with the following pattern : `tmp[X
 
 ![nb2](docs/images/nb_2.png)
 
+However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)).
 
+Thus, after closing the notebook, run the following commands:
 
-
-However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)):
+```bash
+# Fix snakemake issue regarding metadata & incomplete jobs (to remove when solved)
+rm .snakemake/incomplete/
 ```
+
+```bash
+# Snakemake > 7.8 changes its rerun behavior. Before, rerunning jobs relied purely on file modification times. https://github.com/snakemake/snakemake/issues/1694
+# Run snakemake touch function to prevent timestamps errors
+snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT> --touch
+```
+
+```bash
 snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT>
 ```
 
