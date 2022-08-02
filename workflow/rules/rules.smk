@@ -182,6 +182,7 @@ elif config["hand_selection"] is True:
             "../envs/mc_base.yaml"
         params:
             chroms=config["chromosomes"],
+            sample=lambda wc: str(wc.sample)
         script:
             "../scripts/utils/generate_exclude_file.py"
 
