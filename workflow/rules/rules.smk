@@ -108,15 +108,12 @@ if config["mosaicatcher_pipeline"] is False:
             "../envs/mc_bioinfo_tools.yaml"
         shell:
             "samtools index {input} 2>&1 > {log}"
-### ASHLEYS AUTOMATED ANALYSIS
-
 
 
 if config["hand_selection"] is False:
 
     rule generate_features:
         input:
-            # ashleys="{path}/config/ashleys_install_success.txt",
             bam=expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 zip,
@@ -158,13 +155,8 @@ if config["hand_selection"] is False:
             time="10:00:00",
         shell:
             "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
-########################################################
 
 
-
-#                      DEV PART
-########################################################
-### HAND SELECTION VIA JUPYTER NB
 elif config["hand_selection"] is True:
 
     rule generate_exclude_file_for_mosaic_count:
@@ -305,6 +297,7 @@ elif config["use_light_data"] is True:
             path="{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/dev_all_cells_correct/{sample}.log",
+        conda:
+            "../envs/mc_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
-# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
