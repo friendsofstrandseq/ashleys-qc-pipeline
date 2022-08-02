@@ -174,8 +174,14 @@ elif config["hand_selection"] is True:
                     path=config["input_bam_location"]
                 )
             ),
-            # ancient("config/samples.tsv"),
-            bam=config["input_bam_location"],
+            bam=lambda wc: expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam",
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)]
+                if wc.sample in cell_per_sample
+                else "FOOBAR",
+            ),
         output:
             "{path}/config/exclude_file",
         log:
@@ -288,8 +294,6 @@ if config["use_light_data"] is False:
             "../envs/ashleys.yaml"
         shell:
             "cp {input.path} {output.path} > {log} 2>&1"
-# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
-
 
 
 elif config["use_light_data"] is True:
@@ -303,3 +307,4 @@ elif config["use_light_data"] is True:
             "{path}/log/dev_all_cells_correct/{sample}.log",
         script:
             "../scripts/utils/dev_all_cells_correct.py"
+# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
