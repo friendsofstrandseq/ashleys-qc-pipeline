@@ -1,0 +1,8 @@
+name: mc-base
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - pandas
+  - pysam
+  - samtools

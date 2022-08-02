@@ -1,8 +1,6 @@
-#
-
 FROM condaforge/mambaforge:latest
 LABEL io.github.snakemake.containerized="true"
-LABEL io.github.snakemake.conda_env_hash="240ec4738f90572c25b4456fce057e148ac0c5238337781b1a9d4b39ced9aecb"
+LABEL io.github.snakemake.conda_env_hash="6803901075135effe7e11f6c0173d02c9096ec80a6aa7a270de92fa6def2cef7"
 
 # Step 1: Retrieve conda environments
 
@@ -43,6 +41,20 @@ RUN mkdir -p /conda-envs/40a7bb20d75edfcabb61d7db444cc9ea
 COPY workflow/envs/ashleys.yaml /conda-envs/40a7bb20d75edfcabb61d7db444cc9ea/environment.yaml
 
 # Conda environment:
+#   source: workflow/envs/mc_base.yaml
+#   prefix: /conda-envs/144e8cebc86c3d7e2b5919bd5caaec98
+#   name: mc-base
+#   channels:
+#     - conda-forge
+#     - bioconda
+#   dependencies:
+#     - pandas
+#     - pysam
+#     - samtools
+RUN mkdir -p /conda-envs/144e8cebc86c3d7e2b5919bd5caaec98
+COPY workflow/envs/mc_base.yaml /conda-envs/144e8cebc86c3d7e2b5919bd5caaec98/environment.yaml
+
+# Conda environment:
 #   source: workflow/envs/mc_bioinfo_tools.yaml
 #   prefix: /conda-envs/638f610ec9ecb52e489f031fa8ac523b
 #   name: mc-bioinfo-tools
@@ -60,19 +72,19 @@ COPY workflow/envs/mc_bioinfo_tools.yaml /conda-envs/638f610ec9ecb52e489f031fa8a
 
 # Conda environment:
 #   source: workflow/envs/notebook.yaml
-#   prefix: /conda-envs/9df293fe70bdfb960cde51bd8c039072
+#   prefix: /conda-envs/c935eec1cce909102b4cde80b6492c33
 #   name: notebook
 #   channels:
 #     - bioconda
 #     - conda-forge
 #   dependencies:
-#     - ipysheet
 #     - jupyter
+#     - ipysheet
 #     - ipywidgets
+#     - nbconvert
 #     - pandas
-#     - nbconvert==5.4.1
-RUN mkdir -p /conda-envs/9df293fe70bdfb960cde51bd8c039072
-COPY workflow/envs/notebook.yaml /conda-envs/9df293fe70bdfb960cde51bd8c039072/environment.yaml
+RUN mkdir -p /conda-envs/c935eec1cce909102b4cde80b6492c33
+COPY workflow/envs/notebook.yaml /conda-envs/c935eec1cce909102b4cde80b6492c33/environment.yaml
 
 # Conda environment:
 #   source: workflow/envs/rtools.yaml
@@ -124,7 +136,8 @@ COPY workflow/envs/rtools.yaml /conda-envs/fb2e0991658d68d49ab06d2bd2375acf/envi
 RUN mamba env create --prefix /conda-envs/5681728a49bd83ceed09ba194330c858 --file /conda-envs/5681728a49bd83ceed09ba194330c858/environment.yaml && \
     mamba env create --prefix /conda-envs/08d4368302a4bdf7eda6b536495efe7d --file /conda-envs/08d4368302a4bdf7eda6b536495efe7d/environment.yaml && \
     mamba env create --prefix /conda-envs/40a7bb20d75edfcabb61d7db444cc9ea --file /conda-envs/40a7bb20d75edfcabb61d7db444cc9ea/environment.yaml && \
+    mamba env create --prefix /conda-envs/144e8cebc86c3d7e2b5919bd5caaec98 --file /conda-envs/144e8cebc86c3d7e2b5919bd5caaec98/environment.yaml && \
     mamba env create --prefix /conda-envs/638f610ec9ecb52e489f031fa8ac523b --file /conda-envs/638f610ec9ecb52e489f031fa8ac523b/environment.yaml && \
-    mamba env create --prefix /conda-envs/9df293fe70bdfb960cde51bd8c039072 --file /conda-envs/9df293fe70bdfb960cde51bd8c039072/environment.yaml && \
+    mamba env create --prefix /conda-envs/c935eec1cce909102b4cde80b6492c33 --file /conda-envs/c935eec1cce909102b4cde80b6492c33/environment.yaml && \
     mamba env create --prefix /conda-envs/fb2e0991658d68d49ab06d2bd2375acf --file /conda-envs/fb2e0991658d68d49ab06d2bd2375acf/environment.yaml && \
     mamba clean --all -y

@@ -108,15 +108,12 @@ if config["mosaicatcher_pipeline"] is False:
             "../envs/mc_bioinfo_tools.yaml"
         shell:
             "samtools index {input} 2>&1 > {log}"
-### ASHLEYS AUTOMATED ANALYSIS
-
 
 
 if config["hand_selection"] is False:
 
     rule generate_features:
         input:
-            # ashleys="{path}/config/ashleys_install_success.txt",
             bam=expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 zip,
@@ -158,13 +155,8 @@ if config["hand_selection"] is False:
             time="10:00:00",
         shell:
             "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
-########################################################
 
 
-
-#                      DEV PART
-########################################################
-### HAND SELECTION VIA JUPYTER NB
 elif config["hand_selection"] is True:
 
     rule generate_exclude_file_for_mosaic_count:
@@ -174,12 +166,19 @@ elif config["hand_selection"] is True:
                     path=config["input_bam_location"]
                 )
             ),
-            # ancient("config/samples.tsv"),
-            bam=config["input_bam_location"],
+            bam=expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam",
+                zip,
+                path=input_bam_location_expand,
+                sample=samples_expand,
+                cell=cell_expand,
+            ),
         output:
             "{path}/config/exclude_file",
         log:
             "{path}/log/config/exclude_file.log",
+        conda:
+            "../envs/mc_base.yaml"
         params:
             chroms=config["chromosomes"],
         script:
@@ -254,43 +253,23 @@ elif config["hand_selection"] is True:
             mem_mb=get_mem_mb,
         shell:
             """
-            LC_CTYPE=C Rscript scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+            LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
             """
-# PDF must be in the jupyter directory
 
-
-
-# symlink not possible due to jupyter errors (too many symlink)
-# FIXME : linting
-# rule cp_pdf_for_jupyter:
-#     input:
-#         pdf=expand(
-#             "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-#             path=config["input_bam_location"],
-#             sample=samples,
-#         ),
-#     output:
-#         ".snakemake/scripts/CountComplete_{sample}.pdf",
-#     log:
-#         "{path}/log/cp_pdf_for_jupyter/{sample}.log",
-#     shell:
-#         "ln -s {input.pdf} {output} > {log} 2>&1"
-
-
-rule notebook_hand_selection:
-    input:
-        # pdf_raw = "{path}/plots/{sample}/counts/CountComplete_{sample}.pdf",
-        pdf_symlink=".snakemake/scripts/CountComplete_{sample}.pdf",
-    output:
-        path="{path}/{sample}/predictions/predictions_raw.tsv",
-    log:
-        "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
-    params:
-        cell_per_sample=cell_per_sample,
-    conda:
-        "../envs/notebook.yaml"
-    notebook:
-        "../notebooks/hand_selection.py.ipynb"
+    rule notebook_hand_selection:
+        input:
+            pdf_raw="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+        output:
+            path="{path}/{sample}/cell_selection/labels_raw.tsv",
+        log:
+            "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
+        params:
+            cell_per_sample=cell_per_sample,
+        conda:
+            "../envs/notebook.yaml"
+        notebook:
+            "../notebooks/hand_selection.py.ipynb"
 
 
 if config["use_light_data"] is False:
@@ -306,8 +285,6 @@ if config["use_light_data"] is False:
             "../envs/ashleys.yaml"
         shell:
             "cp {input.path} {output.path} > {log} 2>&1"
-# BM cells 05 & 12 I EXAMPLE DATA WERE IDENTIFIED AS NOT POSSIBLE TO BE PROCESSED BY MOSAIC COUNT
-
 
 
 elif config["use_light_data"] is True:
@@ -319,10 +296,7 @@ elif config["use_light_data"] is True:
             path="{path}/{sample}/cell_selection/labels.tsv",
         log:
             "{path}/log/dev_all_cells_correct/{sample}.log",
-        run:
-            df = pd.read_csv(input.path, sep="\t")
-            df["prediction"] = 1
-            df["probability"] = 1
-            df.loc[df["cell"].str.contains("05"), "prediction"] = 0
-            df.loc[df["cell"].str.contains("12"), "prediction"] = 0
-            df.to_csv(output.path, sep="\t", index=False)
+        conda:
+            "../envs/mc_base.yaml"
+        script:
+            "../scripts/utils/dev_all_cells_correct.py"
