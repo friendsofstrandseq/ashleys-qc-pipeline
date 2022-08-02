@@ -6,11 +6,17 @@ min_version("7.4.0")
 configfile: "config/config.yaml"
 
 
-containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.2.0"
+if config["mosaicatcher_pipeline"] is False:
+
+    containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.2.0"
 
 
 include: "rules/common.smk"
+
+
 include: "rules/rules.smk"
+
+
 include: "rules/examples.smk"
 
 

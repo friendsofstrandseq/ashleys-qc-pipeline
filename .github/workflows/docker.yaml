@@ -2,11 +2,11 @@ name: Build container
 
 on:
   push:
-    # tags:
-    #   - "*"
-    branches:
-      - dev
-      # - master
+    tags:
+      - "*"
+    # branches:
+    #   - dev
+    # - master
     # paths:
     #   - "github-actions-runner/Dockerfile"
 
