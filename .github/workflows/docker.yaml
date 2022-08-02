@@ -4,7 +4,9 @@ on:
   push:
     tags:
       - "*"
-      # - master
+    # branches:
+    #   - dev
+    # - master
     # paths:
     #   - "github-actions-runner/Dockerfile"
 
@@ -14,29 +16,22 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       IMAGE_NAME: ashleys-qc-pipeline
-
-    # if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
 
-      # - name: Read upstream tag without version
-      #   id: gettag
-      #   run: echo "::set-output name=tag::$(head -n 1 github-actions-runner/Dockerfile | awk -F':' '{print $2}' | awk -F'-' 'BEGIN { OFS="-" } {$NF=""; print $0}')"
-
-      # - name: Read internal update version
-      #   id: getversion
-      #   run: echo "::set-output name=version::$(grep 'ARG RUNNER_VERSION' github-actions-runner/Dockerfile | awk -F'=' '{print $2}')"
       - name: Set output
         id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - uses: actions/checkout@v2
+
       - name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.vars.outputs.tag }}
+          tags: 1.2.1
           dockerfiles: |
-            ./github-actions-runner/Dockerfile
+            ./github-actions-runner/Dockerfile_complete
 
       - name: Push To DockerHub
         id: push-to-dockerhub
