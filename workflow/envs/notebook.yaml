@@ -6,5 +6,5 @@ dependencies:
   - jupyter
   - ipysheet
   - ipywidgets
-  - nbconvert==5.4.1
+  - nbconvert
   - pandas

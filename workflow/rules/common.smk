@@ -126,24 +126,24 @@ def get_final_output():
         )
     )
     # final_list.extend(expand("{path}/config/{sample}_selected_cells.ok", path=config["input_bam_location"], sample=samples,))
-    final_list.extend(
-        (
-            [
-                sub_e
-                for e in [
-                    expand(
-                        "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-                        path=config["input_bam_location"],
-                        sample=samples,
-                        cell=cell_per_sample[sample],
-                        pair=[1, 2],
-                    )
-                    for sample in samples
-                ]
-                for sub_e in e
-            ]
-        )
-    )
+    # final_list.extend(
+    #     (
+    #         [
+    #             sub_e
+    #             for e in [
+    #                 expand(
+    #                     "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+    #                     path=config["input_bam_location"],
+    #                     sample=samples,
+    #                     cell=cell_per_sample[sample],
+    #                     pair=[1, 2],
+    #                 )
+    #                 for sample in samples
+    #             ]
+    #             for sub_e in e
+    #         ]
+    #     )
+    # )
     return final_list
 
 
