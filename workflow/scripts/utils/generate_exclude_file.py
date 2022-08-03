@@ -24,4 +24,4 @@ output_h = pd.DataFrame(df_h["Contig"].str.replace("SN:", ""))
 output_h = output_h.loc[~output_h["Contig"].isin(snakemake.params["chroms"])]
 
 # EXPORT
-output_h["Contig"].to_csv(snakemake.output[0], index=False, sep="\t", header=False)
+output_h["Contig"].to_csv(snakemake.output.excl, index=False, sep="\t", header=False)

@@ -114,12 +114,11 @@ if config["hand_selection"] is False:
 
     rule generate_features:
         input:
-            bam=expand(
+            bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                zip,
-                path=input_bam_location_expand,
-                sample=samples_expand,
-                cell=cell_expand,
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)],
             ),
         output:
             "{path}/{sample}/predictions/ashleys_features.tsv",
@@ -159,6 +158,9 @@ if config["hand_selection"] is False:
 
 elif config["hand_selection"] is True:
 
+    localrules:
+        notebook_hand_selection,
+
     rule generate_exclude_file_for_mosaic_count:
         input:
             ancient(
@@ -166,17 +168,16 @@ elif config["hand_selection"] is True:
                     path=config["input_bam_location"]
                 )
             ),
-            bam=expand(
+            bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                zip,
-                path=input_bam_location_expand,
-                sample=samples_expand,
-                cell=cell_expand,
+                path=config["input_bam_location"],
+                sample=samples,
+                cell=cell_per_sample[str(wc.sample)],
             ),
         output:
-            "{path}/config/exclude_file",
+            excl="{path}/{sample}/config/{cell}_exclude_file",
         log:
-            "{path}/log/config/exclude_file.log",
+            "{path}/log/config/{sample}/{cell}_exclude_file.log",
         conda:
             "../envs/mc_base.yaml"
         params:
@@ -190,19 +191,15 @@ elif config["hand_selection"] is True:
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
                 sample=samples,
-                cell=cell_per_sample[str(wc.sample)]
-                if wc.sample in cell_per_sample
-                else "FOOBAR",
+                cell=cell_per_sample[str(wc.sample)],
             ),
             bai=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
                 path=config["input_bam_location"],
                 sample=samples,
                 cell=cell_per_sample[str(wc.sample)],
-            )
-            if wc.sample in cell_per_sample
-            else "FOOBAR",
-            excl="{path}/config/exclude_file",
+            ),
+            excl="{path}/{sample}/config/exclude_file",
         output:
             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
