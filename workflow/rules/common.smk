@@ -59,7 +59,7 @@ class HandleInput:
                     )
                     if f.endswith(".bam")
                 ]
-                print(l_files_selected)
+                # print(l_files_selected)
 
                 join = list(set(l_files_all).intersection(set(l_files_selected)))
                 df["Selected"] = False
@@ -98,6 +98,7 @@ samples = list(sorted(list(df_config_files.Sample.unique().tolist())))
 cell_per_sample = (
     df_config_files.groupby("Sample")["Cell"].unique().apply(list).to_dict()
 )
+# print(cell_per_sample)
 
 
 # FIXME: this is a workaround used to use *zip* function inside expand statements
@@ -126,17 +127,34 @@ def get_final_output():
         )
     )
     # final_list.extend(expand("{path}/config/{sample}_selected_cells.ok", path=config["input_bam_location"], sample=samples,))
+    final_list.extend(
+        (
+            [
+                sub_e
+                for e in [
+                    expand(
+                        "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+                        path=config["input_bam_location"],
+                        sample=samples,
+                        cell=cell_per_sample[sample],
+                        pair=[1, 2],
+                    )
+                    for sample in samples
+                ]
+                for sub_e in e
+            ]
+        )
+    )
     # final_list.extend(
     #     (
     #         [
     #             sub_e
     #             for e in [
     #                 expand(
-    #                     "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+    #                     "{path}/{sample}/all/{cell}.sort.mdup.bam",
     #                     path=config["input_bam_location"],
     #                     sample=samples,
     #                     cell=cell_per_sample[sample],
-    #                     pair=[1, 2],
     #                 )
     #                 for sample in samples
     #             ]
@@ -144,6 +162,7 @@ def get_final_output():
     #         ]
     #     )
     # )
+    # print(final_list)
     return final_list
 
 
