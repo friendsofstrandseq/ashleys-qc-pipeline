@@ -18,28 +18,28 @@ sequencing data. The starting point are single-cell FASTQ files from Strand-seq 
 
 # Quick Start
 
-1. Install [Singularity](https://www.sylabs.io/guides/3.0/user-guide/) 
-2. To prevent conda channel errors
+0. [Optional] Install [Singularity](https://www.sylabs.io/guides/3.0/user-guide/) 
+1. To prevent conda channel errors
 ```bash
 conda config --set channel_priority strict
 ```
-3. Install snakemake through conda
+2. Install snakemake through conda
 ```bash
-conda create -n snakemake -c conda-forge -c bioconda "snakemake>=7.4.1" && conda activate snakemake
+conda create -n snakemake -c conda-forge -c bioconda snakemake && conda activate snakemake
 ```
-4. Clone the repository 
+3. Clone the repository 
 ``` bash
 git clone https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
 ```
-5. Download reference data for running your own analysis
+4. Download reference data for running your own analysis
 ```bash
 snakemake --cores 1 --config dl_external_files=True
 ```
-6. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
+5. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 ```bash
 snakemake --cores 6 --config input_bam_location=<PATH>/ashleys-qc-pipeline/.tests/data_CHR21 --use-conda --use-singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60 
 ```
-7. Run your own analysis (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
+6. Run your own analysis (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 ```bash
 snakemake --cores 6 --config input_bam_location=<PATH> --use-conda --use-singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60 
 ```
@@ -78,6 +78,13 @@ ________
 | Parameter   | Comment          | Default                                                                                 |
 | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
 | `reference` | Reference genome | sandbox.zenodo.org/record/1074721/files/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna |
+
+### Experimental: hand-selection related parameters
+
+| Parameter     | Comment                                                                                             | Default       |
+| ------------- | --------------------------------------------------------------------------------------------------- | ------------- |
+| `window`      | Window size used for binning by mosaic count (Can be of high importance regarding library coverage) | 100000        |
+| `chromosomes` | List of chromosomes to be processed in the pipeline                                                 | chr1..22,chrX |
 
 
 ## Snakemake arguments
@@ -210,17 +217,32 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 
 ## Roadmap
 
+### Major features
+
 - [X] Jupyter Notebook hand selection of cells
 - [X] HTML report
 - [ ] Multiple FASTA reference
 
+### Minor features
+
+- [ ] replace `input_bam_location` by `input_folder` (harmonization with [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline.git)) 
+
 ### Experimental feature: hand-selection of cells via Jupyter notebook
+
+---
+**ℹ️ Note**
+
+Singularity execution (`--use-singularity`) is not available for this mode of execution at the moment due to path system issues.
+
+---
 
 If you wish to identify yourself the cells that seem uncorrect according to your expertise, you can use the experimental interactive Jupyter Notebook by passing to the config argument `hand_selection=True`.
 By enabling this feature, the pipeline will run :
 * [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count binning-based function
 * plot Strand-Seq karyotype figures
 * fire a Jupyter Notebook for analysis.
+
+
 
 ---
 **⚠️ Warning**
@@ -288,9 +310,21 @@ snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location
 snakemake --cores 12 --use-conda --config hand_selection=True input_bam_location=<INPUT>
 ```
 
----
-**ℹ️ Note**
 
-Singularity execution is not available for this mode of execution at the moment.
 
----
+# Authors (alphabetical order)
+
+## Contributors
+
+- Ebert Peter
+- Grimes Karen
+- Gros Christina
+- Korbel Jan
+- Marschall Tobias
+- Sanders Ashley
+- Weber Thomas (maintainer and current developer)
+
+
+# References
+
+> Gros, Christina, Ashley D Sanders, Jan O Korbel, Tobias Marschall, and Peter Ebert. “ASHLEYS: Automated Quality Control for Single-Cell Strand-Seq Data.” Bioinformatics 37, no. 19 (October 1, 2021): 3356–57. https://doi.org/10.1093/bioinformatics/btab221.
