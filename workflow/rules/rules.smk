@@ -175,9 +175,9 @@ elif config["hand_selection"] is True:
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
-            excl="{path}/{sample}/config/{cell}_exclude_file",
+            excl="{path}/{sample}/config/exclude_file",
         log:
-            "{path}/log/config/{sample}/{cell}_exclude_file.log",
+            "{path}/log/config/{sample}/exclude_file.log",
         conda:
             "../envs/mc_base.yaml"
         params:
@@ -199,7 +199,7 @@ elif config["hand_selection"] is True:
                 sample=samples,
                 cell=cell_per_sample[str(wc.sample)],
             ),
-            excl="{path}/{sample}/config/{cell}_exclude_file",
+            excl="{path}/{sample}/config/exclude_file",
         output:
             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
