@@ -24,7 +24,7 @@ rule fastqc:
 rule bwa_index:
     input:
         # config["reference"],
-        config["references_data"][config["reference"]]["reference_fasta"],
+        ancient(config["references_data"][config["reference"]]["reference_fasta"]),
     output:
         # idx=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
         idx=multiext(config["references_data"][config["reference"]]["reference_fasta"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
@@ -132,9 +132,10 @@ if config["hand_selection"] is False:
             "{path}/log/ashleys/{sample}/features.log",
         conda:
             "../envs/ashleys.yaml"
+        threads: 64
         params:
             windows="5000000 2000000 1000000 800000 600000 400000 200000",
-            jobs=23,
+            jobs=64,
             extension=".sort.mdup.bam",
             path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
         resources:
