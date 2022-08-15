@@ -1,7 +1,18 @@
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
 input_bam_location: ".tests/data_CHR21"
 # Reference genome used by BWA to map FASTQ files
-reference: .tests/external_data/chr21.fna
+# reference: .tests/external_data/chr21.fna
+
+reference: "hg38"
+
+references_data:
+  "hg38":
+    reference_fasta: ".tests/external_data/chr21.fna"
+  "hg19":
+    reference_fasta: "workflow/data/ref_genomes/hg19.fa"
+  "T2T":
+    reference_fasta: "workflow/data/ref_genomes/T2T.fa"
+
 # Enable / Disable download of external files (1000G SNV & Fasta ref genome)
 dl_external_files: False
 # Overwrite ASHLEYS PREDICTIONS
