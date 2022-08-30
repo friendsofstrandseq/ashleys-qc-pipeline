@@ -123,7 +123,13 @@ if config["hand_selection"] is False:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
+                cell=cell_per_sample[str(wc.sample)],
+            ),
+            bai=lambda wc: expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+                path=config["input_bam_location"],
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
@@ -170,11 +176,11 @@ elif config["hand_selection"] is True:
 
     rule generate_exclude_file_for_mosaic_count:
         input:
-            ancient(
-                "{path}/config/config_df_ashleys.tsv".format(
-                    path=config["input_bam_location"]
-                )
-            ),
+            # ancient(
+            #     "{path}/config/config_df_ashleys.tsv".format(
+            #         path=config["input_bam_location"]
+            #     )
+            # ),
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
@@ -182,7 +188,7 @@ elif config["hand_selection"] is True:
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
-            excl="{path}/{sample}/config/exclude_file",
+            excl="{path}/{sample}/config/chroms_to_exclude.txt",
         log:
             "{path}/log/config/{sample}/exclude_file.log",
         conda:
@@ -197,16 +203,16 @@ elif config["hand_selection"] is True:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
             bai=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
-            excl="{path}/{sample}/config/exclude_file",
+            excl="{path}/{sample}/config/chroms_to_exclude.txt",
         output:
             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
