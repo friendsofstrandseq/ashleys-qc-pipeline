@@ -40,12 +40,6 @@ class HandleInput:
             df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
             df["Full_path"] = "{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder)
             df["Full_path"] = df["Full_path"] + df["File"] + ext
-            # if bam is True:s
-            # l_files_selected = [f for f in os.listdir(thisdir + "/" + sample + "/selected/") if f.endswith(".bam")]
-            # print(l_files_selected)
-            # join = list(set(l_files_all).intersection(set(l_files_selected)))
-            # df["Selected"] = False
-            # df.loc[df["File"].isin(join), "Selected"] = True
 
             complete_df_list.append(df)
 
