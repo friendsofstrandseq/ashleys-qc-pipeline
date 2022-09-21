@@ -184,7 +184,7 @@ elif config["hand_selection"] is True:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
