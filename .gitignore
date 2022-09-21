@@ -137,7 +137,7 @@ test*
 .pyre/
 
 
-./workflow/data
+data
 
 # .tests
 .tests/unit/
