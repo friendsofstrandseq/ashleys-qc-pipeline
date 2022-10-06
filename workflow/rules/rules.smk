@@ -23,13 +23,17 @@ rule fastqc:
 
 rule bwa_index:
     input:
-        config["reference"],
+        # config["reference"],
+        ancient(config["references_data"][config["reference"]]["reference_fasta"]),
     output:
-        idx=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        # idx=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        idx=multiext(config["references_data"][config["reference"]]["reference_fasta"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
     log:
-        "{}.log".format(config["reference"]),
+        # "{}.log".format(config["reference"]),
+        "{}.log".format(config["references_data"][config["reference"]]["reference_fasta"]),
     params:
         algorithm="bwtsw",
+    threads: 16
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
@@ -41,8 +45,10 @@ rule bwa_strandseq_to_reference_alignment:
     input:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
-        ref="{ref}".format(ref=config["reference"]),
-        ref_index="{ref}.ann".format(ref=config["reference"]),
+        # ref="{ref}".format(ref=config["reference"]),
+        ref="{ref}".format(ref=config["references_data"][config["reference"]]["reference_fasta"]),
+        # ref_index="{ref}.ann".format(ref=config["reference"]),
+        ref_index="{ref}.ann".format(ref=config["references_data"][config["reference"]]["reference_fasta"]),
     output:
         bam="{path}/{sample}/all/{cell}.bam",
     log:
@@ -117,7 +123,13 @@ if config["hand_selection"] is False:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
+                cell=cell_per_sample[str(wc.sample)],
+            ),
+            bai=lambda wc: expand(
+                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+                path=config["input_bam_location"],
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
@@ -126,9 +138,10 @@ if config["hand_selection"] is False:
             "{path}/log/ashleys/{sample}/features.log",
         conda:
             "../envs/ashleys.yaml"
+        threads: 64
         params:
             windows="5000000 2000000 1000000 800000 600000 400000 200000",
-            jobs=23,
+            jobs=64,
             extension=".sort.mdup.bam",
             path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
         resources:
@@ -163,19 +176,19 @@ elif config["hand_selection"] is True:
 
     rule generate_exclude_file_for_mosaic_count:
         input:
-            ancient(
-                "{path}/config/config_df_ashleys.tsv".format(
-                    path=config["input_bam_location"]
-                )
-            ),
+            # ancient(
+            #     "{path}/config/config_df_ashleys.tsv".format(
+            #         path=config["input_bam_location"]
+            #     )
+            # ),
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
         output:
-            excl="{path}/{sample}/config/exclude_file",
+            excl="{path}/{sample}/config/chroms_to_exclude.txt",
         log:
             "{path}/log/config/{sample}/exclude_file.log",
         conda:
@@ -190,16 +203,16 @@ elif config["hand_selection"] is True:
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
             bai=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
                 path=config["input_bam_location"],
-                sample=samples,
+                sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
-            excl="{path}/{sample}/config/exclude_file",
+            excl="{path}/{sample}/config/chroms_to_exclude.txt",
         output:
             counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
