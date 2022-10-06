@@ -2,7 +2,6 @@ import pandas as pd
 import os, sys
 
 
-
 class HandleInput:
     def __init__(self, input_path, output_path, check_sm_tag=False, bam=True):
         df_config_files = self.handle_input_data(thisdir=input_path, bam=bam)
@@ -24,13 +23,21 @@ class HandleInput:
         ext = ".bam" if bam is True else ".fastq.gz"
         folder = "all" if bam is True else "fastq"
         complete_df_list = list()
-        for sample in [e for e in os.listdir(thisdir) if e not in ["config", "log", ".DS_Store", "._.DS_Store"]]:
+        for sample in [
+            e
+            for e in os.listdir(thisdir)
+            if e not in ["config", "log", ".DS_Store", "._.DS_Store"]
+        ]:
             # print(thisdir, sample, folder, ext)
 
             # print("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
             l_files_all = [
                 f
-                for f in os.listdir("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
+                for f in os.listdir(
+                    "{thisdir}/{sample}/{folder}/".format(
+                        thisdir=thisdir, sample=sample, folder=folder
+                    )
+                )
                 if f.endswith(ext)
             ]
             df = pd.DataFrame([{"File": f} for f in l_files_all])
@@ -38,13 +45,17 @@ class HandleInput:
             df["Folder"] = thisdir
             df["Sample"] = sample
             df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
-            df["Full_path"] = "{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder)
+            df["Full_path"] = "{thisdir}/{sample}/{folder}/".format(
+                thisdir=thisdir, sample=sample, folder=folder
+            )
             df["Full_path"] = df["Full_path"] + df["File"] + ext
 
             complete_df_list.append(df)
 
         complete_df = pd.concat(complete_df_list)
-        complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(drop=True)
+        complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(
+            drop=True
+        )
         # complete_df = complete_df.loc[~complete_df["Cell"].isin(exclude_list)]
         return complete_df
 
@@ -52,7 +63,7 @@ class HandleInput:
 # # MOVED OUTSIDE A SCRIPT TO PREVENT PATH ISSUES
 # class HandleInput:
 #     def __init__(self, input_path, output_path, check_sm_tag=False, bam=True):
-        
+
 #         df_config_files = self.handle_input_data(thisdir=input_path, bam=bam)
 #         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 #         df_config_files.to_csv(output_path, sep="\t", index=False)

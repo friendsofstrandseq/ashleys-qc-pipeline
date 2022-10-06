@@ -8,24 +8,52 @@ configfile: "config/config.yaml"
 
 if config["mosaicatcher_pipeline"] is False:
 
-    containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.2.1"
+    docker_container = "docker://weber8thomas/ashleys-qc-pipeline:{version}".format(
+        version=str(config["version"])
+    )
+
+    containerized: docker_container
+
+
+# containerized: "docker://weber8thomas/ashleys-qc-pipeline:1.2.1"
 
 
 include: "rules/common.smk"
-
-
 include: "rules/rules.smk"
-
-
 include: "rules/examples.smk"
 
 
 if config["dl_external_files"] is True:
 
-    rule all:
-        input:
-            rules.dl_external_data.output,
-            rules.dl_external_data_index.output,
+    if config["reference"] in ["hg19", "hg38", "T2T"]:
+
+        if config["reference"] == "hg19":
+
+            rule all:
+                input:
+                    rules.download_hg19_reference.output,
+
+
+        elif config["reference"] == "hg38":
+
+            rule all:
+                input:
+                    rules.download_hg38_reference.output,
+
+
+        elif config["reference"] == "T2T":
+
+            rule all:
+                input:
+                    rules.download_T2T_reference.output,
+
+
+    else:
+        sys.exit(
+            "You provide a wrong/not supported reference assembly: {}. Supported assemblies : hg19, hg38, T2T".format(
+                config["reference"]
+            )
+        )
 
 
 else:
