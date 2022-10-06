@@ -1,3 +1,4 @@
+
 rule fastqc:
     input:
         "{path}/{sample}/fastq/{cell}.{pair}.fastq.gz",
@@ -23,10 +24,8 @@ rule fastqc:
 
 rule bwa_index:
     input:
-        # config["reference"],
         ancient(config["references_data"][config["reference"]]["reference_fasta"]),
     output:
-        # idx=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
         idx=multiext(
             config["references_data"][config["reference"]]["reference_fasta"],
             ".amb",
@@ -36,7 +35,6 @@ rule bwa_index:
             ".sa",
         ),
     log:
-        # "{}.log".format(config["reference"]),
         "{}.log".format(
             config["references_data"][config["reference"]]["reference_fasta"]
         ),
@@ -54,11 +52,9 @@ rule bwa_strandseq_to_reference_alignment:
     input:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
-        # ref="{ref}".format(ref=config["reference"]),
         ref="{ref}".format(
             ref=config["references_data"][config["reference"]]["reference_fasta"]
         ),
-        # ref_index="{ref}.ann".format(ref=config["reference"]),
         ref_index="{ref}.ann".format(
             ref=config["references_data"][config["reference"]]["reference_fasta"]
         ),
@@ -189,11 +185,6 @@ elif config["hand_selection"] is True:
 
     rule generate_exclude_file_for_mosaic_count:
         input:
-            # ancient(
-            #     "{path}/config/config_df_ashleys.tsv".format(
-            #         path=config["input_bam_location"]
-            #     )
-            # ),
             bam=lambda wc: expand(
                 "{path}/{sample}/all/{cell}.sort.mdup.bam",
                 path=config["input_bam_location"],
