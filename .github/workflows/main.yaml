@@ -6,6 +6,7 @@ on:
       - main
       - smk_wf_catalog
       - ref_genomes
+      - ref_genomes_dev
       - multi_sample
       - dev
 
