@@ -27,10 +27,19 @@ rule bwa_index:
         ancient(config["references_data"][config["reference"]]["reference_fasta"]),
     output:
         # idx=multiext(config["reference"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
-        idx=multiext(config["references_data"][config["reference"]]["reference_fasta"], ".amb", ".ann", ".bwt", ".pac", ".sa"),
+        idx=multiext(
+            config["references_data"][config["reference"]]["reference_fasta"],
+            ".amb",
+            ".ann",
+            ".bwt",
+            ".pac",
+            ".sa",
+        ),
     log:
         # "{}.log".format(config["reference"]),
-        "{}.log".format(config["references_data"][config["reference"]]["reference_fasta"]),
+        "{}.log".format(
+            config["references_data"][config["reference"]]["reference_fasta"]
+        ),
     params:
         algorithm="bwtsw",
     threads: 16
@@ -46,9 +55,13 @@ rule bwa_strandseq_to_reference_alignment:
         mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
         mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
         # ref="{ref}".format(ref=config["reference"]),
-        ref="{ref}".format(ref=config["references_data"][config["reference"]]["reference_fasta"]),
+        ref="{ref}".format(
+            ref=config["references_data"][config["reference"]]["reference_fasta"]
+        ),
         # ref_index="{ref}.ann".format(ref=config["reference"]),
-        ref_index="{ref}.ann".format(ref=config["references_data"][config["reference"]]["reference_fasta"]),
+        ref_index="{ref}.ann".format(
+            ref=config["references_data"][config["reference"]]["reference_fasta"]
+        ),
     output:
         bam="{path}/{sample}/all/{cell}.bam",
     log:
