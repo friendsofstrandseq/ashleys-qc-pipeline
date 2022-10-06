@@ -1,3 +1,4 @@
+# Pipeline version
 version: 1.3.0
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
 input_bam_location: ".tests/data_CHR17"
