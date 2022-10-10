@@ -110,6 +110,96 @@ rule mark_duplicates:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
 
+
+
+rule generate_exclude_file_for_mosaic_count:
+    input:
+        bam=lambda wc: expand(
+            "{path}/{sample}/all/{cell}.sort.mdup.bam",
+            path=config["input_bam_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[str(wc.sample)],
+        ),
+    output:
+        excl="{path}/{sample}/config/chroms_to_exclude.txt",
+    log:
+        "{path}/log/config/{sample}/exclude_file.log",
+    conda:
+        "../envs/mc_base.yaml"
+    params:
+        chroms=config["chromosomes"],
+    script:
+        "../scripts/utils/generate_exclude_file.py"
+
+rule mosaic_count:
+    input:
+        bam=lambda wc: expand(
+            "{path}/{sample}/all/{cell}.sort.mdup.bam",
+            path=config["input_bam_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[str(wc.sample)],
+        ),
+        bai=lambda wc: expand(
+            "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+            path=config["input_bam_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[str(wc.sample)],
+        ),
+        excl="{path}/{sample}/config/chroms_to_exclude.txt",
+    output:
+        counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
+        info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+    log:
+        "{path}/log/counts/{sample}/mosaic_count.log",
+    conda:
+        "../envs/mc_bioinfo_tools.yaml"
+    params:
+        window=config["window"],
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        mosaicatcher count \
+            --verbose \
+            --do-not-blacklist-hmm \
+            -o {output.counts} \
+            -i {output.info} \
+            -x {input.excl} \
+            -w {params.window} \
+            {input.bam} \
+        > {log} 2>&1
+        """
+
+rule order_mosaic_count_output:
+    input:
+        "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
+    output:
+        "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
+    log:
+        "{path}/log/ashleys_counts/{sample}/{sample}.log",
+    run:
+        df = pd.read_csv(input[0], compression="gzip", sep="\t")
+        df = df.sort_values(by=["sample", "cell", "chrom", "start"])
+        df.to_csv(output[0], index=False, compression="gzip", sep="\t")
+
+rule plot_mosaic_counts:
+    input:
+        counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
+        info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+    output:
+        "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+    log:
+        "{path}/log/plot_mosaic_counts/{sample}.log",
+    conda:
+        "../envs/rtools.yaml"
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+        """
+
+
 if config["mosaicatcher_pipeline"] is False:
 
     rule samtools_index:
@@ -123,6 +213,7 @@ if config["mosaicatcher_pipeline"] is False:
             "../envs/mc_bioinfo_tools.yaml"
         shell:
             "samtools index {input} 2>&1 > {log}"
+
 
 
 if config["hand_selection"] is False:
@@ -141,6 +232,7 @@ if config["hand_selection"] is False:
                 sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
+            plot="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf"
         output:
             "{path}/{sample}/predictions/ashleys_features.tsv",
         log:
@@ -182,93 +274,6 @@ elif config["hand_selection"] is True:
 
     localrules:
         notebook_hand_selection,
-
-    rule generate_exclude_file_for_mosaic_count:
-        input:
-            bam=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-        output:
-            excl="{path}/{sample}/config/chroms_to_exclude.txt",
-        log:
-            "{path}/log/config/{sample}/exclude_file.log",
-        conda:
-            "../envs/mc_base.yaml"
-        params:
-            chroms=config["chromosomes"],
-        script:
-            "../scripts/utils/generate_exclude_file.py"
-
-    rule mosaic_count:
-        input:
-            bam=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            bai=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            excl="{path}/{sample}/config/chroms_to_exclude.txt",
-        output:
-            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-        log:
-            "{path}/log/counts/{sample}/mosaic_count.log",
-        conda:
-            "../envs/mc_bioinfo_tools.yaml"
-        params:
-            window=config["window"],
-        resources:
-            mem_mb=get_mem_mb,
-        shell:
-            """
-            mosaicatcher count \
-                --verbose \
-                --do-not-blacklist-hmm \
-                -o {output.counts} \
-                -i {output.info} \
-                -x {input.excl} \
-                -w {params.window} \
-                {input.bam} \
-            > {log} 2>&1
-            """
-
-    rule order_mosaic_count_output:
-        input:
-            "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-        output:
-            "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-        log:
-            "{path}/log/ashleys_counts/{sample}/{sample}.log",
-        run:
-            df = pd.read_csv(input[0], compression="gzip", sep="\t")
-            df = df.sort_values(by=["sample", "cell", "chrom", "start"])
-            df.to_csv(output[0], index=False, compression="gzip", sep="\t")
-
-    rule plot_mosaic_counts:
-        input:
-            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-        output:
-            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-        log:
-            "{path}/log/plot_mosaic_counts/{sample}.log",
-        conda:
-            "../envs/rtools.yaml"
-        resources:
-            mem_mb=get_mem_mb,
-        shell:
-            """
-            LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
-            """
 
     rule notebook_hand_selection:
         input:
