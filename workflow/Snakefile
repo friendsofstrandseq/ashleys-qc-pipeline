@@ -23,6 +23,9 @@ include: "rules/common.smk"
 include: "rules/rules.smk"
 
 
+include: "rules/gc.smk"
+
+
 include: "rules/examples.smk"
 
 
