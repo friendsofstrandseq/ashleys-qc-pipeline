@@ -76,6 +76,11 @@ cell_per_sample = (
     df_config_files.groupby("Sample")["Cell"].unique().apply(list).to_dict()
 )
 
+plottype_counts = (
+    config["plottype_counts"]
+    if config["GC_analysis"] is True
+    else config["plottype_counts"][0]
+)
 
 def get_final_output():
     """
@@ -89,24 +94,49 @@ def get_final_output():
             sample=samples,
         )
     )
-    # final_list.extend(
-    #     (
-    #         [
-    #             sub_e
-    #             for e in [
-    #                 expand(
-    #                     "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-    #                     path=config["input_bam_location"],
-    #                     sample=sample,
-    #                     cell=cell_per_sample[sample],
-    #                     pair=[1, 2],
-    #                 )
-    #                 for sample in samples
-    #             ]
-    #             for sub_e in e
-    #         ]
-    #     )
-    # )
+
+    final_list.extend(
+        (
+            [
+                sub_e
+                for e in [
+                    expand(
+                        "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+                        path=config["input_bam_location"],
+                        sample=sample,
+                        cell=cell_per_sample[sample],
+                        pair=[1, 2],
+                    )
+                    for sample in samples
+                ]
+                for sub_e in e
+            ]
+        )
+    )
+
+    if config["GC_analysis"] is True:
+        final_list.extend(
+            expand(
+                "{output_folder}/{sample}/plots/{sample}/alfred/gc_devi.png",
+                output_folder=config["input_bam_location"],
+                sample=samples,
+            ),
+        )
+        final_list.extend(
+            expand(
+                "{output_folder}/{sample}/plots/{sample}/alfred/gc_dist.png",
+                output_folder=config["input_bam_location"],
+                sample=samples,
+            ),
+        )
+        final_list.extend(
+            expand(
+                "{output_folder}/{sample}/plots/ashleys_counts/CountComplete.{plottype_counts}.pdf",
+                output_folder=config["input_bam_location"],
+                sample=samples,
+                plottype_counts=config["plottype_counts"],
+            ),
+        )
 
     return final_list
 

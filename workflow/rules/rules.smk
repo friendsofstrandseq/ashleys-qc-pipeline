@@ -187,7 +187,7 @@ rule plot_mosaic_counts:
         counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
         info="{path}/{sample}/ashleys_counts/{sample}.all.info",
     output:
-        "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+        "{path}/{sample}/plots/ashleys_counts/CountComplete.classic.pdf",
     log:
         "{path}/log/plot_mosaic_counts/{sample}.log",
     conda:
@@ -214,6 +214,8 @@ if config["mosaicatcher_pipeline"] is False:
         shell:
             "samtools index {input} 2>&1 > {log}"
 
+    
+
 
 
 if config["hand_selection"] is False:
@@ -232,7 +234,10 @@ if config["hand_selection"] is False:
                 sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
-            plot="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf"
+            plot=expand(
+            "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
+            plottype=plottype_counts,
+        )
         output:
             "{path}/{sample}/predictions/ashleys_features.tsv",
         log:
