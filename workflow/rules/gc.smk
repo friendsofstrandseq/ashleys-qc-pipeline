@@ -14,9 +14,9 @@ if config["GC_analysis"] is True:
                 bam=cell_per_sample[wc.sample],
             ),
         output:
-            "{output_folder}/{sample}/merged_bam/{sample}/merged.raw.bam",
+            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
         log:
-            "{output_folder}/log/mergeBams/{sample}.log",
+            "{output_folder}/log/ashleys_merged_bam/{sample}.log",
         resources:
             mem_mb=get_mem_mb_heavy,
             time="01:00:00",
@@ -34,11 +34,11 @@ if config["GC_analysis"] is True:
         output:
         """
         input:
-            "{output_folder}/{sample}/merged_bam/{sample}/merged.raw.bam",
+            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
         output:
-            "{output_folder}/{sample}/merged_bam/{sample}/merged.bam",
+            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
         log:
-            "{output_folder}/log/mergeBams/{sample}.log",
+            "{output_folder}/log/ashleys_merged_bam/{sample}.mergeSortBams.log",
         resources:
             mem_mb=get_mem_mb_heavy,
             time="01:00:00",
@@ -55,11 +55,11 @@ if config["GC_analysis"] is True:
         output:
         """
         input:
-            "{output_folder}/{sample}/merged_bam/{sample}/merged.bam",
+            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
         output:
-            "{output_folder}/{sample}/merged_bam/{sample}/merged.bam.bai",
+            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam.bai",
         log:
-            "{output_folder}/log/merged_bam/{sample}/merged.log",
+            "{output_folder}/log/ashleys_merged_bam/{sample}/index_merged_bam.log",
         conda:
             "../envs/mc_bioinfo_tools.yaml"
         resources:
@@ -69,8 +69,8 @@ if config["GC_analysis"] is True:
 
     rule alfred:
         input:
-            merged_bam="{folder}/{sample}/merged_bam/{sample}/merged.bam",
-            merged_bam_bai="{folder}/{sample}/merged_bam/{sample}/merged.bam.bai",
+            merged_bam="{folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
+            merged_bam_bai="{folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam.bai",
             fasta=config["references_data"][config["reference"]]["reference_fasta"],
             fasta_index="{fasta}.fai".format(
                 fasta=config["references_data"][config["reference"]]["reference_fasta"]
