@@ -17,7 +17,7 @@ rule fastqc:
     threads: 1
     resources:
         mem_mb=get_mem_mb,
-        time="10:00:00",
+        # time="10:00:00",
     wrapper:
         "v1.7.0/bio/fastqc"
 
@@ -282,7 +282,10 @@ elif config["hand_selection"] is True:
 
     rule notebook_hand_selection:
         input:
-            pdf_raw="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
+            pdf_raw=expand(
+            "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
+            plottype=plottype_counts
+            ),
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
         output:
             path="{path}/{sample}/cell_selection/labels_raw.tsv",
