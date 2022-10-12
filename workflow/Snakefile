@@ -26,19 +26,18 @@ include: "rules/rules.smk"
 include: "rules/gc.smk"
 
 
+if config["mosaicatcher_pipeline"] is False:
+
+    include: "rules/examples.smk"
+
 
 if config["dl_external_files"] is True:
 
     if config["mosaicatcher_pipeline"] is False:
-        print('HELLO')
 
         if config["reference"] in ["hg19", "hg38", "T2T"]:
 
-            include: "rules/examples.smk"
-
-
             if config["reference"] == "hg19":
-
 
                 rule all:
                     input:

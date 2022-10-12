@@ -1,14 +1,10 @@
 name: Build container
 
 on:
-  push:
-    tags:
-      - "*"
-    # branches:
-    #   - dev
-    # - master
-    # paths:
-    #   - "github-actions-runner/Dockerfile"
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   build_container:
@@ -19,16 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Create container file
+        uses: snakemake/snakemake-github-action@v1
+        with:
+          snakefile: ./workflow/Snakefile
+          task: "containerize"
+          args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=True GC_analysis=True"
+
+      - name: Print Dockerfile
+        run: |
+          cat Dockerfile
+
       - name: Run read-yaml action
         id: yaml-data
-        uses: jbutcher5/read-yaml@main      # You may wish to replace main with a version tag such as '1.6' etc.
+        uses: jbutcher5/read-yaml@main # You may wish to replace main with a version tag such as '1.6' etc.
         with:
-          file: './config/config.yaml'
+          file: "./config/config.yaml"
           key-path: '["version"]' # Access the runs key then the using key and retuns the value.
 
       - name: Display read-yaml output
         run: echo "${{ steps.yaml-data.outputs.data }}"
-      - uses: actions/checkout@v2
 
       - name: Build Image
         id: build-image
@@ -37,7 +43,7 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: "${{ steps.yaml-data.outputs.data }}"
           dockerfiles: |
-            ./github-actions-runner/Dockerfile_complete
+            ./Dockerfile
 
       - name: Push To DockerHub
         id: push-to-dockerhub

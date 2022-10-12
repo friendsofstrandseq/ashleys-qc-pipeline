@@ -3,11 +3,6 @@ name: ashleys-qc-pipeline workflow checks
 on:
   push:
     branches:
-      - main
-      - smk_wf_catalog
-      - ref_genomes
-      - ref_genomes_dev
-      - multi_sample
       - dev
 
 jobs:
@@ -69,13 +64,13 @@ jobs:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --config reference=hg38 --config GC_analysis=True --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config GC_analysis=True --conda-frontend mamba --report report.zip"
+          args: "--cores 1 --use-conda --config reference=hg38 --config GC_analysis=True --conda-frontend mamba --report report.zip"
   Testing_ashleys_hg38:
     runs-on: ubuntu-latest
     # needs:
