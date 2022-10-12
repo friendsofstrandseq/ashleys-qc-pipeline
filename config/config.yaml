@@ -9,7 +9,7 @@ dl_external_files: False
 # Overwrite ASHLEYS PREDICTIONS
 use_light_data: False
 # Enable / Disable GC analysis
-GC_analysis: False
+GC_analysis: True
 
 ############################################################################
 #                          EXPERIMENTAL PARAMETERS

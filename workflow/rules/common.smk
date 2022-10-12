@@ -82,6 +82,7 @@ plottype_counts = (
     else config["plottype_counts"][0]
 )
 
+
 def get_final_output():
     """
     Function called by snakemake rule all to run the pipeline

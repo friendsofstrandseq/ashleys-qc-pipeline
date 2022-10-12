@@ -17,7 +17,6 @@ rule fastqc:
     threads: 1
     resources:
         mem_mb=get_mem_mb,
-        # time="10:00:00",
     wrapper:
         "v1.7.0/bio/fastqc"
 
@@ -110,8 +109,6 @@ rule mark_duplicates:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
 
-
-
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -130,6 +127,7 @@ rule generate_exclude_file_for_mosaic_count:
         chroms=config["chromosomes"],
     script:
         "../scripts/utils/generate_exclude_file.py"
+
 
 rule mosaic_count:
     input:
@@ -170,6 +168,7 @@ rule mosaic_count:
         > {log} 2>&1
         """
 
+
 rule order_mosaic_count_output:
     input:
         "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
@@ -181,6 +180,7 @@ rule order_mosaic_count_output:
         df = pd.read_csv(input[0], compression="gzip", sep="\t")
         df = df.sort_values(by=["sample", "cell", "chrom", "start"])
         df.to_csv(output[0], index=False, compression="gzip", sep="\t")
+
 
 rule plot_mosaic_counts:
     input:
@@ -214,9 +214,6 @@ if config["mosaicatcher_pipeline"] is False:
         shell:
             "samtools index {input} 2>&1 > {log}"
 
-    
-
-
 
 if config["hand_selection"] is False:
 
@@ -235,9 +232,9 @@ if config["hand_selection"] is False:
                 cell=cell_per_sample[str(wc.sample)],
             ),
             plot=expand(
-            "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
-            plottype=plottype_counts,
-        )
+                "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
+                plottype=plottype_counts,
+            ),
         output:
             "{path}/{sample}/predictions/ashleys_features.tsv",
         log:
@@ -283,8 +280,8 @@ elif config["hand_selection"] is True:
     rule notebook_hand_selection:
         input:
             pdf_raw=expand(
-            "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
-            plottype=plottype_counts
+                "{{path}}/{{sample}}/plots/ashleys_counts/CountComplete.{plottype}.pdf",
+                plottype=plottype_counts,
             ),
             info="{path}/{sample}/ashleys_counts/{sample}.all.info",
         output:

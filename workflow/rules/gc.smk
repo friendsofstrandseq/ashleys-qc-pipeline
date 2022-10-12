@@ -1,11 +1,6 @@
 if config["GC_analysis"] is True:
 
     rule mergeBams:
-        """
-        rule fct:
-        input:
-        output:
-        """
         input:
             lambda wc: expand(
                 "{input_folder}/{sample}/all/{bam}.sort.mdup.bam",
@@ -26,13 +21,7 @@ if config["GC_analysis"] is True:
         shell:
             "samtools merge -@ {threads} {output} {input} 2>&1 > {log}"
 
-
     rule mergeSortBams:
-        """
-        rule fct:
-        input:
-        output:
-        """
         input:
             "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
         output:
@@ -49,11 +38,6 @@ if config["GC_analysis"] is True:
             "samtools sort -@ {threads} -o {output} {input} 2>&1 > {log}"
 
     rule index_merged_bam:
-        """
-        rule fct:
-        input:
-        output:
-        """
         input:
             "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
         output:
@@ -149,7 +133,6 @@ if config["GC_analysis"] is True:
         script:
             "../scripts/GC/counts_scaling.R"
 
-
     rule plot_mosaic_gc_norm_counts:
         input:
             counts="{folder}/{sample}/counts/GC_correction/{sample}.all.VST.GC.scaled.txt.gz",
@@ -188,4 +171,4 @@ if config["GC_analysis"] is True:
         conda:
             "../envs/rtools.yaml"
         script:
-            "../scripts/plotting/gc.R"
+            "../scripts/GC/gc.R"
