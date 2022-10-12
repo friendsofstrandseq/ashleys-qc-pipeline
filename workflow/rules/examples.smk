@@ -56,3 +56,15 @@ rule download_T2T_reference:
             os.makedirs(directory)
         shell("mv {input} workflow/data/ref_genomes/T2T.fa.gz")
         shell("gunzip workflow/data/ref_genomes/T2T.fa.gz")
+
+rule samtools_faindex:
+    input:
+        ancient("{file}.fa"),
+    output:
+        "{file}.fa.fai",
+    log:
+        "{file}.log",
+    conda:
+        "../envs/mc_bioinfo_tools.yaml"
+    shell:
+        "samtools faidx {input}"

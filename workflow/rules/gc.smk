@@ -3,15 +3,15 @@ if config["GC_analysis"] is True:
     rule mergeBams:
         input:
             lambda wc: expand(
-                "{input_folder}/{sample}/all/{bam}.sort.mdup.bam",
-                input_folder=config["input_bam_location"],
+                "{folder}/{sample}/all/{bam}.sort.mdup.bam",
+                folder=config["input_bam_location"],
                 sample=wc.sample,
                 bam=cell_per_sample[wc.sample],
             ),
         output:
-            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
+            "{folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
         log:
-            "{output_folder}/log/ashleys_merged_bam/{sample}.log",
+            "{folder}/log/ashleys_merged_bam/{sample}.log",
         resources:
             mem_mb=get_mem_mb_heavy,
             time="01:00:00",
@@ -23,11 +23,11 @@ if config["GC_analysis"] is True:
 
     rule mergeSortBams:
         input:
-            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
+            "{folder}/{sample}/ashleys_merged_bam/{sample}/merged.raw.bam",
         output:
-            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
+            "{folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
         log:
-            "{output_folder}/log/ashleys_merged_bam/{sample}.mergeSortBams.log",
+            "{folder}/log/ashleys_merged_bam/{sample}.mergeSortBams.log",
         resources:
             mem_mb=get_mem_mb_heavy,
             time="01:00:00",
@@ -39,11 +39,11 @@ if config["GC_analysis"] is True:
 
     rule index_merged_bam:
         input:
-            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
+            "{folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam",
         output:
-            "{output_folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam.bai",
+            "{folder}/{sample}/ashleys_merged_bam/{sample}/merged.bam.bai",
         log:
-            "{output_folder}/log/ashleys_merged_bam/{sample}/index_merged_bam.log",
+            "{folder}/log/ashleys_merged_bam/{sample}/index_merged_bam.log",
         conda:
             "../envs/mc_bioinfo_tools.yaml"
         resources:
