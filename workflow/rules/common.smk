@@ -86,6 +86,7 @@ plottype_counts = (
 plottype_counts = ["classic"]
 
 if config["GC_analysis"] is True:
+ 
     import string
     import collections
     import numpy as np
@@ -93,8 +94,9 @@ if config["GC_analysis"] is True:
     d = collections.defaultdict(dict)
     orientation = (8,12) if config["plate_orientation"] == "landscape" else (12,8)
     for sample in samples:
-        for j, e in enumerate(np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)):
-            d[sample][list(string.ascii_uppercase)[j]] = e
+        if len(cell_per_sample[sample]) == 96:
+            for j, e in enumerate(np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)):
+                d[sample][list(string.ascii_uppercase)[j]] = e
 
 
 
@@ -171,6 +173,9 @@ def get_final_output():
                 ]
             )
         )
+
+
+
         final_list.extend(
             (
                 [
@@ -183,7 +188,7 @@ def get_final_output():
                             row=list(string.ascii_uppercase)[:orientation[0]],
                             alfred_plot=config["alfred_plots"]
                         )
-                        for sample in samples
+                        for sample in samples if len(cell_per_sample[sample]) == 96
                     ]
                     for sub_e in e
                 ]
