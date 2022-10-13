@@ -38,6 +38,13 @@ plottype_counts:
   - "classic"
   - "GC_corrected"
 
+
+alfred_plots:
+  - "dist"
+  - "devi"
+
+plate_orientation: landscape
+
 # Chromosomes list to process
 chromosomes:
   - chr1

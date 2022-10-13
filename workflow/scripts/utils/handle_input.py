@@ -4,7 +4,7 @@ import os, sys
 
 class HandleInput:
     def __init__(self, input_path, output_path, check_sm_tag=False, bam=True):
-        print(input_path)
+        # print(input_path)
         df_config_files = self.handle_input_data(thisdir=input_path, bam=bam)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         df_config_files.to_csv(output_path, sep="\t", index=False)
@@ -24,9 +24,11 @@ class HandleInput:
         ext = ".bam" if bam is True else ".fastq.gz"
         folder = "all" if bam is True else "fastq"
         complete_df_list = list()
-        print(thisdir)
-        for sample in [e for e in os.listdir(thisdir) if e not in ["config", "log", ".DS_Store", "._.DS_Store"]]:
-            print(thisdir, sample, folder, ext)
+        # print(thisdir)
+        exclude = ["._.DS_Store", ".DS_Store", "all", "ashleys_counts", "bam", "cell_selection", "config", "counts", "fastq", "fastqc", "haplotag", "log", "merged_bam", "mosaiclassifier", "normalizations", "ploidy", "plots", "predictions", "segmentation", "snv_calls", "stats", "strandphaser" ]
+
+        for sample in [e for e in os.listdir(thisdir) if e not in exclude]:
+            # print(thisdir, sample, folder, ext)
 
             # print("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
             l_files_all = [

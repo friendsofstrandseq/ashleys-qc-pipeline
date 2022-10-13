@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv(snakemake.input.path, sep="\t")
+df = pd.read_csv(snakemake.input.folder, sep="\t")
 df["prediction"] = 1
 df["probability"] = 1
 df.loc[df["cell"].str.contains("05"), "prediction"] = 0
