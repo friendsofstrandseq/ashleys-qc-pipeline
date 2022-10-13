@@ -31,7 +31,7 @@ mosaicatcher_pipeline: False
 hand_selection: False
 
 # Window size used by mosaic binning algorithm
-window: 100000
+window: 200000
 
 # Chromosomes list to process
 chromosomes:

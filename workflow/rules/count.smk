@@ -100,6 +100,19 @@ if (
             Rscript workflow/scripts/normalization/normalize.R {input.counts} {input.norm} {output} 2>&1 > {log}
             """
 
+else:
+
+    rule cp_mosaic_count:
+        input:
+            "{folder}/{sample}/counts/{sample}.txt.filter.gz",
+        output:
+            "{folder}/{sample}/counts/{sample}.txt.gz",
+        log:
+            "{folder}/log/counts/{sample}.log",
+        conda:
+            "../envs/mc_base.yaml"
+        shell:
+            "cp {input} {output}"
 
 rule order_mosaic_count_output:
     input:
