@@ -23,10 +23,11 @@ class HandleInput:
         ext = ".bam" if bam is True else ".fastq.gz"
         folder = "all" if bam is True else "fastq"
         complete_df_list = list()
+        exclude = ["._.DS_Store", ".DS_Store", "all", "ashleys_counts", "bam", "cell_selection", "config", "counts", "fastq", "fastqc", "haplotag", "log", "merged_bam", "mosaiclassifier", "normalizations", "ploidy", "plots", "predictions", "segmentation", "snv_calls", "stats", "strandphaser" ]
         for sample in [
             e
             for e in os.listdir(thisdir)
-            if e not in ["config", "log", ".DS_Store", "._.DS_Store"]
+            if e not in exclude
         ]:
             l_files_all = [
                 f
@@ -59,9 +60,9 @@ class HandleInput:
 # Create configuration file with samples
 
 c = HandleInput(
-    input_path=config["input_bam_location"],
-    output_path="{input_bam_location}/config/config_df_ashleys.tsv".format(
-        input_bam_location=config["input_bam_location"]
+    input_path=config["data_location"],
+    output_path="{data_location}/config/config_df_ashleys.tsv".format(
+        data_location=config["data_location"]
     ),
     check_sm_tag=False,
     bam=False,
@@ -82,6 +83,20 @@ plottype_counts = (
     else config["plottype_counts"][0]
 )
 
+plottype_counts = ["classic"]
+
+if config["GC_analysis"] is True:
+    import string
+    import collections
+    import numpy as np
+
+    d = collections.defaultdict(dict)
+    orientation = (8,12) if config["plate_orientation"] == "landscape" else (12,8)
+    for sample in samples:
+        for j, e in enumerate(np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)):
+            d[sample][list(string.ascii_uppercase)[j]] = e
+
+
 
 def get_final_output():
     """
@@ -91,7 +106,7 @@ def get_final_output():
     final_list.extend(
         expand(
             "{path}/{sample}/cell_selection/labels.tsv",
-            path=config["input_bam_location"],
+            path=config["data_location"],
             sample=samples,
         )
     )
@@ -103,7 +118,7 @@ def get_final_output():
                 for e in [
                     expand(
                         "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-                        path=config["input_bam_location"],
+                        path=config["data_location"],
                         sample=sample,
                         cell=cell_per_sample[sample],
                         pair=[1, 2],
@@ -115,27 +130,104 @@ def get_final_output():
         )
     )
 
+
+
+
     if config["GC_analysis"] is True:
+
+
         final_list.extend(
-            expand(
-                "{output_folder}/{sample}/plots/{sample}/alfred/gc_devi.png",
-                output_folder=config["input_bam_location"],
-                sample=samples,
-            ),
+            (
+                [
+                    sub_e
+                    for e in [
+                        expand(
+                            "{path}/{sample}/plots/alfred/{bam}_gc_{alfred_plot}.png",
+                            path=config["data_location"],
+                            sample=sample,
+                            bam=cell_per_sample[sample],
+                            alfred_plot=config["alfred_plots"]
+                        )
+                        for sample in samples
+                    ]
+                    for sub_e in e
+                ]
+            )
         )
         final_list.extend(
-            expand(
-                "{output_folder}/{sample}/plots/{sample}/alfred/gc_dist.png",
-                output_folder=config["input_bam_location"],
-                sample=samples,
-            ),
+            (
+                [
+                    sub_e
+                    for e in [
+                        expand(
+                            "{path}/{sample}/plots/alfred/MERGE/merged_bam_gc_{alfred_plot}.merge.png",
+                            path=config["data_location"],
+                            sample=sample,
+                            alfred_plot=config["alfred_plots"]
+                        )
+                        for sample in samples
+                    ]
+                    for sub_e in e
+                ]
+            )
         )
         final_list.extend(
+            (
+                [
+                    sub_e
+                    for e in [
+                        expand(
+                            "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
+                            path=config["data_location"],
+                            sample=sample,
+                            row=list(string.ascii_uppercase)[:orientation[0]],
+                            alfred_plot=config["alfred_plots"]
+                        )
+                        for sample in samples
+                    ]
+                    for sub_e in e
+                ]
+            )
+        )
+        # final_list.extend(
+        #     (
+        #         [
+        #             sub_e
+        #             for e in [
+        #                 expand(
+        #                     "{path}/{sample}/plots/alfred/{row}_gc_{alfred_plot}.png",
+        #                     path=config["data_location"],
+        #                     sample=sample,
+        #                     row=row,
+        #                     alfred_plot=config["alfred_plots"]
+        #                 )
+        #                 for sample in samples for row in d[sample]
+        #             ]
+        #             for sub_e in e
+        #         ]
+        #     )
+        # )
+        # final_list.extend(
+        #     expand(
+        #         "{output_folder}/{sample}/plots/{sample}/alfred/gc_devi.png",
+        #         output_folder=config["data_location"],
+        #         sample=samples,
+        #     ),
+        # )
+        # final_list.extend(
+        #     expand(
+        #         "{output_folder}/{sample}/plots/{sample}/alfred/gc_dist.png",
+        #         output_folder=config["data_location"],
+        #         sample=samples,
+        #     ),
+        # )
+
+        final_list.extend(
             expand(
-                "{output_folder}/{sample}/plots/ashleys_counts/CountComplete.{plottype_counts}.pdf",
-                output_folder=config["input_bam_location"],
+                "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+                output_folder=config["data_location"],
                 sample=samples,
-                plottype_counts=config["plottype_counts"],
+                plottype_counts=plottype_counts,
             ),
         )
 
