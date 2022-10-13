@@ -194,7 +194,7 @@ elif config["hand_selection"] is True:
                 "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
                 plottype=plottype_counts,
             ),
-            info="{folder}/{sample}/counts/{sample}.all.info",
+            info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
             folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
         log:
