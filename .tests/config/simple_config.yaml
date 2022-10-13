@@ -19,6 +19,8 @@ dl_external_files: False
 # Overwrite ASHLEYS PREDICTIONS
 use_light_data: True
 
+normalized_counts: True
+
 ############################################################################
 #                          EXPERIMENTAL PARAMETERS
 ############################################################################
