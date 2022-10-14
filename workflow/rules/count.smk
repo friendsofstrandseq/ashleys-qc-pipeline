@@ -1,4 +1,3 @@
-
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -129,7 +128,7 @@ rule order_mosaic_count_output:
 
 rule plot_mosaic_counts:
     input:
-        counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        counts="{folder}/{sample}/counts/{sample}.txt.gz",
         info="{folder}/{sample}/counts/{sample}.info_raw",
     output:
         "{folder}/{sample}/plots/counts/CountComplete.classic.pdf",
