@@ -83,8 +83,6 @@ plottype_counts = (
     else config["plottype_counts"][0]
 )
 
-plottype_counts = ["classic"]
-
 if config["GC_analysis"] is True:
  
     import string
@@ -194,38 +192,6 @@ def get_final_output():
                 ]
             )
         )
-        # final_list.extend(
-        #     (
-        #         [
-        #             sub_e
-        #             for e in [
-        #                 expand(
-        #                     "{path}/{sample}/plots/alfred/{row}_gc_{alfred_plot}.png",
-        #                     path=config["data_location"],
-        #                     sample=sample,
-        #                     row=row,
-        #                     alfred_plot=config["alfred_plots"]
-        #                 )
-        #                 for sample in samples for row in d[sample]
-        #             ]
-        #             for sub_e in e
-        #         ]
-        #     )
-        # )
-        # final_list.extend(
-        #     expand(
-        #         "{output_folder}/{sample}/plots/{sample}/alfred/gc_devi.png",
-        #         output_folder=config["data_location"],
-        #         sample=samples,
-        #     ),
-        # )
-        # final_list.extend(
-        #     expand(
-        #         "{output_folder}/{sample}/plots/{sample}/alfred/gc_dist.png",
-        #         output_folder=config["data_location"],
-        #         sample=samples,
-        #     ),
-        # )
 
         final_list.extend(
             expand(
@@ -235,6 +201,16 @@ def get_final_output():
                 plottype_counts=plottype_counts,
             ),
         )
+        
+
+    from pprint import pprint 
+    pprint( expand(
+                "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+                output_folder=config["data_location"],
+                sample=samples,
+                plottype_counts=plottype_counts,
+            ))
+    pprint(final_list)
 
     return final_list
 
