@@ -54,8 +54,13 @@ rule bwa_strandseq_to_reference_alignment:
         ref="{ref}".format(
             ref=config["references_data"][config["reference"]]["reference_fasta"]
         ),
-        ref_index="{ref}.ann".format(
-            ref=config["references_data"][config["reference"]]["reference_fasta"]
+        ref_index=multiext(
+            config["references_data"][config["reference"]]["reference_fasta"],
+            ".amb",
+            ".ann",
+            ".bwt",
+            ".pac",
+            ".sa",
         ),
     output:
         bam=temp("{folder}/{sample}/bam/{cell}.bam"),
@@ -64,7 +69,7 @@ rule bwa_strandseq_to_reference_alignment:
         samtools="{folder}/{sample}/log/{cell}.samtools.log",
     threads: 6
     params:
-        idx_prefix=lambda wildcards, input: input.ref_index.rsplit(".", 1)[0],
+        idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
