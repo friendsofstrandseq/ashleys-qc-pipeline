@@ -84,13 +84,13 @@ jobs:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --config reference=hg38 chromosomes=[chr17] GC_analysis=True --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] GC_analysis=True --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --config reference=hg38 chromosomes=[chr17] GC_analysis=True --conda-frontend mamba --report report.zip"
+          args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] GC_analysis=True --conda-frontend mamba --report report.zip"
   Testing_ashleys_hg38:
     runs-on: ubuntu-latest
     # needs:
@@ -104,13 +104,13 @@ jobs:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --config reference=hg38 chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --config reference=hg38 chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+          args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_ashleys_hg19:
     runs-on: ubuntu-latest
     # needs:
@@ -124,13 +124,13 @@ jobs:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --config reference=hg19 chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --config reference=hg19 chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+          args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_ashleys_T2T:
     runs-on: ubuntu-latest
     # needs:
@@ -144,13 +144,13 @@ jobs:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --config reference=T2T chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
         uses: snakemake/snakemake-github-action@v1.23.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --config reference=T2T chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+          args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_jub_nb:
     runs-on: ubuntu-latest
     # needs:
