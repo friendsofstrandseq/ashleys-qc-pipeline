@@ -2,8 +2,6 @@ from snakemake.utils import min_version
 
 min_version("7.5.0")
 
-# onstart:
-
 
 configfile: "config/config.yaml"
 

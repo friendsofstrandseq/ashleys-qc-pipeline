@@ -1,3 +1,14 @@
+## Rules to perform GC analysis & correction on Strand-Seq libraries
+## ---------------------------------------------------------------
+## fastqc: QC analysis of FASTQ files
+## bwa_index: index fasta file using the BW transformation to perform next reads mapping
+## bwa_strandseq_to_reference_alignment: mapping against FASTA reference (based on reference selected (hg19/hg38/T2T))
+## samtools_sort_bam: sorting bam files
+## mark_duplicates: mark duplicates in bam files
+## *samtools index: index bam files (only if not loaded as a module into mosaicatcher_pipeline) 
+## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries  
+## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
+
 
 rule fastqc:
     input:

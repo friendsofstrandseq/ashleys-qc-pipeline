@@ -1,4 +1,18 @@
+## Rules to perform GC analysis & correction on Strand-Seq libraries
+## ---------------------------------------------------------------
+## mergeBams/mergeBams_plate_row: merge all/fraction of bams
+## mergeSortBams/mergeSortBams_plate_row: sort merged bam file
+## index_merged_bam/index_merged_bam_plate_row: index merged bam file
+## alfred_plate_row/alfred_merged/alfred_sc: alfred QC to retrieve stats on bam files
+## alfred_table_plate_row/alfred_table_merged/alfred_table_sc: extract only GC rows 
+## alfred_plot_plate_row/alfred_plot_merged/alfred_plot_sc: plot statistics using R script
+## VST_correction/GC_correction/counts_scaling: variance stabilizing transformation, GC correction & counts scaling based @MarcoCosenza method
+## plot_mosaic_gc_norm_counts: plots QC counts plot after correction
+
+
 if config["GC_analysis"] is True:
+
+    ruleorder: mergeBams > mergeSortBams > mergeBams_plate_row > mergeSortBams_plate_row > index_merged_bam > index_merged_bam_plate_row > alfred_merged > alfred_plate_row > alfred_sc > alfred_table > alfred_table_merged > alfred_table_plate_row
 
     rule mergeBams:
         input:
@@ -51,7 +65,59 @@ if config["GC_analysis"] is True:
         shell:
             "samtools index {input} > {log} 2>&1"
 
-    ruleorder: mergeBams > mergeSortBams > mergeBams_plate_row > mergeSortBams_plate_row > index_merged_bam > index_merged_bam_plate_row > alfred_merged > alfred_plate_row > alfred_sc > alfred_table > alfred_table_merged > alfred_table_plate_row
+
+
+    rule mergeBams_plate_row:
+        input:
+            # "{folder}/{sample}/all/{bam}.sort.mdup.bam",
+            lambda wc: expand(
+                    "{folder}/{sample}/bam/{bam}.sort.mdup.bam",
+                    folder=config["data_location"],
+                    sample=wc.sample,
+                    bam=d[wc.sample][wc.row]
+            ),
+        output:
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
+        log:
+            "{folder}/log/merged_bam/{sample}.{row}.log",
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time="01:00:00",
+        threads: 32
+        conda:
+            "../envs/mc_bioinfo_tools.yaml"
+        shell:
+            "samtools merge -@ {threads} {output} {input} 2>&1 > {log}"
+
+    rule mergeSortBams_plate_row:
+        input:
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
+        output:
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
+        log:
+            "{folder}/log/merged_bam/{sample}.{row}.mergeSortBams.log",
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time="01:00:00",
+        threads: 32
+        conda:
+            "../envs/mc_bioinfo_tools.yaml"
+        shell:
+            "samtools sort -@ {threads} -o {output} {input} 2>&1 > {log}"
+
+    rule index_merged_bam_plate_row:
+        input:
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
+        output:
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai",
+        log:
+            "{folder}/log/merged_bam/{sample}/{row}.log",
+        conda:
+            "../envs/mc_bioinfo_tools.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        shell:
+            "samtools index {input} > {log} 2>&1"
     
     rule alfred_merged:
         input:
@@ -88,6 +154,28 @@ if config["GC_analysis"] is True:
             alfred_tsv="{folder}/{sample}/alfred/{bam}.tsv.gz",
         log:
             "{folder}/{sample}/log/alfred/{bam}.log",
+        resources:
+            mem_mb=get_mem_mb,
+        conda:
+            "../envs/dev/mc_bioinfo_tools.yaml"
+        shell:
+            """
+            alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
+            """
+
+    rule alfred_plate_row:
+        input:
+            bam="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
+            bam_bai="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai",
+            fasta=config["references_data"][config["reference"]]["reference_fasta"],
+            fasta_index="{fasta}.fai".format(
+                fasta=config["references_data"][config["reference"]]["reference_fasta"]
+            ),
+        output:
+            alfred_json="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.json.gz",
+            alfred_tsv="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.tsv.gz",
+        log:
+            "{folder}/{sample}/log/alfred/{row}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -144,6 +232,81 @@ if config["GC_analysis"] is True:
             """
             zcat {input} | grep "^GC" > {output}
             """
+
+    rule alfred_plot:
+        input:
+            # table="{folder}/{sample}/alfred/{sample}.table",
+            table="{folder}/{sample}/alfred/{bam}.table",
+        output:
+            gcdist_plot=report(
+                "{folder}/{sample}/plots/alfred/{bam}_gc_dist.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}", "Cell(s)" : "{bam}", "Type": "GC distribution"},
+            ),
+            gcdevi_plot=report(
+                "{folder}/{sample}/plots/alfred/{bam}_gc_devi.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}", "Cell(s)" : "{bam}", "Type": "GC deviation"},
+            ),
+        log:
+            "{folder}/{sample}/log/alfred_plot/{bam}.log",
+        resources:
+            mem_mb=get_mem_mb,
+        conda:
+            "../envs/rtools.yaml"
+        script:
+            "../scripts/GC/gc.R"
+
+
+            
+    rule alfred_plot_merge:
+        input:
+            # table="{folder}/{sample}/alfred/{sample}.table",
+            table="{folder}/{sample}/alfred/MERGE/merged_bam.merge.table",
+        output:
+            gcdist_plot=report(
+                "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_dist.merge.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}", "Type": "GC distribution"},
+            ),
+            gcdevi_plot=report(
+                "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}",  "Type": "GC deviation"},
+            ),
+        log:
+            "{folder}/{sample}/log/alfred_plot/merge_bam.log",
+        resources:
+            mem_mb=get_mem_mb,
+        conda:
+            "../envs/rtools.yaml"
+        script:
+            "../scripts/GC/gc.R"
+
+    rule alfred_plot_plate_row:
+        input:
+            # table="{folder}/{sample}/alfred/{sample}.table",
+            table="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.table",
+        output:
+            gcdist_plot=report(
+                "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_dist.row.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}", "Cell(s)" : "{row}", "Type": "GC distribution"},
+            ),
+            gcdevi_plot=report(
+                "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_devi.row.png",
+                category="GC analysis",
+                labels={"Sample": "{sample}", "Cell(s)" : "{row}", "Type": "GC deviation"},
+            ),
+        log:
+            "{folder}/{sample}/log/alfred_plot/{row}.log",
+        resources:
+            mem_mb=get_mem_mb,
+        conda:
+            "../envs/rtools.yaml"
+        script:
+            "../scripts/GC/gc.R"
+
 
     rule VST_correction:
         input:
@@ -205,151 +368,3 @@ if config["GC_analysis"] is True:
             """
             LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
             """
-
-    rule alfred_plot:
-        input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
-            table="{folder}/{sample}/alfred/{bam}.table",
-        output:
-            gcdist_plot=report(
-                "{folder}/{sample}/plots/alfred/{bam}_gc_dist.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}", "Cell(s)" : "{bam}", "Type": "GC distribution"},
-            ),
-            gcdevi_plot=report(
-                "{folder}/{sample}/plots/alfred/{bam}_gc_devi.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}", "Cell(s)" : "{bam}", "Type": "GC deviation"},
-            ),
-        log:
-            "{folder}/{sample}/log/alfred_plot/{bam}.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/rtools.yaml"
-        script:
-            "../scripts/GC/gc.R"
-
-
-
-    rule mergeBams_plate_row:
-        input:
-            # "{folder}/{sample}/all/{bam}.sort.mdup.bam",
-            lambda wc: expand(
-                    "{folder}/{sample}/bam/{bam}.sort.mdup.bam",
-                    folder=config["data_location"],
-                    sample=wc.sample,
-                    bam=d[wc.sample][wc.row]
-            ),
-        output:
-            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
-        log:
-            "{folder}/log/merged_bam/{sample}.{row}.log",
-        resources:
-            mem_mb=get_mem_mb_heavy,
-            time="01:00:00",
-        threads: 32
-        conda:
-            "../envs/mc_bioinfo_tools.yaml"
-        shell:
-            "samtools merge -@ {threads} {output} {input} 2>&1 > {log}"
-
-    rule mergeSortBams_plate_row:
-        input:
-            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
-        output:
-            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
-        log:
-            "{folder}/log/merged_bam/{sample}.{row}.mergeSortBams.log",
-        resources:
-            mem_mb=get_mem_mb_heavy,
-            time="01:00:00",
-        threads: 32
-        conda:
-            "../envs/mc_bioinfo_tools.yaml"
-        shell:
-            "samtools sort -@ {threads} -o {output} {input} 2>&1 > {log}"
-
-    rule index_merged_bam_plate_row:
-        input:
-            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
-        output:
-            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai",
-        log:
-            "{folder}/log/merged_bam/{sample}/{row}.log",
-        conda:
-            "../envs/mc_bioinfo_tools.yaml"
-        resources:
-            mem_mb=get_mem_mb,
-        shell:
-            "samtools index {input} > {log} 2>&1"
-            
-    rule alfred_plate_row:
-        input:
-            bam="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
-            bam_bai="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai",
-            fasta=config["references_data"][config["reference"]]["reference_fasta"],
-            fasta_index="{fasta}.fai".format(
-                fasta=config["references_data"][config["reference"]]["reference_fasta"]
-            ),
-        output:
-            alfred_json="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.json.gz",
-            alfred_tsv="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.tsv.gz",
-        log:
-            "{folder}/{sample}/log/alfred/{row}.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/dev/mc_bioinfo_tools.yaml"
-        shell:
-            """
-            alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
-            """
-
-    rule alfred_plot_merge:
-        input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
-            table="{folder}/{sample}/alfred/MERGE/merged_bam.merge.table",
-        output:
-            gcdist_plot=report(
-                "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_dist.merge.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}", "Type": "GC distribution"},
-            ),
-            gcdevi_plot=report(
-                "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}",  "Type": "GC deviation"},
-            ),
-        log:
-            "{folder}/{sample}/log/alfred_plot/merge_bam.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/rtools.yaml"
-        script:
-            "../scripts/GC/gc.R"
-
-    rule alfred_plot_plate_row:
-        input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
-            table="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.table",
-        output:
-            gcdist_plot=report(
-                "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_dist.row.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}", "Cell(s)" : "{row}", "Type": "GC distribution"},
-            ),
-            gcdevi_plot=report(
-                "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_devi.row.png",
-                category="GC analysis",
-                labels={"Sample": "{sample}", "Cell(s)" : "{row}", "Type": "GC deviation"},
-            ),
-        log:
-            "{folder}/{sample}/log/alfred_plot/{row}.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/rtools.yaml"
-        script:
-            "../scripts/GC/gc.R"
