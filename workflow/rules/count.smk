@@ -1,3 +1,9 @@
+## Rules dedicated to Strand-Seq count based on mosaic program
+## ---------------------------------------------------------------
+## generate_exclude_file_for_mosaic_count: generate a list of chromosomes to exclude except the canonical ones
+## mosaic_count: mosaic count program to count reads in each bin based on window selected (default: 200kb)
+## plot_mosaic_counts: plot QC plots based on counts
+
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(

@@ -1,7 +1,7 @@
 import pandas as pd
 import os, sys
 
-
+# Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe  
 class HandleInput:
     def __init__(self, input_path, output_path, check_sm_tag=False, bam=True):
         df_config_files = self.handle_input_data(thisdir=input_path, bam=bam)
@@ -20,15 +20,18 @@ class HandleInput:
         Returns:
             _type_: _description_
         """
+        # Extension & folder based on bam boolean input
         ext = ".bam" if bam is True else ".fastq.gz"
         folder = "bam" if bam is True else "fastq"
         complete_df_list = list()
+        # List of folders/files to not consider (restrict to samples only)
         exclude = ["._.DS_Store", ".DS_Store", "all", "ashleys_counts", "bam", "cell_selection", "config", "counts", "fastq", "fastqc", "haplotag", "log", "merged_bam", "mosaiclassifier", "normalizations", "ploidy", "plots", "predictions", "segmentation", "snv_calls", "stats", "strandphaser" ]
         for sample in [
             e
             for e in os.listdir(thisdir)
             if e not in exclude
         ]:
+            # Create a list of  files to process for each sample
             l_files_all = [
                 f
                 for f in os.listdir(
@@ -38,6 +41,8 @@ class HandleInput:
                 )
                 if f.endswith(ext)
             ]
+
+            # Dataframe creation
             df = pd.DataFrame([{"File": f} for f in l_files_all])
             df["File"] = df["File"].str.replace(ext, "", regex=True)
             df["Folder"] = thisdir
@@ -50,6 +55,7 @@ class HandleInput:
 
             complete_df_list.append(df)
 
+        # Concat dataframes for each sample & output
         complete_df = pd.concat(complete_df_list)
         complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(
             drop=True
@@ -77,22 +83,28 @@ cell_per_sample = (
     df_config_files.groupby("Sample")["Cell"].unique().apply(list).to_dict()
 )
 
+# Plottype options for QC count plot
 plottype_counts = (
     config["plottype_counts"]
     if config["GC_analysis"] is True
     else config["plottype_counts"][0]
 )
 
+# Special row/column mode for GC analysis of a 96-well plate 
 if config["GC_analysis"] is True:
  
     import string
     import collections
     import numpy as np
-
+    
+    # Instanciate a dict of dict
     d = collections.defaultdict(dict)
+    # Select orientation based on config file (landscape/portrait)
     orientation = (8,12) if config["plate_orientation"] == "landscape" else (12,8)
     for sample in samples:
+        # If sample contains 96 files 
         if len(cell_per_sample[sample]) == 96:
+            # Create dict for each row/column & save it into d 
             for j, e in enumerate(np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)):
                 d[sample][list(string.ascii_uppercase)[j]] = e
 
@@ -111,6 +123,7 @@ def get_final_output():
         )
     )
 
+    # FASTQC outputs
     final_list.extend(
         (
             [
@@ -135,7 +148,7 @@ def get_final_output():
 
     if config["GC_analysis"] is True:
 
-
+        # ALFRED for each single cell
         final_list.extend(
             (
                 [
@@ -154,6 +167,8 @@ def get_final_output():
                 ]
             )
         )
+        
+        # ALFRED for the complete plate
         final_list.extend(
             (
                 [
@@ -173,26 +188,28 @@ def get_final_output():
         )
 
 
-
-        final_list.extend(
-            (
-                [
-                    sub_e
-                    for e in [
-                        expand(
-                            "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
-                            path=config["data_location"],
-                            sample=sample,
-                            row=list(string.ascii_uppercase)[:orientation[0]],
-                            alfred_plot=config["alfred_plots"]
-                        )
-                        for sample in samples if len(cell_per_sample[sample]) == 96
+        # ALFRED for each row/column
+        if d:
+            final_list.extend(
+                (
+                    [
+                        sub_e
+                        for e in [
+                            expand(
+                                "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
+                                path=config["data_location"],
+                                sample=sample,
+                                row=list(string.ascii_uppercase)[:orientation[0]],
+                                alfred_plot=config["alfred_plots"]
+                            )
+                            for sample in samples if len(cell_per_sample[sample]) == 96
+                        ]
+                        for sub_e in e
                     ]
-                    for sub_e in e
-                ]
+                )
             )
-        )
 
+        # QC count plots (classic only or classic + corrected based on config GC_analysis option)
         final_list.extend(
             expand(
                 "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
@@ -202,15 +219,6 @@ def get_final_output():
             ),
         )
         
-
-    from pprint import pprint 
-    pprint( expand(
-                "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
-                output_folder=config["data_location"],
-                sample=samples,
-                plottype_counts=plottype_counts,
-            ))
-    pprint(final_list)
 
     return final_list
 
