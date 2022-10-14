@@ -1,3 +1,6 @@
+## Rules dedicated to download index Fasta files
+## ---------------------------------------------------------------
+
 import os
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
@@ -56,6 +59,7 @@ rule download_T2T_reference:
             os.makedirs(directory)
         shell("mv {input} workflow/data/ref_genomes/T2T.fa.gz")
         shell("gunzip workflow/data/ref_genomes/T2T.fa.gz")
+
 
 rule samtools_faindex:
     input:

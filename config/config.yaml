@@ -12,8 +12,6 @@ use_light_data: False
 # Enable / Disable GC analysis
 GC_analysis: False
 
-normalized_counts: True
-
 ############################################################################
 #                          EXPERIMENTAL PARAMETERS
 ############################################################################
