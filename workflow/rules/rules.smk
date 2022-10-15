@@ -1,23 +1,33 @@
+## Rules to perform GC analysis & correction on Strand-Seq libraries
+## ---------------------------------------------------------------
+## fastqc: QC analysis of FASTQ files
+## bwa_index: index fasta file using the BW transformation to perform next reads mapping
+## bwa_strandseq_to_reference_alignment: mapping against FASTA reference (based on reference selected (hg19/hg38/T2T))
+## samtools_sort_bam: sorting bam files
+## mark_duplicates: mark duplicates in bam files
+## *samtools index: index bam files (only if not loaded as a module into mosaicatcher_pipeline) 
+## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries  
+## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
+
 
 rule fastqc:
     input:
-        "{path}/{sample}/fastq/{cell}.{pair}.fastq.gz",
+        "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
     output:
         html=report(
-            "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
             category="FastQC",
             subcategory="{sample}",
             labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
         ),
-        zip="{path}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
+        zip="{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
     params:
         "--quiet",
     log:
-        "{path}/log/fastqc/{sample}/{cell}_{pair}.log",
+        "{folder}/log/fastqc/{sample}/{cell}_{pair}.log",
     threads: 1
     resources:
         mem_mb=get_mem_mb,
-        time="10:00:00",
     wrapper:
         "v1.7.0/bio/fastqc"
 
@@ -50,22 +60,27 @@ rule bwa_index:
 
 rule bwa_strandseq_to_reference_alignment:
     input:
-        mate1="{path}/{sample}/fastq/{cell}.1.fastq.gz",
-        mate2="{path}/{sample}/fastq/{cell}.2.fastq.gz",
+        mate1="{folder}/{sample}/fastq/{cell}.1.fastq.gz",
+        mate2="{folder}/{sample}/fastq/{cell}.2.fastq.gz",
         ref="{ref}".format(
             ref=config["references_data"][config["reference"]]["reference_fasta"]
         ),
-        ref_index="{ref}.ann".format(
-            ref=config["references_data"][config["reference"]]["reference_fasta"]
+        ref_index=multiext(
+            config["references_data"][config["reference"]]["reference_fasta"],
+            ".amb",
+            ".ann",
+            ".bwt",
+            ".pac",
+            ".sa",
         ),
     output:
-        bam="{path}/{sample}/all/{cell}.bam",
+        bam=temp("{folder}/{sample}/bam/{cell}.bam"),
     log:
-        bwa="{path}/{sample}/log/{cell}.bwa.log",
-        samtools="{path}/{sample}/log/{cell}.samtools.log",
+        bwa="{folder}/{sample}/log/{cell}.bwa.log",
+        samtools="{folder}/{sample}/log/{cell}.samtools.log",
     threads: 6
     params:
-        idx_prefix=lambda wildcards, input: input.ref_index.rsplit(".", 1)[0],
+        idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
@@ -80,11 +95,11 @@ rule bwa_strandseq_to_reference_alignment:
 
 rule samtools_sort_bam:
     input:
-        "{path}/{sample}/all/{cell}.bam",
+        "{folder}/{sample}/bam/{cell}.bam",
     output:
-        temp("{path}/{sample}/all/{cell}.sort.bam"),
+        temp("{folder}/{sample}/bam/{cell}.sort.bam"),
     log:
-        "{path}/{sample}/log/samtools_sort/{cell}.log",
+        "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
         mem_mb=get_mem_mb,
         time="10:00:00",
@@ -96,11 +111,11 @@ rule samtools_sort_bam:
 
 rule mark_duplicates:
     input:
-        bam="{path}/{sample}/all/{cell}.sort.bam",
+        bam="{folder}/{sample}/bam/{cell}.sort.bam",
     output:
-        "{path}/{sample}/all/{cell}.sort.mdup.bam",
+        "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
     log:
-        "{path}/{sample}/log/markdup/{cell}.log",
+        "{folder}/{sample}/log/markdup/{cell}.log",
     conda:
         "../envs/mc_bioinfo_tools.yaml"
     resources:
@@ -110,15 +125,18 @@ rule mark_duplicates:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
 
+
+
 if config["mosaicatcher_pipeline"] is False:
+
 
     rule samtools_index:
         input:
-            "{path}/{sample}/all/{cell}.sort.mdup.bam",
+            "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
         output:
-            "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
+            "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
         log:
-            "{path}/{sample}/log/samtools_index/{cell}.log",
+            "{folder}/{sample}/log/samtools_index/{cell}.log",
         conda:
             "../envs/mc_bioinfo_tools.yaml"
         shell:
@@ -130,42 +148,45 @@ if config["hand_selection"] is False:
     rule generate_features:
         input:
             bam=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
+                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+                folder=config["data_location"],
                 sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
             bai=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-                path=config["input_bam_location"],
+                "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
+                folder=config["data_location"],
                 sample=wc.sample,
                 cell=cell_per_sample[str(wc.sample)],
             ),
+            plot=expand(
+                "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+                plottype=plottype_counts,
+            ),
         output:
-            "{path}/{sample}/predictions/ashleys_features.tsv",
+            "{folder}/{sample}/predictions/ashleys_features.tsv",
         log:
-            "{path}/log/ashleys/{sample}/features.log",
+            "{folder}/log/ashleys/{sample}/features.log",
         conda:
             "../envs/ashleys.yaml"
         threads: 64
         params:
             windows="5000000 2000000 1000000 800000 600000 400000 200000",
-            jobs=64,
             extension=".sort.mdup.bam",
-            path=lambda wildcards, input: "{}all".format(input.bam[0].split("all")[0]),
+            folder=lambda wildcards, input: "{}bam".format(input.bam[0].split("bam")[0]),
         resources:
             mem_mb=get_mem_mb_heavy,
             time="10:00:00",
         shell:
-            "ashleys -j {params.jobs} features -f {params.path} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+            "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
     rule predict:
         input:
-            path="{path}/{sample}/predictions/ashleys_features.tsv",
+            folder="{folder}/{sample}/predictions/ashleys_features.tsv",
         output:
-            "{path}/{sample}/cell_selection/labels_raw.tsv",
+            "{folder}/{sample}/cell_selection/labels_raw.tsv",
         log:
-            "{path}/log/ashleys/{sample}/prediction_ashleys.log",
+            "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
         conda:
             "../envs/ashleys.yaml"
         params:
@@ -175,7 +196,7 @@ if config["hand_selection"] is False:
             mem_mb=get_mem_mb,
             time="10:00:00",
         shell:
-            "ashleys predict -p {input.path} -o {output} -m {params.model_default}"
+            "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
 
 elif config["hand_selection"] is True:
@@ -183,101 +204,17 @@ elif config["hand_selection"] is True:
     localrules:
         notebook_hand_selection,
 
-    rule generate_exclude_file_for_mosaic_count:
-        input:
-            bam=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-        output:
-            excl="{path}/{sample}/config/chroms_to_exclude.txt",
-        log:
-            "{path}/log/config/{sample}/exclude_file.log",
-        conda:
-            "../envs/mc_base.yaml"
-        params:
-            chroms=config["chromosomes"],
-        script:
-            "../scripts/utils/generate_exclude_file.py"
-
-    rule mosaic_count:
-        input:
-            bam=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            bai=lambda wc: expand(
-                "{path}/{sample}/all/{cell}.sort.mdup.bam.bai",
-                path=config["input_bam_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            excl="{path}/{sample}/config/chroms_to_exclude.txt",
-        output:
-            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-        log:
-            "{path}/log/counts/{sample}/mosaic_count.log",
-        conda:
-            "../envs/mc_bioinfo_tools.yaml"
-        params:
-            window=config["window"],
-        resources:
-            mem_mb=get_mem_mb,
-        shell:
-            """
-            mosaicatcher count \
-                --verbose \
-                --do-not-blacklist-hmm \
-                -o {output.counts} \
-                -i {output.info} \
-                -x {input.excl} \
-                -w {params.window} \
-                {input.bam} \
-            > {log} 2>&1
-            """
-
-    rule order_mosaic_count_output:
-        input:
-            "{path}/{sample}/ashleys_counts/{sample}.all.txt.fixme.gz",
-        output:
-            "{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-        log:
-            "{path}/log/ashleys_counts/{sample}/{sample}.log",
-        run:
-            df = pd.read_csv(input[0], compression="gzip", sep="\t")
-            df = df.sort_values(by=["sample", "cell", "chrom", "start"])
-            df.to_csv(output[0], index=False, compression="gzip", sep="\t")
-
-    rule plot_mosaic_counts:
-        input:
-            counts="{path}/{sample}/ashleys_counts/{sample}.all.txt.gz",
-            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
-        output:
-            "{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-        log:
-            "{path}/log/plot_mosaic_counts/{sample}.log",
-        conda:
-            "../envs/rtools.yaml"
-        resources:
-            mem_mb=get_mem_mb,
-        shell:
-            """
-            LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
-            """
-
     rule notebook_hand_selection:
         input:
-            pdf_raw="{path}/{sample}/plots/ashleys_counts/CountComplete_{sample}.pdf",
-            info="{path}/{sample}/ashleys_counts/{sample}.all.info",
+            pdf_raw=expand(
+                "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+                plottype=plottype_counts,
+            ),
+            info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
-            path="{path}/{sample}/cell_selection/labels_raw.tsv",
+            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
         log:
-            "{path}/log/hand_selection/{sample}/prediction_probabilities.log",
+            "{folder}/log/hand_selection/{sample}/prediction_probabilities.log",
         params:
             cell_per_sample=cell_per_sample,
         conda:
@@ -290,26 +227,26 @@ if config["use_light_data"] is False:
 
     rule cp_predictions:
         input:
-            path="{path}/{sample}/cell_selection/labels_raw.tsv",
+            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path="{path}/{sample}/cell_selection/labels.tsv",
+            folder="{folder}/{sample}/cell_selection/labels.tsv",
         log:
-            "{path}/log/cp_predictions/{sample}.log",
+            "{folder}/log/cp_predictions/{sample}.log",
         conda:
             "../envs/ashleys.yaml"
         shell:
-            "cp {input.path} {output.path} > {log} 2>&1"
+            "cp {input.folder} {output.folder} > {log} 2>&1"
 
 
 elif config["use_light_data"] is True:
 
     rule dev_all_cells_correct:
         input:
-            path="{path}/{sample}/cell_selection/labels_raw.tsv",
+            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            path="{path}/{sample}/cell_selection/labels.tsv",
+            folder="{folder}/{sample}/cell_selection/labels.tsv",
         log:
-            "{path}/log/dev_all_cells_correct/{sample}.log",
+            "{folder}/log/dev_all_cells_correct/{sample}.log",
         conda:
             "../envs/mc_base.yaml"
         script:
