@@ -1,5 +1,6 @@
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
-input_bam_location: ".tests/data_CHR17"
+# input_bam_location: ".tests/data_CHR17"
+data_location: ".tests/data_CHR17"
 # Reference genome used by BWA to map FASTQ files
 # reference: .tests/external_data/chr21.fna
 
@@ -18,6 +19,8 @@ dl_external_files: False
 # Overwrite ASHLEYS PREDICTIONS
 use_light_data: True
 
+normalized_counts: True
+
 ############################################################################
 #                          EXPERIMENTAL PARAMETERS
 ############################################################################
@@ -28,7 +31,7 @@ mosaicatcher_pipeline: False
 hand_selection: False
 
 # Window size used by mosaic binning algorithm
-window: 100000
+window: 200000
 
 # Chromosomes list to process
 chromosomes:
