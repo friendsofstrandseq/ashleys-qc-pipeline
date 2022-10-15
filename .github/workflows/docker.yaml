@@ -20,7 +20,7 @@ jobs:
         with:
           snakefile: ./workflow/Snakefile
           task: "containerize"
-          args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=False GC_analysis=True"
+          args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=False GC_analysis=True data_location=../.tests/data_CHR17"
 
       - name: Print Dockerfile
         run: |
