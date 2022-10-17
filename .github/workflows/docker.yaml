@@ -19,6 +19,7 @@ jobs:
         uses: snakemake/snakemake-github-action@v1
         with:
           snakefile: ./workflow/Snakefile
+          directory: .
           task: "containerize"
           args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=False GC_analysis=True"
 
