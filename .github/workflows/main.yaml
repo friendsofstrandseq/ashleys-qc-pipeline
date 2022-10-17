@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Linting
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -39,14 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -60,14 +60,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] GC_analysis=True --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -80,14 +80,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -100,14 +100,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -120,14 +120,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -140,13 +140,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba -p --verbose --debug"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.23.0
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           directory: .
           snakefile: ./workflow/Snakefile
