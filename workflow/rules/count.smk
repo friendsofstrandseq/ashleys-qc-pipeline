@@ -17,7 +17,7 @@ rule generate_exclude_file_for_mosaic_count:
     log:
         "{folder}/log/config/{sample}/exclude_file.log",
     conda:
-        "../envs/ashleys_base.yaml"
+        "../envs/ashleys.yaml"
     params:
         chroms=config["chromosomes"],
     script:
