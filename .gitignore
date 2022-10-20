@@ -153,6 +153,7 @@ sandbox.zenodo.org/
 
 .tests/data_CHR21/
 .tests/data_CHR17/RPE-BM510/all/
+.tests/data_CHR17/RPE-BM510/bam/
 .tests/data_CHR17/RPE-BM510/alfred/
 .tests/data_CHR17/RPE-BM510/counts/
 .tests/data_CHR17/RPE-BM510/ashleys_merged_bam/
@@ -170,7 +171,6 @@ sandbox.zenodo.org/
 .tests/data_CHR17/config/
 .tests/data_CHR17/config/
 !.tests/data_CHR17/RPE-BM510/fastq/
-!.tests/data_CHR17/RPE-BM510/bam/
 !workflow/data/GC/
 !workflow/data/normalization/
 workflow/data/ref_genomes
