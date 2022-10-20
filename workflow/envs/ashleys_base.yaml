@@ -1,4 +1,4 @@
-name: mc-bioinfo-tools
+name: ashleys_base
 channels:
   - conda-forge
   - bioconda
@@ -8,3 +8,6 @@ dependencies:
   - bwa
   - sambamba
   - mosaicatcher
+  - alfred
+  - ashleys-qc
+  - pandas
