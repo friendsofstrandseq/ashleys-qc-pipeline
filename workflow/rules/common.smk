@@ -115,13 +115,13 @@ def get_final_output():
     Function called by snakemake rule all to run the pipeline
     """
     final_list = list()
-    # final_list.extend(
-    #     expand(
-    #         "{path}/{sample}/cell_selection/labels.tsv",
-    #         path=config["data_location"],
-    #         sample=samples,
-    #     )
-    # )
+    final_list.extend(
+        expand(
+            "{path}/{sample}/cell_selection/labels.tsv",
+            path=config["data_location"],
+            sample=samples,
+        )
+    )
 
     # FASTQC outputs
     final_list.extend(
@@ -210,14 +210,14 @@ def get_final_output():
             )
 
         # QC count plots (classic only or classic + corrected based on config GC_analysis option)
-        # final_list.extend(
-        #     expand(
-        #         "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
-        #         output_folder=config["data_location"],
-        #         sample=samples,
-        #         plottype_counts=plottype_counts,
-        #     ),
-        # )
+        final_list.extend(
+            expand(
+                "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+                output_folder=config["data_location"],
+                sample=samples,
+                plottype_counts=plottype_counts,
+            ),
+        )
         
 
     return final_list
