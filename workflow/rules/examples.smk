@@ -69,6 +69,6 @@ rule samtools_faindex:
     log:
         "{file}.log",
     conda:
-        "../envs/mc_bioinfo_tools.yaml"
+        "../envs/ashleys_base.yaml"
     shell:
         "samtools faidx {input}"
