@@ -2,7 +2,7 @@ name: Build container
 
 on:
   pull_request:
-    types: [closed]
+    types: [labeled]
     branches:
       - main
 
