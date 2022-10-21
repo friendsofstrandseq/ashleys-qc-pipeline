@@ -1,10 +1,16 @@
-name: mc-bioinfo-tools
+name: ashleys_base
 channels:
   - conda-forge
   - bioconda
+  - anaconda
+  - defaults
 dependencies:
   - samtools
   - tabix
   - bwa
   - sambamba
   - mosaicatcher
+  - alfred
+  - ashleys-qc
+  - pandas
+  # - pysam

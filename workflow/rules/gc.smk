@@ -31,7 +31,7 @@ if config["GC_analysis"] is True:
             time="01:00:00",
         threads: 32
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             "samtools merge -@ {threads} {output} {input} 2>&1 > {log}"
 
@@ -47,7 +47,7 @@ if config["GC_analysis"] is True:
             time="01:00:00",
         threads: 32 
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             "samtools sort -@ {threads} -o {output} {input} 2>&1 > {log}"
 
@@ -59,7 +59,7 @@ if config["GC_analysis"] is True:
         log:
             "{folder}/log/{sample}/merged_bam/index_merged_bam.log",
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         resources:
             mem_mb=get_mem_mb,
         shell:
@@ -85,7 +85,7 @@ if config["GC_analysis"] is True:
             time="01:00:00",
         threads: 32
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             "samtools merge -@ {threads} {output} {input} 2>&1 > {log}"
 
@@ -101,7 +101,7 @@ if config["GC_analysis"] is True:
             time="01:00:00",
         threads: 32
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             "samtools sort -@ {threads} -o {output} {input} 2>&1 > {log}"
 
@@ -113,7 +113,7 @@ if config["GC_analysis"] is True:
         log:
             "{folder}/log/merged_bam/{sample}/{row}.log",
         conda:
-            "../envs/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         resources:
             mem_mb=get_mem_mb,
         shell:
@@ -135,7 +135,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.merged_bam}
@@ -157,7 +157,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
@@ -179,7 +179,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/mc_bioinfo_tools.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
@@ -196,7 +196,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/mc_base.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             zcat {input} | grep "^GC" > {output}
@@ -211,7 +211,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/mc_base.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             zcat {input} | grep "^GC" > {output}
@@ -227,7 +227,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/mc_base.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             """
             zcat {input} | grep "^GC" > {output}
@@ -235,7 +235,6 @@ if config["GC_analysis"] is True:
 
     rule alfred_plot:
         input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
             table="{folder}/{sample}/alfred/{bam}.table",
         output:
             gcdist_plot=report(
@@ -253,7 +252,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/rtools.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/gc.R"
 
@@ -261,7 +260,6 @@ if config["GC_analysis"] is True:
             
     rule alfred_plot_merge:
         input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
             table="{folder}/{sample}/alfred/MERGE/merged_bam.merge.table",
         output:
             gcdist_plot=report(
@@ -279,13 +277,12 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/rtools.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/gc.R"
 
     rule alfred_plot_plate_row:
         input:
-            # table="{folder}/{sample}/alfred/{sample}.table",
             table="{folder}/{sample}/alfred/PLATE_ROW/{row}.row.table",
         output:
             gcdist_plot=report(
@@ -303,7 +300,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/rtools.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/gc.R"
 
@@ -318,7 +315,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/GC.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/variance_stabilizing_transformation.R"
 
@@ -334,7 +331,7 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/GC.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/GC_correction.R"
 
@@ -348,10 +345,11 @@ if config["GC_analysis"] is True:
         resources:
             mem_mb=get_mem_mb,
         conda:
-            "../envs/dev/GC.yaml"
+            "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/counts_scaling.R"
 
+            
     rule plot_mosaic_gc_norm_counts:
         input:
             counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.gz",
@@ -361,7 +359,7 @@ if config["GC_analysis"] is True:
         log:
             "{folder}/{sample}/log/plot_mosaic_counts/{sample}.log",
         conda:
-            "../envs/rtools.yaml"
+            "../envs/ashleys_rtools.yaml"
         resources:
             mem_mb=get_mem_mb,
         shell:
