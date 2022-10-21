@@ -168,7 +168,7 @@ if config["hand_selection"] is False:
         log:
             "{folder}/log/ashleys/{sample}/features.log",
         conda:
-            "../envs/ashleys.yaml"
+            "../envs/ashleys_base.yaml"
         threads: 64
         params:
             windows="5000000 2000000 1000000 800000 600000 400000 200000",
@@ -188,7 +188,7 @@ if config["hand_selection"] is False:
         log:
             "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
         conda:
-            "../envs/ashleys.yaml"
+            "../envs/ashleys_base.yaml"
         params:
             model_default="./workflow/ashleys_models/svc_default.pkl",
             model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
@@ -233,7 +233,7 @@ if config["use_light_data"] is False:
         log:
             "{folder}/log/cp_predictions/{sample}.log",
         conda:
-            "../envs/ashleys.yaml"
+            "../envs/ashleys_base.yaml"
         shell:
             "cp {input.folder} {output.folder} > {log} 2>&1"
 
@@ -248,6 +248,6 @@ elif config["use_light_data"] is True:
         log:
             "{folder}/log/dev_all_cells_correct/{sample}.log",
         conda:
-            "../envs/ashleys.yaml"
+            "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
