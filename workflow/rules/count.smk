@@ -17,7 +17,7 @@ rule generate_exclude_file_for_mosaic_count:
     log:
         "{folder}/log/config/{sample}/exclude_file.log",
     conda:
-        "../envs/mc_base.yaml"
+        "../envs/ashleys_base.yaml"
     params:
         chroms=config["chromosomes"],
     script:
@@ -45,7 +45,7 @@ rule mosaic_count:
     log:
         "{folder}/log/counts/{sample}/mosaic_count.log",
     conda:
-        "../envs/mc_bioinfo_tools.yaml"
+        "../envs/ashleys_base.yaml"
     params:
         window=config["window"],
     resources:
@@ -74,7 +74,7 @@ rule plot_mosaic_counts:
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:
-        "../envs/rtools.yaml"
+        "../envs/ashleys_rtools.yaml"
     resources:
         mem_mb=get_mem_mb,
     shell:

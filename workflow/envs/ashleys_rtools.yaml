@@ -1,0 +1,41 @@
+name: rtools
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - anaconda
+dependencies:
+  # - bioconductor-biocparallel
+  # - bioconductor-bsgenome
+  # - bioconductor-bsgenome.hsapiens.ucsc.hg19
+  # - bioconductor-bsgenome.hsapiens.ucsc.hg38
+  # - bioconductor-fastseg
+  # - bioconductor-genomicalignments
+  - bioconductor-genomicranges
+  # - bioconductor-rsamtools
+  # - bioconductor-s4vectors
+  - r-assertthat
+  - r-base
+  # - r-biocmanager
+  - r-cowplot
+  - r-data.table
+  # - r-devtools
+  # - r-doparallel
+  # - r-foreach
+  - r-ggplot2
+  # - r-gtools
+  - r-reshape2
+  # - r-zoo
+  # - r-dplyr
+  # - r-mc2d
+  # - r-pheatmap
+  # - bioconductor-complexheatmap
+  # - r-gplots
+  - r-scales
+  - r-rcolorbrewer
+  # - r-stringr
+  - r-cairo
+  - fonts-anaconda
+  # NEW
+  - bioconductor-edger
+  - r-r.utils
