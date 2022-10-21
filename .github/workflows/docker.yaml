@@ -13,10 +13,10 @@ jobs:
     env:
       IMAGE_NAME: ashleys-qc-pipeline
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
 
       - name: Create container file
-        uses: snakemake/snakemake-github-action@v1
+        uses: snakemake/snakemake-github-action@v1.24.0
         with:
           snakefile: ./workflow/Snakefile
           directory: .

@@ -218,7 +218,8 @@ elif config["hand_selection"] is True:
         params:
             cell_per_sample=cell_per_sample,
         conda:
-            "../envs/notebook.yaml"
+            "../envs/ashleys_notebook.yaml"
+        container: None
         notebook:
             "../notebooks/hand_selection.py.ipynb"
 
