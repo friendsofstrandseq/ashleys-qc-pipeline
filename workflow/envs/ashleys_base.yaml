@@ -11,6 +11,6 @@ dependencies:
   - sambamba
   - mosaicatcher
   - alfred
-  # - ashleys-qc
-  # - pandas
+  - ashleys-qc
+  - pandas
   # - pysam
