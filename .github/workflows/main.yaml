@@ -10,11 +10,7 @@ jobs:
   Formatting:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
 
       - name: Formatting
         uses: github/super-linter@v4
@@ -27,11 +23,7 @@ jobs:
   Linting:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Linting
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
@@ -45,15 +37,9 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
       - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.24.0
-        with:
-          directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug"
@@ -70,11 +56,7 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
@@ -94,11 +76,7 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
@@ -118,11 +96,7 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
@@ -142,11 +116,7 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
@@ -166,11 +136,7 @@ jobs:
     #   - Linting
     #   - Formatting
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v3.1.0
-=======
-      - uses: actions/checkout@v3
->>>>>>> f0244417365a955ebdc74cd79f3d4b0462c4f7e0
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
