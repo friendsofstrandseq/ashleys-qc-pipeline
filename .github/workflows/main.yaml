@@ -41,6 +41,7 @@ jobs:
       - name: Testing data
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
+          directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug"
