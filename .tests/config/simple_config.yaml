@@ -37,3 +37,9 @@ window: 200000
 # Chromosomes list to process
 chromosomes:
   - chr17
+
+# GENECORE
+genecore: False
+samples_to_process: []
+genecore_date_folder: ""
+genecore_prefix: "/g/korbel/shared/genecore"

@@ -175,6 +175,7 @@ sandbox.zenodo.org/
 !workflow/data/normalization/
 workflow/data/ref_genomes
 workflow/data/segdups/
+workflow/data/arbigent/
 *.html
 # !.tests/data/RPE-BM510/selected/PE*.bam
 logs/
@@ -196,3 +197,4 @@ config/samples.tsv
 .local/share/jupyter/
 .jupyter/
 log.txt
+.vscode/launch.json
