@@ -110,30 +110,31 @@ class HandleInput:
                     for f in genecore_list if sample in f
                 ]
             )
-            df["File"] = df["File"].str.replace(".fastq.gz", "", regex=True)
-            df["Sample"] = sample
-            df["Pair"] = df["File"].apply(lambda r: r.split(".")[1])
-            df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
-            df["Full_path"] = df["Folder"] + "/" + df["File"] + ".fastq.gz"
-            df["Genecore_path"] = (
-                config["genecore_prefix"]
-                + "/"
-                + config["genecore_date_folder"]
-                + "/"
-                + d_master[sample]["prefix"]
-                + "lane1"
-                + df["File"].str.replace(".", "_")
-                + "_sequence.txt.gz"
-            )
-            df["Genecore_file"] = (
-                d_master[sample]["prefix"] + "lane1" + df["File"].str.replace(".", "_")
-            )
-            df["Genecore_file"] = df["Genecore_file"].apply(
-                lambda r: "_".join(r.split("_")[:-1])
-            )
+            if df.shape[0]>0:
+                df["File"] = df["File"].str.replace(".fastq.gz", "", regex=True)
+                df["Sample"] = sample
+                df["Pair"] = df["File"].apply(lambda r: r.split(".")[1])
+                df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
+                df["Full_path"] = df["Folder"] + "/" + df["File"] + ".fastq.gz"
+                df["Genecore_path"] = (
+                    config["genecore_prefix"]
+                    + "/"
+                    + config["genecore_date_folder"]
+                    + "/"
+                    + d_master[sample]["prefix"]
+                    + "lane1"
+                    + df["File"].str.replace(".", "_", regex=True)
+                    + "_sequence.txt.gz"
+                )
+                df["Genecore_file"] = (
+                    d_master[sample]["prefix"] + "lane1" + df["File"].str.replace(".", "_", regex=True)
+                )
+                df["Genecore_file"] = df["Genecore_file"].apply(
+                    lambda r: "_".join(r.split("_")[:-1])
+                )
 
-            # Concat dataframes for each sample & output
-            complete_df_list.append(df)
+                # Concat dataframes for each sample & output
+                complete_df_list.append(df)
 
         complete_df = pd.concat(complete_df_list)
 
@@ -319,7 +320,6 @@ if config["GC_analysis"] is True:
 # for k in cell_per_sample:
 #     print(k)
 #     print(len(cell_per_sample[k]))
-# exit()
 
 def get_final_output():
     """
@@ -327,26 +327,26 @@ def get_final_output():
     """
     final_list = list()
 
-
-    # FASTQC outputs
-    final_list.extend(
-        (
-            [
-                sub_e
-                for e in [
-                    expand(
-                        "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-                        path=config["data_location"],
-                        sample=sample,
-                        cell=cell_per_sample[sample],
-                        pair=[1, 2],
-                    )
-                    for sample in samples
+    if config["genecore"] is False:
+        # FASTQC outputs
+        final_list.extend(
+            (
+                [
+                    sub_e
+                    for e in [
+                        expand(
+                            "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+                            path=config["data_location"],
+                            sample=sample,
+                            cell=cell_per_sample[sample],
+                            pair=[1, 2],
+                        )
+                        for sample in samples
+                    ]
+                    for sub_e in e
                 ]
-                for sub_e in e
-            ]
+            )
         )
-    )
 
 
     final_list.extend(
