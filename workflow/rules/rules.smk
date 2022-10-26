@@ -21,8 +21,14 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             .tolist(),
         output:
             "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
+        # wildcard_constraints:
+        #     cell="^((?!mdup).)*$"
         shell:
             "ln -s {input} {output}"
+    
+    ruleorder: genecore_symlink > fastqc > bwa_strandseq_to_reference_alignment
+
+
 
 rule fastqc:
     input:
@@ -71,7 +77,10 @@ rule bwa_index:
     wrapper:
         "v1.7.0/bio/bwa/index"
 
-ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
+if config["mosaicatcher_pipeline"] is False:
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
+else:
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
 
 rule bwa_strandseq_to_reference_alignment:
     input:
