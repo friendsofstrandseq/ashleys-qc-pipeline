@@ -1,4 +1,4 @@
-version: 1.3.1
+version: 1.3.2
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
 # input_bam_location: ".tests/data_CHR17"
 data_location: ".tests/data_CHR17"
@@ -37,3 +37,9 @@ window: 200000
 # Chromosomes list to process
 chromosomes:
   - chr17
+
+# GENECORE
+genecore: False
+samples_to_process: []
+genecore_date_folder: ""
+genecore_prefix: "/g/korbel/shared/genecore"
