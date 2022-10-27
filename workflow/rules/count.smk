@@ -4,6 +4,7 @@
 ## mosaic_count: mosaic count program to count reads in each bin based on window selected (default: 200kb)
 ## plot_mosaic_counts: plot QC plots based on counts
 
+
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -62,7 +63,6 @@ rule mosaic_count:
             {input.bam} \
         > {log} 2>&1
         """
-
 
 
 rule plot_mosaic_counts:

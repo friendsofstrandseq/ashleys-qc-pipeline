@@ -5,9 +5,28 @@
 ## bwa_strandseq_to_reference_alignment: mapping against FASTA reference (based on reference selected (hg19/hg38/T2T))
 ## samtools_sort_bam: sorting bam files
 ## mark_duplicates: mark duplicates in bam files
-## *samtools index: index bam files (only if not loaded as a module into mosaicatcher_pipeline) 
-## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries  
+## *samtools index: index bam files (only if not loaded as a module into mosaicatcher_pipeline)
+## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries
 ## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
+
+if config["genecore"] is True and config["genecore_date_folder"]:
+
+    rule genecore_symlink:
+        input:
+            lambda wc: df_config_files.loc[
+                (df_config_files["Sample"] == wc.sample)
+                & (df_config_files["File"] == "{}.{}".format(wc.cell, wc.pair))
+            ]["Genecore_path"]
+            .unique()
+            .tolist(),
+        output:
+            "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
+# wildcard_constraints:
+#     cell="^((?!mdup).)*$"
+        shell:
+            "ln -s {input} {output}"
+
+    ruleorder: genecore_symlink > fastqc > bwa_strandseq_to_reference_alignment
 
 
 rule fastqc:
@@ -56,6 +75,16 @@ rule bwa_index:
         time="10:00:00",
     wrapper:
         "v1.7.0/bio/bwa/index"
+
+
+if config["mosaicatcher_pipeline"] is False:
+
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
+
+
+else:
+
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
 
 
 rule bwa_strandseq_to_reference_alignment:
@@ -125,10 +154,7 @@ rule mark_duplicates:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
 
-
-
 if config["mosaicatcher_pipeline"] is False:
-
 
     rule samtools_index:
         input:
@@ -219,7 +245,8 @@ elif config["hand_selection"] is True:
             cell_per_sample=cell_per_sample,
         conda:
             "../envs/ashleys_notebook.yaml"
-        container: None
+        container:
+            None
         notebook:
             "../notebooks/hand_selection.py.ipynb"
 
