@@ -100,34 +100,30 @@ class HandleInput:
             if sample in samples_to_process
         ]
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-        
+
         complete_df_list = list()
 
         for sample in d_master:
             df = pd.DataFrame(
                 [
                     {"File": os.path.basename(f), "Folder": os.path.dirname(f)}
-                    for f in genecore_list if sample in f
+                    for f in genecore_list
+                    if sample in f
                 ]
             )
-            if df.shape[0]>0:
+            if df.shape[0] > 0:
                 df["File"] = df["File"].str.replace(".fastq.gz", "", regex=True)
                 df["Sample"] = sample
                 df["Pair"] = df["File"].apply(lambda r: r.split(".")[1])
                 df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
-                df["Full_path"] = df["Folder"] + "/" + df["File"] + ".fastq.gz"
-                df["Genecore_path"] = (
-                    config["genecore_prefix"]
-                    + "/"
-                    + config["genecore_date_folder"]
-                    + "/"
-                    + d_master[sample]["prefix"]
-                    + "lane1"
-                    + df["File"].str.replace(".", "_", regex=True)
-                    + "_sequence.txt.gz"
+                df["Full_path"] = df[["Folder", "File"]].apply(
+                    lambda r: f"{r['Folder']}/{r['File']}.fastq.gz", axis=1
                 )
-                df["Genecore_file"] = (
-                    d_master[sample]["prefix"] + "lane1" + df["File"].str.replace(".", "_", regex=True)
+                df["Genecore_path"] = df["File"].apply(
+                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['prefix']}lane1/{r.replace('.', '_')}_sequence.txt.gz"
+                )
+                df["Genecore_file"] = df["File"].apply(
+                    lambda r: f"{d_master[sample]['prefix']}lane1{r.replace('.', '_')}"
                 )
                 df["Genecore_file"] = df["Genecore_file"].apply(
                     lambda r: "_".join(r.split("_")[:-1])
@@ -258,7 +254,6 @@ def findstem(arr):
     return res
 
 
-
 # Create configuration file with samples
 
 c = HandleInput(
@@ -315,11 +310,12 @@ if config["GC_analysis"] is True:
             ):
                 d[sample][list(string.ascii_uppercase)[j]] = e
 
-# from pprint import pprint 
+# from pprint import pprint
 # pprint(cell_per_sample)
 # for k in cell_per_sample:
 #     print(k)
 #     print(len(cell_per_sample[k]))
+
 
 def get_final_output():
     """
@@ -348,7 +344,6 @@ def get_final_output():
             )
         )
 
-
     final_list.extend(
         expand(
             "{path}/{sample}/cell_selection/labels.tsv",
@@ -370,7 +365,7 @@ def get_final_output():
                             path=config["data_location"],
                             sample=sample,
                             bam=cell_per_sample[sample],
-                            alfred_plot=config["alfred_plots"]
+                            alfred_plot=config["alfred_plots"],
                         )
                         for sample in samples
                     ]
@@ -389,7 +384,7 @@ def get_final_output():
                             "{path}/{sample}/plots/alfred/MERGE/merged_bam_gc_{alfred_plot}.merge.png",
                             path=config["data_location"],
                             sample=sample,
-                            alfred_plot=config["alfred_plots"]
+                            alfred_plot=config["alfred_plots"],
                         )
                         for sample in samples
                     ]
@@ -409,10 +404,11 @@ def get_final_output():
                                 "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
                                 path=config["data_location"],
                                 sample=sample,
-                                row=list(string.ascii_uppercase)[:orientation[0]],
-                                alfred_plot=config["alfred_plots"]
+                                row=list(string.ascii_uppercase)[: orientation[0]],
+                                alfred_plot=config["alfred_plots"],
                             )
-                            for sample in samples if len(cell_per_sample[sample]) == 96
+                            for sample in samples
+                            if len(cell_per_sample[sample]) == 96
                         ]
                         for sub_e in e
                     ]
