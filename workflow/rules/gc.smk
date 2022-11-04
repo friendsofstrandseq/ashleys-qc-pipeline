@@ -23,7 +23,7 @@ if config["GC_analysis"] is True:
                 bam=cell_per_sample[wc.sample],
             ),
         output:
-            temp("{folder}/{sample}/merged_bam/merged.raw.bam"),
+            "{folder}/{sample}/merged_bam/merged.raw.bam",
         log:
             "{folder}/log/merged_bam/{sample}.log",
         resources:
@@ -39,7 +39,7 @@ if config["GC_analysis"] is True:
         input:
             "{folder}/{sample}/merged_bam/merged.raw.bam",
         output:
-            temp("{folder}/{sample}/merged_bam/merged.bam"),
+            "{folder}/{sample}/merged_bam/merged.bam",
         log:
             "{folder}/log/merged_bam/{sample}.mergeSortBams.log",
         resources:
@@ -55,7 +55,7 @@ if config["GC_analysis"] is True:
         input:
             "{folder}/{sample}/merged_bam/merged.bam",
         output:
-            temp("{folder}/{sample}/merged_bam/merged.bam.bai"),
+            "{folder}/{sample}/merged_bam/merged.bam.bai",
         log:
             "{folder}/log/{sample}/merged_bam/index_merged_bam.log",
         conda:
@@ -75,7 +75,7 @@ if config["GC_analysis"] is True:
                 bam=d[wc.sample][wc.row],
             ),
         output:
-            temp("{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam"),
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
         log:
             "{folder}/log/merged_bam/{sample}.{row}.log",
         resources:
@@ -91,7 +91,7 @@ if config["GC_analysis"] is True:
         input:
             "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
         output:
-            temp("{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam"),
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
         log:
             "{folder}/log/merged_bam/{sample}.{row}.mergeSortBams.log",
         resources:
@@ -107,7 +107,7 @@ if config["GC_analysis"] is True:
         input:
             "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
         output:
-            temp("{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai"),
+            "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam.bai",
         log:
             "{folder}/log/merged_bam/{sample}/{row}.log",
         conda:
