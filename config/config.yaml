@@ -1,5 +1,9 @@
 # Pipeline version
+<<<<<<< Updated upstream
 version: 1.3.2
+=======
+version: 1.3.4
+>>>>>>> Stashed changes
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
 # input_bam_location: ".tests/data_CHR17"
 data_location: ".tests/data_CHR17"
@@ -11,9 +15,11 @@ dl_external_files: False
 use_light_data: False
 # Enable / Disable GC analysis
 GC_analysis: False
+# Ashleys-qc binary classification threshold
+ashleys_threshold: 0.5
 
 ############################################################################
-#                          EXPERIMENTAL PARAMETERS
+#                          ADVANCED PARAMETERS
 ############################################################################
 
 reference: "hg38"
