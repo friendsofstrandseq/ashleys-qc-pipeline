@@ -253,17 +253,17 @@ elif config["hand_selection"] is True:
 
 if config["use_light_data"] is False:
 
-    rule cp_predictions:
+    rule tune_predictions_based_on_threshold:
         input:
-            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
+            "{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            folder="{folder}/{sample}/cell_selection/labels.tsv",
+            "{folder}/{sample}/cell_selection/labels.tsv",
         log:
             "{folder}/log/cp_predictions/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
-        shell:
-            "cp {input.folder} {output.folder} > {log} 2>&1"
+        script:
+            "../scripts/utils/tune_predictions_based_on_threshold.py"
 
 
 elif config["use_light_data"] is True:
