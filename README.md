@@ -83,14 +83,14 @@ All these arguments can be specified in two ways:
 | `data_location` | Path to parent folder containing samples | String         | .tests/data_CHR17/ |
 | `email`         | Email address for completion summary     | String         | None               |
 
-### Boolean parameters
+### Parameters
 
-| Parameter           | Comment                                                                                                                                                        | Default | Experimental |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------ |
-| `dl_external_files` | Allow to retrieve automatically external files (GRCh38 reference genome + 1000G SNV VCF file) required to run the pipeline.                                    | False   |              |
-| `hand_selection`    | Allow to identify manually high-quality strand-seq libraries.                                                                                                  | False   | X            |
-| `GC_analysis`       | Enable/Disable GC analysis and correction of Strand-Seq libraries libraries.                                                                                   | False   | X            |
-| `plate_orientation` | If GC_analysis enabled and conditions tested by rows/columns, set the orientation (landscape/portrait) to perform a row/column-wise analysis of the libraries. | False   | X            |
+| Parameter           | Comment                                                                                                                                                        | Default   | Experimental |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------ |
+| `hand_selection`    | Allow to identify manually high-quality strand-seq libraries.                                                                                                  | False     | X            |
+| `GC_analysis`       | Enable/Disable GC analysis and correction of Strand-Seq libraries libraries.                                                                                   | False     |              |
+| `plate_orientation` | If GC_analysis enabled and conditions tested by rows/columns, set the orientation (landscape/portrait) to perform a row/column-wise analysis of the libraries. | landscape |              |
+| `ashleys_threshold` | Ashleys-qc threshold for binary classification of low/good quality cells                                                                                       | 0.5       |              |
 
 ### External files
 
