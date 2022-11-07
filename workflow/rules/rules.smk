@@ -260,15 +260,10 @@ if config["use_light_data"] is False:
             "{folder}/{sample}/cell_selection/labels.tsv",
         log:
             "{folder}/log/cp_predictions/{sample}.log",
-        # conda:
-        #     "../envs/ashleys_base.yaml"
-        # shell:
-        run:
-            df = pd.read_csv(input[0], sep="\t")
-            df.loc[df["probability"] >= float(config["ashleys_threshold"]), "prediction"] = 1
-            df.loc[df["probability"] < float(config["ashleys_threshold"]), "prediction"] = 0
-            df.sort_values(by="cell").to_csv(output[0], sep="\t", index=False)
-            # "cp {input.folder} {output.folder} > {log} 2>&1"
+        conda:
+            "../envs/ashleys_base.yaml"
+        script:
+            "../scripts/utils/tune_predictions_based_on_threshold.py"
 
 
 elif config["use_light_data"] is True:
