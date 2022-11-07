@@ -5,6 +5,12 @@ on:
     branches:
       - main
 
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - main
+
 jobs:
   tagged-release:
     name: "Tagged Release"
@@ -34,4 +40,3 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           automatic_release_tag: ${{ steps.yaml-data.outputs.data }}
-
