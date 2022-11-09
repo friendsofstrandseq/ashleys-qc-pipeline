@@ -9,6 +9,7 @@
 ## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries
 ## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
 
+
 if config["genecore"] is True and config["genecore_date_folder"]:
 
     rule genecore_symlink:
@@ -21,12 +22,12 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             .tolist(),
         output:
             "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
-# wildcard_constraints:
-#     cell="^((?!mdup).)*$"
+        # wildcard_constraints:
+        #     cell="^((?!\.sort\.mdup).*)$"
         shell:
             "ln -s {input} {output}"
 
-    ruleorder: genecore_symlink > fastqc > bwa_strandseq_to_reference_alignment
+    ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
 
 
 rule fastqc:
@@ -49,6 +50,18 @@ rule fastqc:
         mem_mb=get_mem_mb,
     wrapper:
         "v1.7.0/bio/fastqc"
+
+rule fastqc_aggregate:
+    input:
+        lambda wc: expand(
+            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
+            folder=config["data_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[wc.sample],
+            pair=[1,2],
+        )
+    output:
+        touch("{folder}/{sample}/config/fastqc_output_touch.txt")
 
 
 rule bwa_index:
@@ -103,7 +116,7 @@ rule bwa_strandseq_to_reference_alignment:
             ".sa",
         ),
     output:
-        bam=temp("{folder}/{sample}/bam/{cell}.bam"),
+        bam=temp("{folder}/{sample}/bam/{cell}.bam.raw"),
     log:
         bwa="{folder}/{sample}/log/{cell}.bwa.log",
         samtools="{folder}/{sample}/log/{cell}.samtools.log",
@@ -124,9 +137,9 @@ rule bwa_strandseq_to_reference_alignment:
 
 rule samtools_sort_bam:
     input:
-        "{folder}/{sample}/bam/{cell}.bam",
+        "{folder}/{sample}/bam/{cell}.bam.raw",
     output:
-        temp("{folder}/{sample}/bam/{cell}.sort.bam"),
+        temp("{folder}/{sample}/bam/{cell}.bam.sort"),
     log:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
@@ -140,7 +153,7 @@ rule samtools_sort_bam:
 
 rule mark_duplicates:
     input:
-        bam="{folder}/{sample}/bam/{cell}.sort.bam",
+        bam="{folder}/{sample}/bam/{cell}.bam.sort",
     output:
         "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
     log:
@@ -232,7 +245,7 @@ elif config["hand_selection"] is True:
 
     rule notebook_hand_selection:
         input:
-            pdf_raw=expand(
+            pdf=expand(
                 "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
                 plottype=plottype_counts,
             ),
