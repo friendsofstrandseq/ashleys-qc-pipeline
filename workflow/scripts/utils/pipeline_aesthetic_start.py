@@ -19,7 +19,7 @@ def pipeline_aesthetic_start(config):
     smk = """
                      _                        _        
      ___ _ __   __ _| | _____ _ __ ___   __ _| | _____ 
-    / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \
+    / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \\
     \__ \ | | | (_| |   <  __/ | | | | | (_| |   <  __/
     |___/_| |_|\__,_|_|\_\___|_| |_| |_|\__,_|_|\_\___|
     """
@@ -33,7 +33,7 @@ def pipeline_aesthetic_start(config):
                            |___/              |_|     
     """
 
-    wf_info = "smk-wf-catalog/mosaicatcher-pipeline v{version}".format(version=str(config["version"]))
+    wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(version=str(config["version"]))
     print(sep + fg.GREEN + smk)
     print(fg.ENDC)
     print(fg.YELLOW + wf_name)
@@ -58,7 +58,6 @@ def pipeline_aesthetic_start(config):
     print("\033[1m{}\033[0m".format("Main options:"))
     l = [
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("GC analysis", ": " + str(config["GC_analysis"])),
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Read Counts normalization", ": " + str(config["normalized_counts"])),
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Binning window size", ": " + str(config["window"])),
     ]
     [print(e) for e in l]
