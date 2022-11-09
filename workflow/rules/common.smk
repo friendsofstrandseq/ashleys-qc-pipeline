@@ -1,6 +1,33 @@
 import pandas as pd
 import os, sys
 import collections
+from scripts.utils import make_log_useful, pipeline_aesthetic_start
+
+if config["mosaicatcher_pipeline"] is False:
+
+    onstart:
+        pipeline_aesthetic_start.pipeline_aesthetic_start(config)
+
+    # wildcard_constraints:
+    #     cell="^((?!mdup).*)$"
+
+
+    def onsuccess_fct(log):
+        make_log_useful.make_log_useful(log, "SUCCESS", config)
+        shell(
+            'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {{log}}'.format(
+                config["version"], config["data_location"], config["email"]
+            )
+        )
+
+
+    def onerror_fct(log):
+        make_log_useful.make_log_useful(log, "ERROR", config)
+        shell(
+            'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - ERRROR" {} < {{log}}'.format(
+                config["version"], config["data_location"], config["email"]
+            )
+        )
 
 # Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe
 class HandleInput:
@@ -120,7 +147,7 @@ class HandleInput:
                     lambda r: f"{r['Folder']}/{r['File']}.fastq.gz", axis=1
                 )
                 df["Genecore_path"] = df["File"].apply(
-                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['prefix']}lane1/{r.replace('.', '_')}_sequence.txt.gz"
+                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['prefix']}lane1{r.replace('.', '_')}_sequence.txt.gz"
                 )
                 df["Genecore_file"] = df["File"].apply(
                     lambda r: f"{d_master[sample]['prefix']}lane1{r.replace('.', '_')}"
@@ -138,8 +165,7 @@ class HandleInput:
             drop=True
         )
         pd.options.display.max_colwidth = 200
-        print(complete_df)
-        # exit()
+        # print(complete_df)
         return complete_df, d_master
 
     @staticmethod
@@ -310,11 +336,6 @@ if config["GC_analysis"] is True:
             ):
                 d[sample][list(string.ascii_uppercase)[j]] = e
 
-# from pprint import pprint
-# pprint(cell_per_sample)
-# for k in cell_per_sample:
-#     print(k)
-#     print(len(cell_per_sample[k]))
 
 
 def get_final_output():
@@ -323,57 +344,57 @@ def get_final_output():
     """
     final_list = list()
 
-    if config["genecore"] is False:
-        # FASTQC outputs
+    # FASTQC outputs
+    final_list.extend(
+        expand(
+            "{path}/{sample}/config/fastqc_output_touch.txt",
+            path=config["data_location"],
+            sample=samples,
+        ),
+    )
+
+
+
+    if config["mosaicatcher_pipeline"] is False:
+
         final_list.extend(
-            (
-                [
-                    sub_e
-                    for e in [
-                        expand(
-                            "{path}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-                            path=config["data_location"],
-                            sample=sample,
-                            cell=cell_per_sample[sample],
-                            pair=[1, 2],
-                        )
-                        for sample in samples
-                    ]
-                    for sub_e in e
-                ]
+            expand(
+                "{path}/{sample}/cell_selection/labels.tsv",
+                path=config["data_location"],
+                sample=samples,
             )
         )
 
-    final_list.extend(
-        expand(
-            "{path}/{sample}/cell_selection/labels.tsv",
-            path=config["data_location"],
-            sample=samples,
+
+        # QC count plots (classic only or classic + corrected based on config GC_analysis option)
+
+        final_list.extend(
+            expand(
+                "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+                output_folder=config["data_location"],
+                sample=samples,
+                plottype_counts=plottype_counts,
+            ),
         )
-    )
+
+
+
 
     if config["GC_analysis"] is True:
 
+
+
         # ALFRED for each single cell
+
         final_list.extend(
-            (
-                [
-                    sub_e
-                    for e in [
-                        expand(
-                            "{path}/{sample}/plots/alfred/{bam}_gc_{alfred_plot}.png",
-                            path=config["data_location"],
-                            sample=sample,
-                            bam=cell_per_sample[sample],
-                            alfred_plot=config["alfred_plots"],
-                        )
-                        for sample in samples
-                    ]
-                    for sub_e in e
-                ]
-            )
+            expand(
+                "{path}/{sample}/config/alfred_output_touch.txt",
+                path=config["data_location"],
+                sample=samples,
+            ),
         )
 
+        
         # ALFRED for the complete plate
         final_list.extend(
             (
@@ -414,19 +435,6 @@ def get_final_output():
                     ]
                 )
             )
-
-    # if config["genecore"] is True and config["genecore_date_folder"]:
-    #     final_list.extend(genecore_list)
-
-    # QC count plots (classic only or classic + corrected based on config GC_analysis option)
-    final_list.extend(
-        expand(
-            "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
-            output_folder=config["data_location"],
-            sample=samples,
-            plottype_counts=plottype_counts,
-        ),
-    )
 
     return final_list
 
