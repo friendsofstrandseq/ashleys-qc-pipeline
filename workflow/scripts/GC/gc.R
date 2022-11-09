@@ -1,6 +1,18 @@
 library(ggplot2)
 library(reshape2)
 
+# cellwise <- "cell" %in% names(snakemake@wildcards)
+if (("cell" %in% names(snakemake@wildcards)) == TRUE) {
+    wc_cell_row_plate <- snakemake@wildcards[["cell"]]
+    type <- "Cell"
+} else if(("row" %in% names(snakemake@wildcards)) == TRUE) {
+    wc_cell_row_plate <- snakemake@wildcards[["row"]]
+    type <- "Row"
+} else {
+    wc_cell_row_plate <- "Full plate"
+    type <- "Type"
+}
+
 # zcat out.tsv.gz  | grep "^GC" > scripts/gc.table
 
 args = commandArgs(trailingOnly=TRUE)
@@ -24,7 +36,8 @@ p = ggplot(data=x, aes(x=GCcontent, y=fractionOfReads))
 p = p + geom_freqpoly(aes(color=Sample), stat="identity")
 p = p + xlab("GC content")
 p = p + ylab("Normalized count")
-p = p + ggtitle(paste0("GC content mean = ", gc_mean))
+p = p + ggtitle(paste0("Sample = ", snakemake@wildcards[["sample"]], "\n", type, "= ", wc_cell_row_plate, "\nGC content mean = ", format(round(gc_mean, 2), nsmall = 2))) + theme(plot.title = element_text(size = 12))
+
 p
 dev.off()
 
@@ -33,6 +46,6 @@ png(snakemake@output[["gcdevi_plot"]])
 p = ggplot(data=df, aes(x=GCcontent, y=value)) + geom_line(aes(color=variable))
 p = p + xlab("GC content")
 p = p + ylab("Sample to reference")
-p = p + ggtitle(paste0("SSE = ", sse))
+p = p + ggtitle(paste0("Sample = ", snakemake@wildcards[["sample"]], "\n", type, "= ", wc_cell_row_plate, "\nSSE = ", format(round(sse, 2), nsmall = 2))) + theme(plot.title = element_text(size = 12))
 p
 dev.off()
