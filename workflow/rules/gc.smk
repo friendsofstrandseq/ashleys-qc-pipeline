@@ -17,10 +17,10 @@ if config["GC_analysis"] is True:
     rule mergeBams:
         input:
             lambda wc: expand(
-                "{folder}/{sample}/bam/{bam}.sort.mdup.bam",
+                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
                 folder=config["data_location"],
                 sample=wc.sample,
-                bam=cell_per_sample[wc.sample],
+                cell=cell_per_sample[str(wc.sample)],
             ),
         output:
             "{folder}/{sample}/merged_bam/merged.raw.bam",
@@ -67,12 +67,12 @@ if config["GC_analysis"] is True:
 
     rule mergeBams_plate_row:
         input:
-            # "{folder}/{sample}/all/{bam}.sort.mdup.bam",
+            # "{folder}/{sample}/all/{cell}.sort.mdup.bam",
             lambda wc: expand(
-                "{folder}/{sample}/bam/{bam}.sort.mdup.bam",
+                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
                 folder=config["data_location"],
                 sample=wc.sample,
-                bam=d[wc.sample][wc.row],
+                cell=d[wc.sample][wc.row],
             ),
         output:
             "{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.raw.bam",
@@ -141,17 +141,17 @@ if config["GC_analysis"] is True:
 
     rule alfred_sc:
         input:
-            bam="{folder}/{sample}/bam/{bam}.sort.mdup.bam",
-            bam_bai="{folder}/{sample}/bam/{bam}.sort.mdup.bam.bai",
+            bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+            bam_bai="{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
             fasta=config["references_data"][config["reference"]]["reference_fasta"],
             fasta_index="{fasta}.fai".format(
                 fasta=config["references_data"][config["reference"]]["reference_fasta"]
             ),
         output:
-            alfred_json="{folder}/{sample}/alfred/{bam}.json.gz",
-            alfred_tsv="{folder}/{sample}/alfred/{bam}.tsv.gz",
+            alfred_json="{folder}/{sample}/alfred/{cell}.json.gz",
+            alfred_tsv="{folder}/{sample}/alfred/{cell}.tsv.gz",
         log:
-            "{folder}/{sample}/log/alfred/{bam}.log",
+            "{folder}/{sample}/log/alfred/{cell}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -160,6 +160,8 @@ if config["GC_analysis"] is True:
             """
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
             """
+
+
 
     rule alfred_plate_row:
         input:
@@ -185,11 +187,11 @@ if config["GC_analysis"] is True:
 
     rule alfred_table:
         input:
-            bam="{folder}/{sample}/alfred/{bam}.tsv.gz",
+            bam="{folder}/{sample}/alfred/{cell}.tsv.gz",
         output:
-            "{folder}/{sample}/alfred/{bam}.table",
+            "{folder}/{sample}/alfred/{cell}.table",
         log:
-            "{folder}/{sample}/log/alfred_table/{bam}.log",
+            "{folder}/{sample}/log/alfred_table/{cell}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -233,34 +235,48 @@ if config["GC_analysis"] is True:
 
     rule alfred_plot:
         input:
-            table="{folder}/{sample}/alfred/{bam}.table",
+            table="{folder}/{sample}/alfred/{cell}.table",
         output:
             gcdist_plot=report(
-                "{folder}/{sample}/plots/alfred/{bam}_gc_dist.png",
+                "{folder}/{sample}/plots/alfred/{cell}_gc_dist.png",
                 category="GC analysis",
+                subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Cell(s)": "{bam}",
+                    "Cell/Row/Plate": "Cell {cell}",
                     "Type": "GC distribution",
                 },
             ),
             gcdevi_plot=report(
-                "{folder}/{sample}/plots/alfred/{bam}_gc_devi.png",
+                "{folder}/{sample}/plots/alfred/{cell}_gc_devi.png",
                 category="GC analysis",
+                subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Cell(s)": "{bam}",
+                    "Cell/Row/Plate": "Cell {cell}",
                     "Type": "GC deviation",
                 },
             ),
         log:
-            "{folder}/{sample}/log/alfred_plot/{bam}.log",
+            "{folder}/{sample}/log/alfred_plot/{cell}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/GC/gc.R"
+
+    rule alfred_aggregate:
+        input:
+            lambda wc: expand(
+                "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
+                folder=config["data_location"],
+                sample=wc.sample,
+                cell=cell_per_sample[wc.sample],
+                alfred_plot=config["alfred_plots"],
+            )
+        output:
+            touch("{folder}/{sample}/config/alfred_output_touch.txt")
 
     rule alfred_plot_merge:
         input:
@@ -269,12 +285,13 @@ if config["GC_analysis"] is True:
             gcdist_plot=report(
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_dist.merge.png",
                 category="GC analysis",
-                labels={"Sample": "{sample}", "Type": "GC distribution"},
+                subcategory="{sample}",
+                labels={"Sample": "{sample}", "Plot Type": "GC distribution", "Cell/Row/Plate": "Plate"},
             ),
             gcdevi_plot=report(
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
                 category="GC analysis",
-                labels={"Sample": "{sample}", "Type": "GC deviation"},
+                labels={"Sample": "{sample}", "Plot Type": "GC deviation", "Cell/Row/Plate": "Plate"},
             ),
         log:
             "{folder}/{sample}/log/alfred_plot/merge_bam.log",
@@ -292,18 +309,20 @@ if config["GC_analysis"] is True:
             gcdist_plot=report(
                 "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_dist.row.png",
                 category="GC analysis",
+                subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Cell(s)": "{row}",
-                    "Type": "GC distribution",
+                    "Plot Type": "GC distribution", 
+                    "Cell/Row/Plate": "Row {row}",
                 },
             ),
             gcdevi_plot=report(
                 "{folder}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_devi.row.png",
                 category="GC analysis",
+                subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Cell(s)": "{row}",
+                    "Cell/Row/Plate": "Row {row}",
                     "Type": "GC deviation",
                 },
             ),

@@ -37,7 +37,7 @@ conda create -n snakemake -c defaults -c anaconda -c conda-forge -c bioconda sna
 3. Clone the repository
 
 ```bash
-git clone https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
+git clone --recurse-submodules https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
 ```
 
 4. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
@@ -97,6 +97,14 @@ All these arguments can be specified in two ways:
 | Parameter   | Comment          | Default | Other possibilities |
 | ----------- | ---------------- | ------- | ------------------- |
 | `reference` | Reference genome | hg38    | hg19, T2T           |
+
+### EMBL parameters
+
+| Parameter              | Comment                                                                                                                          | Parameter type | Default |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- |
+| `genecore`             | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                     | Boolean        | False   |
+| `genecore_date_folder` | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                  | String         | ""      |
+| `samples_to_process`   | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "x") | List           | []      |
 
 ### Experimental: hand-selection related parameters
 
