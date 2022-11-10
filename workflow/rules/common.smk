@@ -1,19 +1,23 @@
 import pandas as pd
 import os, sys
 import collections
-from scripts.utils import make_log_useful, pipeline_aesthetic_start
 
-if config["mosaicatcher_pipeline"] is False:
+print(config)
+print(config["mosaicatcher_pipeline"])
+print(type(config["mosaicatcher_pipeline"]))
+
+if config["mosaicatcher_pipeline"] == False:
+    from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
 
     onstart:
-        pipeline_aesthetic_start.pipeline_aesthetic_start(config)
+        pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
 
     # wildcard_constraints:
     #     cell="^((?!mdup).*)$"
 
 
     def onsuccess_fct(log):
-        make_log_useful.make_log_useful(log, "SUCCESS", config)
+        make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
         shell(
             'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {{log}}'.format(
                 config["version"], config["data_location"], config["email"]
@@ -22,7 +26,7 @@ if config["mosaicatcher_pipeline"] is False:
 
 
     def onerror_fct(log):
-        make_log_useful.make_log_useful(log, "ERROR", config)
+        make_log_useful_ashleys.make_log_useful(log, "ERROR", config)
         shell(
             'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - ERRROR" {} < {{log}}'.format(
                 config["version"], config["data_location"], config["email"]
