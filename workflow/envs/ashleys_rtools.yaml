@@ -39,3 +39,7 @@ dependencies:
   # NEW
   - bioconductor-edger
   - r-r.utils
+  # PLATE PLOT
+  - r-dplyr
+  - r-platetools
+  - r-viridis
