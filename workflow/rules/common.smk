@@ -455,11 +455,11 @@ def get_final_output():
             )
     
     # Plate plots
-    
-    if len(cell_per_sample[sample]) == 96:
+    for sample in samples:
+        
+        if len(cell_per_sample[sample]) == 96:
 
-        final_list.extend(
-            (
+            final_list.extend(
                 [
                     sub_e
                     for e in [
@@ -469,12 +469,10 @@ def get_final_output():
                             sample=sample,
                             plate_plot=["predictions", "probabilities"],
                         )
-                        for sample in samples
                     ]
                     for sub_e in e
                 ]
             )
-        )
 
     return final_list
 
