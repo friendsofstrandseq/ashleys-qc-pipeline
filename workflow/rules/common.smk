@@ -346,23 +346,23 @@ def get_final_output():
     final_list = list()
 
     # FASTQC outputs
-    final_list.extend(
-        (
-            [
-                sub_e
-                for e in [
-                    expand(
-                        "{path}/{sample}/bam/{cell}.sort.mdup.bam",
-                        path=config["data_location"],
-                        sample=sample,
-                        cell=cell_per_sample[sample],
-                    )
-                    for sample in samples
-                ]
-                for sub_e in e
-            ]
-        )
-    )
+    # final_list.extend(
+    #     (
+    #         [
+    #             sub_e
+    #             for e in [
+    #                 expand(
+    #                     "{path}/{sample}/bam/{cell}.sort.mdup.bam",
+    #                     path=config["data_location"],
+    #                     sample=sample,
+    #                     cell=cell_per_sample[sample],
+    #                 )
+    #                 for sample in samples
+    #             ]
+    #             for sub_e in e
+    #         ]
+    #     )
+    # )
     final_list.extend(
         expand(
             "{path}/{sample}/config/fastqc_output_touch.txt",
@@ -474,6 +474,7 @@ def get_final_output():
                 ]
             )
 
+    # print(final_list)
     return final_list
 
 
