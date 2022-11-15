@@ -61,11 +61,7 @@ rule fastqc_aggregate:
             pair=[1,2],
         )
     output:
-        "{folder}/{sample}/config/fastqc_output_touch.txt"
-    conda:
-        "../envs/ashleys_base.yaml"
-    shell:
-        "touch {output}"
+        touch("{folder}/{sample}/config/fastqc_output_touch.txt")
 
 
 rule bwa_index:
