@@ -282,8 +282,18 @@ if config["use_light_data"] is False:
         input:
             labels = "{folder}/{sample}/cell_selection/labels.tsv",
         output:
-            predictions = "{folder}/{sample}/plots/plate/ashleys_plate_predictions.pdf",   
-            probabilities = "{folder}/{sample}/plots/plate/ashleys_plate_probabilities.pdf"         
+            predictions=report(
+                "{folder}/{sample}/plots/plate/ashleys_plate_predictions.pdf",
+                category="Ashleys plate plots",
+                subcategory="{sample}",
+                labels={"Sample": "{sample}", "Plot Type": "Predictions"},
+            ),   
+            probabilities=report(
+                "{folder}/{sample}/plots/plate/ashleys_plate_probabilities.pdf",
+                category="Ashleys plate plots",
+                subcategory="{sample}",
+                labels={"Sample": "{sample}", "Plot Type": "Probabilities"},
+            ),   
         log:
             "{folder}/log/plot_plate/{sample}.log",
         conda:
