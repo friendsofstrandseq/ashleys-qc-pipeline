@@ -474,7 +474,7 @@ def get_final_output():
                 ]
             )
 
-    print(final_list)
+    # print(final_list)
     return final_list
 
 
