@@ -291,6 +291,7 @@ if config["GC_analysis"] is True:
             gcdevi_plot=report(
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
                 category="GC analysis",
+                subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "GC deviation", "Cell/Row/Plate": "Plate"},
             ),
         log:
