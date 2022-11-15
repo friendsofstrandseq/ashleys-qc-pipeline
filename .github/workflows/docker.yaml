@@ -14,17 +14,17 @@ jobs:
       IMAGE_NAME: ashleys-qc-pipeline
     steps:
       - uses: actions/checkout@v3.1.0
-      - name: Create container file
-        uses: snakemake/snakemake-github-action@v1.24.0
-        with:
-          snakefile: ./workflow/Snakefile
-          directory: .
-          task: "containerize"
-          args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=False GC_analysis=True"
+      # - name: Create container file
+      #   uses: snakemake/snakemake-github-action@v1.24.0
+      #   with:
+      #     snakefile: ./workflow/Snakefile
+      #     directory: .
+      #     task: "containerize"
+      #     args: "--cores 1 --use-conda --configfile ./config/config.yaml --config hand_selection=False GC_analysis=True"
 
-      - name: Print Dockerfile
-        run: |
-          cat Dockerfile
+      # - name: Print Dockerfile
+      #   run: |
+      #     cat Dockerfile
 
       - name: Run read-yaml action
         id: yaml-data
@@ -36,6 +36,10 @@ jobs:
       - name: Display read-yaml output
         run: echo "${{ steps.yaml-data.outputs.data }}"
 
+      - name: Print Dockerfile
+        run: |
+          cat ./github-actions-runner/Dockerfile-${{ steps.yaml-data.outputs.data }}.dockerfile
+
       - name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@v2
@@ -43,7 +47,7 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: "${{ steps.yaml-data.outputs.data }}"
           dockerfiles: |
-            ./Dockerfile
+            ./github-actions-runner/Dockerfile-${{ steps.yaml-data.outputs.data }}.dockerfile
 
       - name: Push To DockerHub
         id: push-to-dockerhub
