@@ -1,0 +1,11 @@
+name: plate_env
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - anaconda
+dependencies:
+  - r-dplyr
+  - r-ggplot2
+  - r-platetools
+  - r-viridis
