@@ -2,9 +2,6 @@ import pandas as pd
 import os, sys
 import collections
 
-print(config)
-print(config["mosaicatcher_pipeline"])
-print(type(config["mosaicatcher_pipeline"]))
 
 if config["mosaicatcher_pipeline"] == False:
     from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
@@ -350,6 +347,23 @@ def get_final_output():
 
     # FASTQC outputs
     final_list.extend(
+        (
+            [
+                sub_e
+                for e in [
+                    expand(
+                        "{path}/{sample}/bam/{cell}.sort.mdup.bam",
+                        path=config["data_location"],
+                        sample=sample,
+                        cell=cell_per_sample[sample],
+                    )
+                    for sample in samples
+                ]
+                for sub_e in e
+            ]
+        )
+    )
+    final_list.extend(
         expand(
             "{path}/{sample}/config/fastqc_output_touch.txt",
             path=config["data_location"],
@@ -439,6 +453,28 @@ def get_final_output():
                     ]
                 )
             )
+    
+    # Plate plots
+    
+    if len(cell_per_sample[sample]) == 96:
+
+        final_list.extend(
+            (
+                [
+                    sub_e
+                    for e in [
+                        expand(
+                            "{path}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
+                            path=config["data_location"],
+                            sample=sample,
+                            plate_plot=["predictions", "probabilities"],
+                        )
+                        for sample in samples
+                    ]
+                    for sub_e in e
+                ]
+            )
+        )
 
     return final_list
 

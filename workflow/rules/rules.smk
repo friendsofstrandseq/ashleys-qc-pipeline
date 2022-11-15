@@ -278,6 +278,20 @@ if config["use_light_data"] is False:
         script:
             "../scripts/utils/tune_predictions_based_on_threshold.py"
 
+    rule plot_plate:
+        input:
+            labels = "{folder}/{sample}/cell_selection/labels.tsv",
+        output:
+            predictions = "{folder}/{sample}/plots/plate/ashleys_plate_predictions.pdf",   
+            probabilities = "{folder}/{sample}/plots/plate/ashleys_plate_probabilities.pdf"         
+        log:
+            "{folder}/log/plot_plate/{sample}.log",
+        conda:
+            "../envs/ashleys_rtools.yaml"
+        script:
+            "../scripts/plotting/plot_plate.R"
+
+
 
 elif config["use_light_data"] is True:
 
@@ -292,3 +306,4 @@ elif config["use_light_data"] is True:
             "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
+
