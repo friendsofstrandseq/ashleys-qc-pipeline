@@ -116,7 +116,7 @@ rule bwa_strandseq_to_reference_alignment:
             ".sa",
         ),
     output:
-        bam=temp("{folder}/{sample}/bam/{cell}.bam.raw"),
+        bam="{folder}/{sample}/bam/{cell}.bam.raw",
     log:
         bwa="{folder}/{sample}/log/{cell}.bwa.log",
         samtools="{folder}/{sample}/log/{cell}.samtools.log",
@@ -139,7 +139,7 @@ rule samtools_sort_bam:
     input:
         "{folder}/{sample}/bam/{cell}.bam.raw",
     output:
-        temp("{folder}/{sample}/bam/{cell}.bam.sort"),
+        "{folder}/{sample}/bam/{cell}.bam.sort",
     log:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
