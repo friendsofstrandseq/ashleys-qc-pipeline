@@ -19,7 +19,7 @@ def aggregate_correct_cells_bam(wildcards):
             "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
             folder=config["data_location"],
             sample=wildcards.sample,
-            cell=cell_per_sample[str(wc.sample)],
+            cell=cell_per_sample[str(wildcards.sample)],
         ) 
 
 def aggregate_correct_cells_plot(wildcards):
@@ -43,6 +43,6 @@ def aggregate_correct_cells_plot(wildcards):
             "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
             folder=config["data_location"],
             sample=wildcards.sample,
-            cell=cell_per_sample[str(wc.sample)],
+            cell=cell_per_sample[str(wildcards.sample)],
         ) 
 
