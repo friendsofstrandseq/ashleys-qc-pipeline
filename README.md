@@ -19,45 +19,97 @@ sequencing data. The starting point are single-cell FASTQ files from Strand-seq 
 3. Sorting, Deduplicating and Indexing of BAM files through [Samtools](http://www.htslib.org/) & [sambaba](https://lomereiter.github.io/sambamba/docs/sambamba-view.html)
 4. Generating features and use [ashleys-qc](https://github.com/friendsofstrandseq/ashleys-qc) model to identify high-quality cells
 
-# Quick Start
+# Quick Start on example data
 
 0. [Optional] Install [Singularity](https://www.sylabs.io/guides/3.0/user-guide/)
-1. To prevent conda channel errors
 
-```bash
-conda config --set channel_priority strict
-```
-
-2. Install snakemake through conda
+1. Install snakemake through conda
 
 ```bash
 conda create -n snakemake -c defaults -c anaconda -c conda-forge -c bioconda snakemake && conda activate snakemake
 ```
 
-3. Clone the repository
+2. Clone the repository
 
 ```bash
 git clone --recurse-submodules https://github.com/friendsofstrandseq/ashleys-qc-pipeline.git && cd ashleys-qc-pipeline
 ```
 
-4. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
+3. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 
 ```bash
 snakemake --cores 6 --configfile .tests/config/simple_config.yaml --profile workflow/snakemake_profiles/local/conda_singularity --singularity-args "-B /<disk>:/<disk>"
 ```
 
-5. Run your own analysis **locally** (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
+4. Run your own analysis **locally** (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 
 ```bash
 snakemake --cores 6 --config data_location=<PATH> --profile workflow/snakemake_profiles/local/conda_singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60
 ```
 
----
-
 **ℹ️ Note**
 
 - Steps 1 - 3 are required only during first execution
 - After the first execution, do not forget to go in the git repository and to activate the snakemake environment
+
+
+# 🔬​ Start running your own analysis
+
+## Directory structure
+
+The ashleys-qc-pipeline takes as input Strand-Seq fastq file following the structure below:
+
+```bash
+Parent_folder
+|-- Sample_1
+|   `-- fastq
+|       |-- Cell_01.1.fastq.gz
+|       |-- Cell_01.2.fastq.gz
+|       |-- Cell_02.1.fastq.gz
+|       |-- Cell_02.2.fastq.gz
+|       |-- Cell_03.1.fastq.gz
+|       |-- Cell_03.2.fastq.gz
+|       |-- Cell_04.1.fastq.gz
+|       `-- Cell_04.2.fastq.gz
+|
+`-- Sample_2
+    `-- fastq
+        |-- Cell_21.1.fastq.gz
+        |-- Cell_21.2.fastq.gz
+        |-- Cell_22.1.fastq.gz
+        |-- Cell_22.2.fastq.gz
+        |-- Cell_23.1.fastq.gz
+        |-- Cell_23.2.fastq.gz
+        |-- Cell_24.1.fastq.gz
+        `-- Cell_24.2.fastq.gz
+```
+
+Thus, in a `Parent_Folder`, create a subdirectory `Parent_Folder/sampleName/` for each `sample`. Each Strand-seq FASTQ files of this sample need to go into the `fastq` folder and respect the following syntax: `<CELL>.<1|2>.fastq.gz`, `1|2` corresponding to the pair identifier.
+
+## Execution
+
+The `--profile` argument will define whether you want to execute the workflow locally on your laptop/desktop (`workflow/snakemake_profiles/local/conda_singularity/`), or if you want to run it on HPC. A generic slurm profile is available (`workflow/snakemake_profiles/HPC/slurm_generic/`).
+
+Local execution (not HPC or cloud):
+
+
+```bash
+snakemake \
+    --cores <N> --config data_location=<INPUT_DATA_FOLDER> \
+    --profile workflow/snakemake_profiles/local/conda_singularity/ \
+    --singularity-args "-B /<disk>:/<disk>"
+```
+
+HPC execution (require first that you modify the workflow/snakemake_profiles/HPC/slurm_generic/config.yaml for your own cluster)
+
+```bash
+snakemake \
+    --config data_location=<INPUT_DATA_FOLDER> \
+    --profile workflow/snakemake_profiles/HPC/slurm_generic/ \
+    --singularity-args "-B /<disk>:/<disk>"
+```
+
+
 
 ---
 
@@ -104,7 +156,7 @@ All these arguments can be specified in two ways:
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- |
 | `genecore`             | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                     | Boolean        | False   |
 | `genecore_date_folder` | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                  | String         | ""      |
-| `samples_to_process`   | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "x") | List           | []      |
+| `samples_to_process`   | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []      |
 
 ### Experimental: hand-selection related parameters
 

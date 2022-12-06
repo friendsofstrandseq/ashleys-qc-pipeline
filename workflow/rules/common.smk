@@ -3,8 +3,12 @@ import os, sys
 import collections
 
 
+
 if config["mosaicatcher_pipeline"] == False:
     from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
+
+    if config["list_commands"] is True:
+        pipeline_aesthetic_start_ashleys.argparse_help(config)
 
     onstart:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
@@ -67,7 +71,7 @@ class HandleInput:
         complete_df_list = list()
 
         # List of folders/files to not consider (restrict to samples only)
-        l = [
+        l = sorted([
             e
             for e in os.listdir(
                 "{genecore_prefix}/{date_folder}".format(
@@ -75,8 +79,8 @@ class HandleInput:
                     date_folder=config["genecore_date_folder"],
                 )
             )
-            if e.endswith(".gz")
-        ]
+            if e.endswith(".txt.gz")
+        ])
 
         # Create a list of  files to process for each sample
         d_master = collections.defaultdict(dict)
@@ -86,19 +90,24 @@ class HandleInput:
             if (j + 1) % 192 == 0:
                 common_element = findstem(sub_l)
                 l_elems = common_element.split("lane1")
+                # print(sub_l)
+                # print(common_element)
+                # print(l_elems)
+                # print(l_elems[1].split("PE20"))
                 prefix = l_elems[0]
-                technician_name = l_elems[0].split("_")[-2]
-                sample = l_elems[1].split("x")[0]
-                index = l_elems[1].split("x")[1].split("PE")[0][-1]
-                pe_index = common_element[-1]
+                # technician_name = l_elems[0].split("_")[-2]
+                sample = l_elems[1].split("PE20")[0]
+                index = l_elems[1].split("PE20")[1]
+                # pe_index = common_element[-1]
                 sub_l = list()
 
                 d_master[sample]["prefix"] = prefix
-                d_master[sample]["technician_name"] = technician_name
+                # d_master[sample]["technician_name"] = technician_name
                 d_master[sample]["index"] = index
-                d_master[sample]["pe_index"] = pe_index
                 d_master[sample]["common_element"] = common_element
-
+        # from pprint import pprint
+        # pprint(d_master)
+        # exit()
         samples_to_process = (
             config["samples_to_process"]
             if len(config["samples_to_process"]) > 0
@@ -112,14 +121,14 @@ class HandleInput:
 
         genecore_list = [
             expand(
-                "{data_location}/{sample}/fastq/{sample}x0{index}PE20{cell_nb}.{pair}.fastq.gz",
+                "{data_location}/{sample}/fastq/{sample}PE20{cell_nb}.{pair}.fastq.gz",
                 data_location=config["data_location"],
                 sample=sample,
-                index=d_master[sample]["index"],
+                # index=d_master[sample]["index"],
                 cell_nb=list(
                     range(
-                        (int(d_master[sample]["pe_index"]) * 100) + 1,
-                        (int(d_master[sample]["pe_index"]) * 100) + 97,
+                        (int(d_master[sample]["index"]) * 100) + 1,
+                        (int(d_master[sample]["index"]) * 100) + 97,
                     )
                 ),
                 pair=["1", "2"],
@@ -318,7 +327,7 @@ plottype_counts = (
 )
 
 # Special row/column mode for GC analysis of a 96-well plate
-if config["GC_analysis"] is True:
+if config["GC_analysis"] is True and config["GC_rowcol_condition"] is True:
 
     import string
     import collections
@@ -346,30 +355,15 @@ def get_final_output():
     final_list = list()
 
     # FASTQC outputs
-    # final_list.extend(
-    #     (
-    #         [
-    #             sub_e
-    #             for e in [
-    #                 expand(
-    #                     "{path}/{sample}/bam/{cell}.sort.mdup.bam",
-    #                     path=config["data_location"],
-    #                     sample=sample,
-    #                     cell=cell_per_sample[sample],
-    #                 )
-    #                 for sample in samples
-    #             ]
-    #             for sub_e in e
-    #         ]
-    #     )
-    # )
-    final_list.extend(
-        expand(
-            "{path}/{sample}/config/fastqc_output_touch.txt",
-            path=config["data_location"],
-            sample=samples,
-        ),
-    )
+
+    if config["FastQC_analysis"] is True:
+        final_list.extend(
+            expand(
+                "{path}/{sample}/config/fastqc_output_touch.txt",
+                path=config["data_location"],
+                sample=samples,
+            ),
+        )
 
 
 
@@ -396,10 +390,7 @@ def get_final_output():
         )
 
 
-
-
     if config["GC_analysis"] is True:
-
 
 
         # ALFRED for each single cell
@@ -433,28 +424,32 @@ def get_final_output():
         )
 
         # ALFRED for each row/column
-        if d:
-            final_list.extend(
-                (
-                    [
-                        sub_e
-                        for e in [
-                            expand(
-                                "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
-                                path=config["data_location"],
-                                sample=sample,
-                                row=list(string.ascii_uppercase)[: orientation[0]],
-                                alfred_plot=config["alfred_plots"],
-                            )
-                            for sample in samples
-                            if len(cell_per_sample[sample]) == 96
+        if config["GC_rowcol_condition"] is True:
+
+            if d:
+                final_list.extend(
+                    (
+                        [
+                            sub_e
+                            for e in [
+                                expand(
+                                    "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
+                                    path=config["data_location"],
+                                    sample=sample,
+                                    row=list(string.ascii_uppercase)[: orientation[0]],
+                                    alfred_plot=config["alfred_plots"],
+                                )
+                                for sample in samples
+                                if len(cell_per_sample[sample]) == 96
+                            ]
+                            for sub_e in e
                         ]
-                        for sub_e in e
-                    ]
+                    )
                 )
-            )
     
+
     # Plate plots
+
     for sample in samples:
         
         if len(cell_per_sample[sample]) == 96:
