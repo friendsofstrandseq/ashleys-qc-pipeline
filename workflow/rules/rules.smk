@@ -24,6 +24,8 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
         # wildcard_constraints:
         #     cell="^((?!\.sort\.mdup).*)$"
+        log:
+            "{folder}/log/genecore_symlink/{sample}/{cell}_{pair}.log",
         shell:
             "ln -s {input} {output}"
 
@@ -272,6 +274,8 @@ if config["use_light_data"] is False:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
         output:
             labels_corrected = "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+        log:
+            "{folder}/log/positive_control_bypass/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:

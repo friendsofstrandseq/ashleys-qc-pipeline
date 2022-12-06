@@ -37,7 +37,7 @@ if config["mosaicatcher_pipeline"] is False:
 
     include: "rules/examples.smk"
 
-print(config)
+# print(config)
 
 if config["list_commands"] is False:
     # print('TEST')

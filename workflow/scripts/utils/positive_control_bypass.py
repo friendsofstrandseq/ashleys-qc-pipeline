@@ -4,8 +4,8 @@ import scipy
 
 
 # LOAD MOSAIC COUNTS
-# counts_df = pd.read_csv(counts, sep="\t", compression="gzip")
 counts = snakemake.input.counts
+counts_df = pd.read_csv(counts, sep="\t", compression="gzip")
 counts_df["cell"] = counts_df["cell"] + ".sort.mdup.bam"
 
 # Groupby cell & sum reads
