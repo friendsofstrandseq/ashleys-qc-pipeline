@@ -14,14 +14,17 @@ if config["GC_analysis"] is True:
 
     ruleorder: mergeBams > mergeSortBams > mergeBams_plate_row > mergeSortBams_plate_row > index_merged_bam > index_merged_bam_plate_row > alfred_merged > alfred_plate_row > alfred_sc > alfred_table > alfred_table_merged > alfred_table_plate_row
 
+
+
     rule mergeBams:
         input:
-            lambda wc: expand(
-                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
+            # lambda wc: expand(
+            #     "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+            #     folder=config["data_location"],
+            #     sample=wc.sample,
+            #     cell=cell_per_sample[str(wc.sample)],
+            # ),
+            aggregate_correct_cells_bam,
         output:
             "{folder}/{sample}/merged_bam/merged.raw.bam",
         log:
@@ -268,13 +271,14 @@ if config["GC_analysis"] is True:
 
     rule alfred_aggregate:
         input:
-            lambda wc: expand(
-                "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[wc.sample],
-                alfred_plot=config["alfred_plots"],
-            )
+            # lambda wc: expand(
+            #     "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
+            #     folder=config["data_location"],
+            #     sample=wc.sample,
+            #     cell=cell_per_sample[wc.sample],
+            #     alfred_plot=config["alfred_plots"],
+            # )
+            aggregate_correct_cells_plot
         output:
             touch("{folder}/{sample}/config/alfred_output_touch.txt")
 
