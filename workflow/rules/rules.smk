@@ -266,9 +266,21 @@ elif config["hand_selection"] is True:
 
 if config["use_light_data"] is False:
 
-    rule tune_predictions_based_on_threshold:
+    rule positive_control_bypass:
         input:
-            "{folder}/{sample}/cell_selection/labels_raw.tsv",
+            labels = "{folder}/{sample}/cell_selection/labels_raw.tsv",
+            counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        output:
+            labels_corrected = "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+        conda:
+            "../envs/ashleys_base.yaml"
+        script:
+            "../scripts/utils/positive_control_bypass.py"        
+
+
+    checkpoint tune_predictions_based_on_threshold:
+        input:
+            "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
         output:
             "{folder}/{sample}/cell_selection/labels.tsv",
         log:

@@ -18,6 +18,9 @@ if config["mosaicatcher_pipeline"] is False:
 include: "rules/common.smk"
 
 
+include: "rules/aggregate_fct.smk"
+
+
 include: "rules/rules.smk"
 
 
@@ -34,44 +37,45 @@ if config["mosaicatcher_pipeline"] is False:
 
     include: "rules/examples.smk"
 
+print(config)
 
-if config["dl_external_files"] is True:
+if config["list_commands"] is False:
+    # print('TEST')
+    # if config["mosaicatcher_pipeline"] is False:
 
-    if config["mosaicatcher_pipeline"] is False:
+    #     if config["reference"] in ["hg19", "hg38", "T2T"]:
 
-        if config["reference"] in ["hg19", "hg38", "T2T"]:
+    #         if config["reference"] == "hg19":
 
-            if config["reference"] == "hg19":
-
-                rule all:
-                    input:
-                        rules.download_hg19_reference.output,
-
-
-            elif config["reference"] == "hg38":
-
-                rule all:
-                    input:
-                        rules.download_hg38_reference.output,
+    #             rule all:
+    #                 input:
+    #                     rules.download_hg19_reference.output,
 
 
-            elif config["reference"] == "T2T":
+    #         elif config["reference"] == "hg38":
 
-                rule all:
-                    input:
-                        rules.download_T2T_reference.output,
-
-
-        else:
-            sys.exit(
-                "You provide a wrong/not supported reference assembly: {}. Supported assemblies : hg19, hg38, T2T".format(
-                    config["reference"]
-                )
-            )
+    #             rule all:
+    #                 input:
+    #                     rules.download_hg38_reference.output,
 
 
-else:
+    #         elif config["reference"] == "T2T":
 
+    #             rule all:
+    #                 input:
+    #                     rules.download_T2T_reference.output,
+
+
+    #     else:
+    #         sys.exit(
+    #             "You provide a wrong/not supported reference assembly: {}. Supported assemblies : hg19, hg38, T2T".format(
+    #                 config["reference"]
+    #             )
+    #         )
+
+
+    # else:
+    # print('TEST2')
     rule all:
         input:
             get_final_output(),
