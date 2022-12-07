@@ -16,7 +16,8 @@ counts_gb_df["nb_reads"] = counts_gb_df["c"] + counts_gb_df["w"]
 # labels = pd.read_csv(directory + "/cell_selection/labels_raw.tsv".format(sample=sample), sep="\t").sort_values(by="cell")
 labels_path = snakemake.input.labels
 labels = pd.read_csv(labels_path, sep="\t").sort_values(by="cell")
-labels["sample"] = sample
+# labels["sample"] = sample
+labels["sample"] = snakemake.wildcards.sample
 
 # Retrieve correct prediction
 labels_corrected = labels.loc[labels["prediction"] == 1]
@@ -38,4 +39,4 @@ labels.loc[labels["cell"].isin(labels_corrected.cell.values.tolist()), "predicti
 labels.loc[labels["cell"].isin(labels_corrected.cell.values.tolist()), "probability"] = labels_corrected.new_probability.values.tolist()
 
 # Output
-labels.to_csv(snakemake.output.labels_corrected)
+labels.to_csv(snakemake.output.labels_corrected, index=False, sep="\t")

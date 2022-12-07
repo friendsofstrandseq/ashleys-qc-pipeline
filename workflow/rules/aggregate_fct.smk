@@ -37,6 +37,7 @@ def aggregate_correct_cells_plot(wildcards):
             folder=config["data_location"],
             sample=wildcards.sample,
             cell=cell_list,
+            alfred_plot=config["alfred_plots"],
         ) 
     else:
         return expand(
@@ -44,5 +45,6 @@ def aggregate_correct_cells_plot(wildcards):
             folder=config["data_location"],
             sample=wildcards.sample,
             cell=cell_per_sample[str(wildcards.sample)],
+            alfred_plot=config["alfred_plots"],
         ) 
 
