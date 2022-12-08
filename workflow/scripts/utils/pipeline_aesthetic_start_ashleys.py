@@ -122,9 +122,22 @@ def argparse_help(config):
     # parser = argparse.ArgumentParser(prog="mosaicatcher-pipeline", add_help=False)
     # group = parser.add_argument_group("--config")
     print(f"{fg.BLACK}\n\n\033[1mConfig options available (--config):\033[0m\n\n")
-    l1 = [f"{fg.BLACK}\033[1m       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}\033[0m".format("Option", "Type", "Required", "Default", "Description")]
-    l = [f"{fg.BLACK}       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}".format(e, config_metadata[e]["type"],config_metadata[e]["required"],config_metadata[e]["default"], ": " + config_metadata[e]["desc"]) for e in config_metadata]
-    [print(e) for e in l1+l]
+    l1 = [
+        f"{fg.BLACK}\033[1m       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}\033[0m".format(
+            "Option", "Type", "Required", "Default", "Description"
+        )
+    ]
+    l = [
+        f"{fg.BLACK}       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}".format(
+            e,
+            config_metadata[e]["type"],
+            str(config_metadata[e]["required"]),
+            str(config_metadata[e]["default"]),
+            ": " + config_metadata[e]["desc"],
+        )
+        for e in config_metadata
+    ]
+    [print(e) for e in l1 + l]
     print("\n\n")
     # args = parser.parse_args()
     # print(pipeline_aesthetic_start.fg.BOLD)
