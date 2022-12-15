@@ -9,9 +9,11 @@
 ## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries
 ## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
 
+if config["mosaicatcher_pipeline"] is False:
+    localrules: genecore_symlink
 
 if config["genecore"] is True and config["genecore_date_folder"]:
-
+    
     rule genecore_symlink:
         input:
             lambda wc: df_config_files.loc[

@@ -52,7 +52,6 @@ snakemake --cores 6 --config data_location=<PATH> --profile workflow/snakemake_p
 - Steps 1 - 3 are required only during first execution
 - After the first execution, do not forget to go in the git repository and to activate the snakemake environment
 
-
 # 🔬​ Start running your own analysis
 
 ## Directory structure
@@ -92,10 +91,9 @@ The `--profile` argument will define whether you want to execute the workflow lo
 
 Local execution (not HPC or cloud):
 
-
 ```bash
 snakemake \
-    --cores <N> --config data_location=<INPUT_DATA_FOLDER> \
+    --cores <N> --config data_location=<DATA_FOLDER> \
     --profile workflow/snakemake_profiles/local/conda_singularity/ \
     --singularity-args "-B /<disk>:/<disk>"
 ```
@@ -104,12 +102,48 @@ HPC execution (require first that you modify the workflow/snakemake_profiles/HPC
 
 ```bash
 snakemake \
-    --config data_location=<INPUT_DATA_FOLDER> \
+    --config data_location=<DATA_FOLDER> \
     --profile workflow/snakemake_profiles/HPC/slurm_generic/ \
     --singularity-args "-B /<disk>:/<disk>"
 ```
 
+EMBL HPC execution (disks binding points already set in the snakemake profile)
 
+```bash
+snakemake \
+    --config data_location=<DATA_FOLDER> \
+    --profile workflow/snakemake_profiles/HPC/slurm_EMBL/
+```
+
+### GeneCore execution (EMBL)
+
+genecore option allows EMBL users to directly run ashleys-qc-pipeline on genecore shared folders containing sequencing runs. Run folder usually contains multiple plate that were sequenced.
+Here, Snakemake will automatically create a parent folder corresponding to the genecore_date_folder under the data_location directory and a subfolder for each plate/sample that was sequenced.
+Each sample directory will contained an additional folder listing the symbolic links pointing to the raw data produced by the facility.
+
+**Example:**
+
+```bash
+snakemake \
+    --config genecore=True genecore_date_folder=2022-12-01-H35CNAFX5 data_location=<DATA_FOLDER> \
+    --profile workflow/snakemake_profiles/HPC/slurm_EMBL/
+```
+
+## Pipeline update procedure
+
+If you already use a previous version of mosaicatcher-pipeline, here is a short procedure to update it:
+
+- First, update all origin/<branch> refs to latest:
+
+`git fetch --all`
+
+- Jump to a new version (here 1.3.5) & pull code:
+
+`git checkout 1.3.5 && git pull`
+
+Then, to initiate or update git snakemake_profiles submodule:
+
+`git submodule update --init --recursive`
 
 ---
 
@@ -128,42 +162,29 @@ All these arguments can be specified in two ways:
 
 ---
 
-### Input/output options
-
-| Parameter       | Comment                                  | Parameter type | Default            |
-| --------------- | ---------------------------------------- | -------------- | ------------------ |
-| `data_location` | Path to parent folder containing samples | String         | .tests/data_CHR17/ |
-| `email`         | Email address for completion summary     | String         | None               |
-
 ### Parameters
 
-| Parameter           | Comment                                                                                                                                                        | Default   | Experimental |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------ |
-| `hand_selection`    | Allow to identify manually high-quality strand-seq libraries.                                                                                                  | False     | X            |
-| `GC_analysis`       | Enable/Disable GC analysis and correction of Strand-Seq libraries libraries.                                                                                   | False     |              |
-| `plate_orientation` | If GC_analysis enabled and conditions tested by rows/columns, set the orientation (landscape/portrait) to perform a row/column-wise analysis of the libraries. | landscape |              |
-| `ashleys_threshold` | Ashleys-qc threshold for binary classification of low/good quality cells                                                                                       | 0.5       |              |
-
-### External files
-
-| Parameter   | Comment          | Default | Other possibilities |
-| ----------- | ---------------- | ------- | ------------------- |
-| `reference` | Reference genome | hg38    | hg19, T2T           |
+| Parameter            | Comment                                                                                                                                                        | Default            | Experimental | Other choices |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ------------- |
+| `data_location`      | Path to parent folder containing samples                                                                                                                       | .tests/data_CHR17/ |              |               |
+| `email`              | Email address for completion summary                                                                                                                           | None               |              |               |
+| `reference`          | Reference genome                                                                                                                                               | hg38               |              | hg19, T2T     |
+| `hand_selection`     | Allow to identify manually high-quality strand-seq libraries.                                                                                                  | False              | X            |               |
+| `GC_analysis`        | Enable/Disable GC analysis and correction of Strand-Seq libraries libraries.                                                                                   | False              |              |               |
+| `GC_rowcol_analysis` | Enable / Disable GC row condition analysis                                                                                                                     | False              |              |               |
+| `FastQC_analysis`    | Enable / Disable FastQC analysis                                                                                                                               | False              |              |               |
+| `plate_orientation`  | If GC_analysis enabled and conditions tested by rows/columns, set the orientation (landscape/portrait) to perform a row/column-wise analysis of the libraries. | landscape          |              |               |
+| `ashleys_threshold`  | Ashleys-qc threshold for binary classification of low/good quality cells                                                                                       | 0.5                |              |               |
+| `window`             | Window size used for binning by mosaic count (Can be of high importance regarding library coverage)                                                            | 200000             |              |               |
+| `chromosomes`        | List of chromosomes to be processed in the pipeline                                                                                                            | chr1..22,chrX      |              |               |
 
 ### EMBL parameters
 
-| Parameter              | Comment                                                                                                                          | Parameter type | Default |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- |
-| `genecore`             | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                     | Boolean        | False   |
-| `genecore_date_folder` | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                  | String         | ""      |
+| Parameter              | Comment                                                                                                                             | Parameter type | Default |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- |
+| `genecore`             | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                        | Boolean        | False   |
+| `genecore_date_folder` | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                     | String         | ""      |
 | `samples_to_process`   | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []      |
-
-### Experimental: hand-selection related parameters
-
-| Parameter     | Comment                                                                                             | Default       |
-| ------------- | --------------------------------------------------------------------------------------------------- | ------------- |
-| `window`      | Window size used for binning by mosaic count (Can be of high importance regarding library coverage) | 200000        |
-| `chromosomes` | List of chromosomes to be processed in the pipeline                                                 | chr1..22,chrX |
 
 ## Snakemake arguments
 
@@ -339,7 +360,7 @@ The following command, including snakemake `--notebook-listen` (allow to chose t
 
 ```bash
 snakemake --cores 12 --profile workflow/snakemake_profiles/local/conda --config hand_selection=True data_location=<INPUT> \
-  --notebook-listen localhost:5500 --edit-notebook <INPUT>/<SAMPLE>/cell_selection/labels_raw.tsv
+  --notebook-listen localhost:5500 --edit-notebook <DATA_FOLDER>/<SAMPLE>/cell_selection/labels_raw.tsv
 ```
 
 Then, you can accessing Jupyter Notebook with your favorite web browser through the following URL:
@@ -389,11 +410,11 @@ rm .snakemake/incomplete/
 ```bash
 # Snakemake > 7.8 changes its rerun behavior. Before, rerunning jobs relied purely on file modification times. https://github.com/snakemake/snakemake/issues/1694
 # Run snakemake touch function to prevent timestamps errors
-snakemake --cores 12 --use-conda --config hand_selection=True data_location=<INPUT> --touch
+snakemake --cores 12 --use-conda --config hand_selection=True data_location=<DATA_FOLDER> --touch
 ```
 
 ```bash
-snakemake --cores 12 --use-conda --config hand_selection=True data_location=<INPUT>
+snakemake --cores 12 --use-conda --config hand_selection=True data_location=<DATA_FOLDER>
 ```
 
 # Authors (alphabetical order)
