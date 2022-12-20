@@ -17,7 +17,7 @@ if config["mosaicatcher_pipeline"] == False:
     #     cell="^((?!mdup).*)$"
 
     # Dump yaml config 
-    yaml.dump(config, open(config["data_location"] + "/config/config_copy.yaml", 'w'), default_flow_style=False)
+    # yaml.dump(config, open(config["data_location"] + "/config/config_copy.yaml", 'w'), default_flow_style=False)
 
     def onsuccess_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
