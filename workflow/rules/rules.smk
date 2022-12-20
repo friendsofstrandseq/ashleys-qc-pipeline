@@ -271,7 +271,7 @@ if config["hand_selection"] is True:
             "../notebooks/hand_selection.py.ipynb"
 
 else:
-    rule positive_control_bypass:
+    rule copy_labels:
         input:
             labels = "{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
