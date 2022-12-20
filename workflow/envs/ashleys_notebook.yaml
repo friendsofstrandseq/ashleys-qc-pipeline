@@ -1,10 +1,18 @@
-name: notebook
+name: ashleys_notebook
 channels:
   - bioconda
   - conda-forge
 dependencies:
-  - jupyter
-  - ipysheet
-  - ipywidgets
-  - nbconvert
+  - ipykernel=6.15.1=pyh210e3f2_0
+  - ipysheet=0.5.0=pyhd8ed1ab_0
+  - ipython_genutils=0.2.0=py_1
+  - ipython=8.4.0=py310hff52083_0
+  - ipywidgets=7.7.1=pyhd8ed1ab_0
+  - jupyter_client=7.3.4=pyhd8ed1ab_0
+  - jupyter_console=6.4.4=pyhd8ed1ab_0
+  - jupyter_core=4.10.0=py310hff52083_0
+  - jupyter_server=1.19.1=pyhd8ed1ab_0
+  - jupyter=1.0.0=py310hff52083_7
+  - nbconvert=6.5.0=pyhd8ed1ab_0
+  - nbformat=5.4.0=pyhd8ed1ab_0
   - pandas
