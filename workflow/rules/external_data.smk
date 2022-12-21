@@ -39,8 +39,8 @@ rule download_hg38_reference:
         "../envs/ashleys_base.yaml"
     shell:
         '''
-        directory = "workflow/data/ref_genomes/"
-        mkdir -p "{{$directory}}"
+        directory="workflow/data/ref_genomes/"
+        mkdir -p "$directory"
         mv {input} workflow/data/ref_genomes/hg38.fa.gz
         gunzip workflow/data/ref_genomes/hg38.fa.gz
         '''
