@@ -3,19 +3,19 @@ email:
   type: string
   required: False
   default: '""'
-  eval: False
+  lint_check: False
 data_location:
   desc: "Input BAM location"
   type: string
   required: True
   default: '""'
-  eval: False
+  lint_check: False
 reference:
   desc: "Reference assembly selected"
   type: string
   required: True
   default: hg38
-  eval: True
+  lint_check: False
   options:
     - hg19
     - hg38
@@ -25,7 +25,7 @@ hand_selection:
   type: bool
   required: False
   default: False
-  eval: False
+  lint_check: True
   options:
     - True
     - False
@@ -34,7 +34,7 @@ FastQC_analysis:
   type: bool
   required: False
   default: False
-  eval: False
+  lint_check: True
   options:
     - True
     - False
@@ -43,7 +43,7 @@ GC_analysis:
   type: bool
   required: False
   default: False
-  eval: True
+  lint_check: True
   options:
     - True
     - False
@@ -52,7 +52,7 @@ GC_rowcol_condition:
   type: bool
   required: False
   default: False
-  eval: False
+  lint_check: True
   options:
     - True
     - False
@@ -61,7 +61,7 @@ ashleys_threshold:
   type: bool
   required: False
   default: 0.5
-  eval: False
+  lint_check: False
   options:
     - True
     - False
@@ -69,7 +69,7 @@ plate_orientation:
   desc: "Plate orientation for GC analysis (landscape/portrait)"
   type: string
   required: False
-  eval: False
+  lint_check: True
   default: landscape
   options:
     - True
@@ -79,7 +79,7 @@ window:
   type: int
   required: True
   default: 200000
-  eval: True
+  lint_check: False
   options:
     - 200000
     - 100000
@@ -88,13 +88,13 @@ chromosomes:
   type: list
   required: True
   default: "[chr1..22,chrX]"
-  eval: False
+  lint_check: False
 genecore:
   desc: Enable / Disable genecore option to work on GeneCore folder. Required genecore_date_folder
   type: bool
   required: False
   default: False
-  eval: False
+  lint_check: True
   options:
     - True
     - False
@@ -103,13 +103,10 @@ genecore_date_folder:
   type: str
   required: False
   default: '""'
-  eval: False
-  options:
-    - True
-    - False
+  lint_check: False
 samples_to_process:
   desc: Optional list of samples to be specifically processed in genecore_date_folder
   type: list
   required: True
   default: "[]"
-  eval: False
+  lint_check: False

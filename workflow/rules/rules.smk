@@ -10,11 +10,12 @@
 ## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
 
 
-
 if config["genecore"] is True and config["genecore_date_folder"]:
     if config["mosaicatcher_pipeline"] is False:
-        localrules: genecore_symlink
-    
+
+        localrules:
+            genecore_symlink,
+
     rule genecore_symlink:
         input:
             lambda wc: df_config_files.loc[
@@ -56,6 +57,7 @@ rule fastqc:
     wrapper:
         "v1.7.0/bio/fastqc"
 
+
 rule fastqc_aggregate:
     input:
         lambda wc: expand(
@@ -63,10 +65,10 @@ rule fastqc_aggregate:
             folder=config["data_location"],
             sample=wc.sample,
             cell=cell_per_sample[wc.sample],
-            pair=[1,2],
-        )
+            pair=[1, 2],
+        ),
     output:
-        touch("{folder}/{sample}/config/fastqc_output_touch.txt")
+        touch("{folder}/{sample}/config/fastqc_output_touch.txt"),
 
 
 rule bwa_index:
@@ -98,7 +100,6 @@ rule bwa_index:
 if config["mosaicatcher_pipeline"] is False:
 
     ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
-
 
 else:
 
@@ -189,6 +190,7 @@ if config["mosaicatcher_pipeline"] is False:
 
 # if config["hand_selection"] is False:
 
+
 rule generate_features:
     input:
         bam=lambda wc: expand(
@@ -224,6 +226,7 @@ rule generate_features:
     shell:
         "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
+
 rule predict:
     input:
         folder="{folder}/{sample}/predictions/ashleys_features.tsv",
@@ -243,6 +246,13 @@ rule predict:
         "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
 
+if config["hand_selection"] is False:
+    rule test:
+        output:
+            touch("test.txt")
+        shell:
+            "cmd"
+
 if config["hand_selection"] is True:
 
     localrules:
@@ -255,7 +265,7 @@ if config["hand_selection"] is True:
                 plottype=plottype_counts,
             ),
             info="{folder}/{sample}/counts/{sample}.info_raw",
-            ashleys_labels = "{folder}/{sample}/cell_selection/labels_raw.tsv",
+            ashleys_labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
             folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
         log:
@@ -264,16 +274,16 @@ if config["hand_selection"] is True:
             cell_per_sample=cell_per_sample,
         conda:
             "../envs/ashleys_notebook.yaml"
-            # "ashleys_notebook"
         container:
             None
         notebook:
             "../notebooks/hand_selection.py.ipynb"
 
 else:
+
     rule copy_labels:
         input:
-            labels = "{folder}/{sample}/cell_selection/labels_raw.tsv",
+            labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
             folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
         log:
@@ -281,24 +291,23 @@ else:
         conda:
             "../envs/ashleys_base.yaml"
         shell:
-            "cp {input} {output}"      
+            "cp {input} {output}"
 
 
 if config["use_light_data"] is False:
 
     rule positive_control_bypass:
         input:
-            labels = "{folder}/{sample}/cell_selection/labels_notebook.tsv",
+            labels="{folder}/{sample}/cell_selection/labels_notebook.tsv",
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
         output:
-            labels_corrected = "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+            labels_corrected="{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
         log:
             "{folder}/log/positive_control_bypass/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:
-            "../scripts/utils/positive_control_bypass.py"        
-
+            "../scripts/utils/positive_control_bypass.py"
 
     checkpoint tune_predictions_based_on_threshold:
         input:
@@ -314,28 +323,26 @@ if config["use_light_data"] is False:
 
     rule plot_plate:
         input:
-            labels = "{folder}/{sample}/cell_selection/labels.tsv",
+            labels="{folder}/{sample}/cell_selection/labels.tsv",
         output:
             predictions=report(
                 "{folder}/{sample}/plots/plate/ashleys_plate_predictions.pdf",
                 category="Ashleys plate plots",
                 subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "Predictions"},
-            ),   
+            ),
             probabilities=report(
                 "{folder}/{sample}/plots/plate/ashleys_plate_probabilities.pdf",
                 category="Ashleys plate plots",
                 subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "Probabilities"},
-            ),   
+            ),
         log:
             "{folder}/log/plot_plate/{sample}.log",
         conda:
             "../envs/ashleys_rtools.yaml"
         script:
             "../scripts/plotting/plot_plate.R"
-
-
 
 elif config["use_light_data"] is True:
 
@@ -350,4 +357,3 @@ elif config["use_light_data"] is True:
             "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
-
