@@ -14,8 +14,6 @@ if config["GC_analysis"] is True:
 
     ruleorder: mergeBams > mergeSortBams > mergeBams_plate_row > mergeSortBams_plate_row > index_merged_bam > index_merged_bam_plate_row > alfred_merged > alfred_plate_row > alfred_sc > alfred_table > alfred_table_merged > alfred_table_plate_row
 
-
-
     rule mergeBams:
         input:
             # lambda wc: expand(
@@ -164,8 +162,6 @@ if config["GC_analysis"] is True:
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
             """
 
-
-
     rule alfred_plate_row:
         input:
             bam="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
@@ -278,9 +274,9 @@ if config["GC_analysis"] is True:
             #     cell=cell_per_sample[wc.sample],
             #     alfred_plot=config["alfred_plots"],
             # )
-            aggregate_correct_cells_plot
+            aggregate_correct_cells_plot,
         output:
-            touch("{folder}/{sample}/config/alfred_output_touch.txt")
+            touch("{folder}/{sample}/config/alfred_output_touch.txt"),
 
     rule alfred_plot_merge:
         input:
@@ -290,13 +286,21 @@ if config["GC_analysis"] is True:
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_dist.merge.png",
                 category="GC analysis",
                 subcategory="{sample}",
-                labels={"Sample": "{sample}", "Plot Type": "GC distribution", "Cell/Row/Plate": "Plate"},
+                labels={
+                    "Sample": "{sample}",
+                    "Plot Type": "GC distribution",
+                    "Cell/Row/Plate": "Plate",
+                },
             ),
             gcdevi_plot=report(
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
                 category="GC analysis",
                 subcategory="{sample}",
-                labels={"Sample": "{sample}", "Plot Type": "GC deviation", "Cell/Row/Plate": "Plate"},
+                labels={
+                    "Sample": "{sample}",
+                    "Plot Type": "GC deviation",
+                    "Cell/Row/Plate": "Plate",
+                },
             ),
         log:
             "{folder}/{sample}/log/alfred_plot/merge_bam.log",
@@ -317,7 +321,7 @@ if config["GC_analysis"] is True:
                 subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Plot Type": "GC distribution", 
+                    "Plot Type": "GC distribution",
                     "Cell/Row/Plate": "Row {row}",
                 },
             ),

@@ -13,14 +13,15 @@ def aggregate_correct_cells_bam(wildcards):
             folder=config["data_location"],
             sample=wildcards.sample,
             cell=cell_list,
-        ) 
+        )
     else:
         return expand(
             "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
             folder=config["data_location"],
             sample=wildcards.sample,
             cell=cell_per_sample[str(wildcards.sample)],
-        ) 
+        )
+
 
 def aggregate_correct_cells_plot(wildcards):
     if config["use_light_data"] is False:
@@ -38,7 +39,7 @@ def aggregate_correct_cells_plot(wildcards):
             sample=wildcards.sample,
             cell=cell_list,
             alfred_plot=config["alfred_plots"],
-        ) 
+        )
     else:
         return expand(
             "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
@@ -46,5 +47,4 @@ def aggregate_correct_cells_plot(wildcards):
             sample=wildcards.sample,
             cell=cell_per_sample[str(wildcards.sample)],
             alfred_plot=config["alfred_plots"],
-        ) 
-
+        )
