@@ -15,7 +15,7 @@ reference:
   type: string
   required: True
   default: hg38
-  lint_check: False
+  lint_check: True
   options:
     - hg19
     - hg38
@@ -52,28 +52,19 @@ GC_rowcol_condition:
   type: bool
   required: False
   default: False
-  lint_check: True
-  options:
-    - True
-    - False
+  lint_check: False
 ashleys_threshold:
   desc: "Ashleys-qc binary classification threshold"
   type: bool
   required: False
   default: 0.5
   lint_check: False
-  options:
-    - True
-    - False
 plate_orientation:
   desc: "Plate orientation for GC analysis (landscape/portrait)"
   type: string
   required: False
-  lint_check: True
+  lint_check: False
   default: landscape
-  options:
-    - True
-    - False
 window:
   desc: "Mosaic bin window size"
   type: int
@@ -94,7 +85,7 @@ genecore:
   type: bool
   required: False
   default: False
-  lint_check: True
+  lint_check: False
   options:
     - True
     - False
