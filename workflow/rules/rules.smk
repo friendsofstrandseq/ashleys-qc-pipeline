@@ -246,13 +246,6 @@ rule predict:
         "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
 
-if config["hand_selection"] is False:
-    rule test:
-        output:
-            touch("test.txt")
-        shell:
-            "cmd"
-
 if config["hand_selection"] is True:
 
     localrules:
