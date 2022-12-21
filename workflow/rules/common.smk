@@ -13,12 +13,6 @@ if config["mosaicatcher_pipeline"] == False:
     onstart:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
 
-    # wildcard_constraints:
-    #     cell="^((?!mdup).*)$"
-
-    # Dump yaml config 
-    # yaml.dump(config, open(config["data_location"] + "/config/config_copy.yaml", 'w'), default_flow_style=False)
-
     def onsuccess_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
         shell(
@@ -27,7 +21,6 @@ if config["mosaicatcher_pipeline"] == False:
             )
         )
 
-
     def onerror_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "ERROR", config)
         shell(
@@ -35,7 +28,7 @@ if config["mosaicatcher_pipeline"] == False:
                 config["version"], config["data_location"], config["email"]
             )
         )
-    
+
 
 # Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe
 class HandleInput:
@@ -74,16 +67,18 @@ class HandleInput:
         complete_df_list = list()
 
         # List of folders/files to not consider (restrict to samples only)
-        l = sorted([
-            e
-            for e in os.listdir(
-                "{genecore_prefix}/{date_folder}".format(
-                    genecore_prefix=config["genecore_prefix"],
-                    date_folder=config["genecore_date_folder"],
+        l = sorted(
+            [
+                e
+                for e in os.listdir(
+                    "{genecore_prefix}/{date_folder}".format(
+                        genecore_prefix=config["genecore_prefix"],
+                        date_folder=config["genecore_date_folder"],
+                    )
                 )
-            )
-            if e.endswith(".txt.gz")
-        ])
+                if e.endswith(".txt.gz")
+            ]
+        )
 
         # Create a list of  files to process for each sample
         d_master = collections.defaultdict(dict)
@@ -350,7 +345,6 @@ if config["GC_analysis"] is True and config["GC_rowcol_condition"] is True:
                 d[sample][list(string.ascii_uppercase)[j]] = e
 
 
-
 def get_final_output():
     """
     Function called by snakemake rule all to run the pipeline
@@ -368,8 +362,6 @@ def get_final_output():
             ),
         )
 
-
-
     if config["mosaicatcher_pipeline"] is False:
 
         final_list.extend(
@@ -379,7 +371,6 @@ def get_final_output():
                 sample=samples,
             )
         )
-
 
         # QC count plots (classic only or classic + corrected based on config GC_analysis option)
 
@@ -392,9 +383,7 @@ def get_final_output():
             ),
         )
 
-
     if config["GC_analysis"] is True:
-
 
         # ALFRED for each single cell
 
@@ -406,7 +395,6 @@ def get_final_output():
             ),
         )
 
-        
         # ALFRED for the complete plate
         final_list.extend(
             (
@@ -449,12 +437,11 @@ def get_final_output():
                         ]
                     )
                 )
-    
 
     # Plate plots
 
     for sample in samples:
-        
+
         if len(cell_per_sample[sample]) == 96:
 
             final_list.extend(
@@ -471,6 +458,8 @@ def get_final_output():
                     for sub_e in e
                 ]
             )
+    if config["hand_selection"] is False:
+        final_list.extend(["test.txt"])
 
     # print(final_list)
     return final_list
@@ -482,7 +471,7 @@ def get_mem_mb(wildcards, attempt):
     attemps = reiterations + 1
     Max number attemps = 8
     """
-    mem_avail = [2, 4, 8, 16, 64, 128, 256]
+    mem_avail = [2, 4, 8, 16, 32]
     return mem_avail[attempt - 1] * 1000
 
 
@@ -492,5 +481,5 @@ def get_mem_mb_heavy(wildcards, attempt):
     attemps = reiterations + 1
     Max number attemps = 8
     """
-    mem_avail = [16, 64, 128, 256]
+    mem_avail = [16, 32, 64, 128, 256]
     return mem_avail[attempt - 1] * 1000
