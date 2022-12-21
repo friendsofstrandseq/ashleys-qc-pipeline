@@ -458,8 +458,6 @@ def get_final_output():
                     for sub_e in e
                 ]
             )
-    if config["hand_selection"] is False:
-        final_list.extend(["test.txt"])
 
     # print(final_list)
     return final_list
