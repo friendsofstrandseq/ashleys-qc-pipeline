@@ -1,7 +1,7 @@
 ![logo](docs/images/logo.png)
 
 [![Workflow checks](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml/badge.svg)](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml)
-[![Snakemake](https://img.shields.io/badge/snakemake-≥7.4.0-brightgreen.svg)](https://snakemake.github.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥7.14.0-brightgreen.svg)](https://snakemake.github.io)
 
 ---
 
@@ -47,10 +47,23 @@ snakemake --cores 6 --configfile .tests/config/simple_config.yaml --profile work
 snakemake --cores 6 --config data_location=<PATH> --profile workflow/snakemake_profiles/local/conda_singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60
 ```
 
+---
+
 **ℹ️ Note**
 
-- Steps 1 - 3 are required only during first execution
+- Steps 0 - 2 are required only during first execution
 - After the first execution, do not forget to go in the git repository and to activate the snakemake environment
+
+---
+
+---
+
+**ℹ️ Note for 🇪🇺 EMBL users**
+
+- You can load already installed snakemake modusl on the HPC (by connecting to login01 & login02) using the following `module load snakemake/7.14.0-foss-2022a`
+- Use the following command for singularity-args parameter: `--singularity-args "-B /g:/g -B /scratch:/scratch"`
+
+---
 
 # 🔬​ Start running your own analysis
 
@@ -163,6 +176,8 @@ All these arguments can be specified in two ways:
 ---
 
 ### Parameters
+
+The list of parameters is available through the command: `snakemake -c1 --config list_commands=True`
 
 | Parameter            | Comment                                                                                                                                                        | Default            | Experimental | Other choices |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ------------- |
@@ -323,13 +338,22 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 
 ### Major features
 
-- [x] Jupyter Notebook hand selection of cells
-- [x] HTML report
-- [x] Multiple FASTA reference
+- [x] Jupyter Notebook hand selection of cells ([1.2.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.2.1))
+- [x] HTML report ([1.2.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.2.1))
+- [x] GC analysis module ([1.3.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.1))
+- [x] Multiple FASTA reference ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
+- [x] (EMBL) GeneCore mode of execution: allow selection and execution directly by specifying genecore run folder (2022-11-02-H372MAFX5 for instance) ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
+- [x] Automatic bypass of the positive control in ashleys labels (through z-score distribution analysis) ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
 
 ### Minor features
 
-- [x] replace `input_bam_location` by `data_location` (harmonization with [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline.git))
+- [x] replace `input_bam_location` by `data_location` (harmonization with [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline.git)) ([1.3.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.1))
+- [x] Ashleys custom threshold parameter ([1.3.4](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.4))
+- [x] Aesthetic start + mail logging ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
+- [x] Plate plot ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5)
+- [x] Jupyter Notebook update ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
+- [x] List of commands available through list_commands parameter ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
+- [x] `FastQC_analysis` boolean `GC_rowcol_analysis` parameters to enable/disable optional modules ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
 
 ### Experimental feature: hand-selection of cells via Jupyter notebook
 
@@ -337,16 +361,12 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 
 **ℹ️ Note**
 
-Singularity execution (`--use-singularity`) is not available for this mode of execution at the moment due to path system issues.
+Singularity execution (`--use-singularity`) is <del>not</del> **NOW** available for this mode, as well as HPC execution. (The jupyter notebook rule was flagged as part of the snakemake localrule statement and will bypass container execution through `container: none` statement.
 
 ---
 
 If you wish to identify yourself the cells that seem uncorrect according to your expertise, you can use the experimental interactive Jupyter Notebook by passing to the config argument `hand_selection=True`.
-By enabling this feature, the pipeline will run :
-
-- [mosaicatcher](https://github.com/friendsofstrandseq/mosaicatcher) count binning-based function
-- plot Strand-Seq karyotype figures
-- fire a Jupyter Notebook for analysis.
+By enabling this feature, the pipeline will run fire a Jupyter Notebook for analysis afterwards QC plot creation and ashleys prediction.
 
 ---
 
@@ -363,11 +383,7 @@ snakemake --cores 12 --profile workflow/snakemake_profiles/local/conda --config 
   --notebook-listen localhost:5500 --edit-notebook <DATA_FOLDER>/<SAMPLE>/cell_selection/labels_raw.tsv
 ```
 
-Then, you can accessing Jupyter Notebook with your favorite web browser through the following URL:
-
-```
-http://localhost:5500
-```
+Then, you can accessing Jupyter Notebook with your favorite web browser through the following URL `http://localhost:5500` (token available in the terminal) or by clicking directly on the web link in the terminal itself.
 
 You will need to open the following untitled with the following pattern : `tmp[XXX].hand_selection.py.ipynb` and follow the instructions inside it.
 
@@ -396,7 +412,7 @@ Instructions listed in the notebook are also listed here:
 
 ![nb1](docs/images/nb_1.png)
 
-![nb2](docs/images/nb_2.png)
+![nb3](docs/images/nb_2.png)
 
 However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)).
 

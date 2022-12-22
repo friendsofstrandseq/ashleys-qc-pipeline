@@ -30,8 +30,6 @@ include: "rules/gc.smk"
 include: "rules/count.smk"
 
 
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     include: "rules/external_data.smk"

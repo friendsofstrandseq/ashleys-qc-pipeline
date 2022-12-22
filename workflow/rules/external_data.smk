@@ -20,12 +20,12 @@ rule download_hg19_reference:
     conda:
         "../envs/ashleys_base.yaml"
     shell:
-        '''
+        """
         directory="workflow/data/ref_genomes/"
         mkdir -p "$directory"
         mv {input} workflow/data/ref_genomes/hg19.fa.gz
         gunzip workflow/data/ref_genomes/hg19.fa.gz
-        '''
+        """
 
 
 rule download_hg38_reference:
@@ -41,13 +41,12 @@ rule download_hg38_reference:
     conda:
         "../envs/ashleys_base.yaml"
     shell:
-        '''
+        """
         directory="workflow/data/ref_genomes/"
         mkdir -p "$directory"
         mv {input} workflow/data/ref_genomes/hg38.fa.gz
         gunzip workflow/data/ref_genomes/hg38.fa.gz
-        '''
-
+        """
 
 
 rule download_T2T_reference:
@@ -63,12 +62,12 @@ rule download_T2T_reference:
     conda:
         "../envs/ashleys_base.yaml"
     shell:
-        '''
+        """
         directory="workflow/data/ref_genomes/"
         mkdir -p "$directory"
         mv {input} workflow/data/ref_genomes/T2T.fa.gz
         gunzip workflow/data/ref_genomes/T2T.fa.gz
-        '''
+        """
 
 
 rule samtools_faindex:

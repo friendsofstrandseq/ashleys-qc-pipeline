@@ -199,3 +199,4 @@ config/samples.tsv
 .jupyter/
 log.txt
 .vscode/launch.json
+.tests/data_CHR17/RPE-BM510/merged_bam/
