@@ -11,6 +11,10 @@
 
 
 if config["genecore"] is True and config["genecore_date_folder"]:
+    if config["mosaicatcher_pipeline"] is False:
+
+        localrules:
+            genecore_symlink,
 
     rule genecore_symlink:
         input:
@@ -24,6 +28,8 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
         # wildcard_constraints:
         #     cell="^((?!\.sort\.mdup).*)$"
+        log:
+            "{folder}/log/genecore_symlink/{sample}/{cell}_{pair}.log",
         shell:
             "ln -s {input} {output}"
 
@@ -51,6 +57,7 @@ rule fastqc:
     wrapper:
         "v1.7.0/bio/fastqc"
 
+
 rule fastqc_aggregate:
     input:
         lambda wc: expand(
@@ -58,10 +65,10 @@ rule fastqc_aggregate:
             folder=config["data_location"],
             sample=wc.sample,
             cell=cell_per_sample[wc.sample],
-            pair=[1,2],
-        )
+            pair=[1, 2],
+        ),
     output:
-        touch("{folder}/{sample}/config/fastqc_output_touch.txt")
+        touch("{folder}/{sample}/config/fastqc_output_touch.txt"),
 
 
 rule bwa_index:
@@ -94,7 +101,6 @@ if config["mosaicatcher_pipeline"] is False:
 
     ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
 
-
 else:
 
     ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
@@ -116,7 +122,7 @@ rule bwa_strandseq_to_reference_alignment:
             ".sa",
         ),
     output:
-        bam=temp("{folder}/{sample}/bam/{cell}.bam.raw"),
+        bam="{folder}/{sample}/bam/{cell}.bam.raw",
     log:
         bwa="{folder}/{sample}/log/{cell}.bwa.log",
         samtools="{folder}/{sample}/log/{cell}.samtools.log",
@@ -139,7 +145,7 @@ rule samtools_sort_bam:
     input:
         "{folder}/{sample}/bam/{cell}.bam.raw",
     output:
-        temp("{folder}/{sample}/bam/{cell}.bam.sort"),
+        "{folder}/{sample}/bam/{cell}.bam.sort",
     log:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
@@ -182,63 +188,65 @@ if config["mosaicatcher_pipeline"] is False:
             "samtools index {input} 2>&1 > {log}"
 
 
-if config["hand_selection"] is False:
-
-    rule generate_features:
-        input:
-            bam=lambda wc: expand(
-                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            bai=lambda wc: expand(
-                "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-            plot=expand(
-                "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
-                plottype=plottype_counts,
-            ),
-        output:
-            "{folder}/{sample}/predictions/ashleys_features.tsv",
-        log:
-            "{folder}/log/ashleys/{sample}/features.log",
-        conda:
-            "../envs/ashleys_base.yaml"
-        threads: 64
-        params:
-            windows="5000000 2000000 1000000 800000 600000 400000 200000",
-            extension=".sort.mdup.bam",
-            folder=lambda wildcards, input: "{}bam".format(input.bam[0].split("bam")[0]),
-        resources:
-            mem_mb=get_mem_mb_heavy,
-            time="10:00:00",
-        shell:
-            "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
-
-    rule predict:
-        input:
-            folder="{folder}/{sample}/predictions/ashleys_features.tsv",
-        output:
-            "{folder}/{sample}/cell_selection/labels_raw.tsv",
-        log:
-            "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
-        conda:
-            "../envs/ashleys_base.yaml"
-        params:
-            model_default="./workflow/ashleys_models/svc_default.pkl",
-            model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
-        resources:
-            mem_mb=get_mem_mb,
-            time="10:00:00",
-        shell:
-            "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
+# if config["hand_selection"] is False:
 
 
-elif config["hand_selection"] is True:
+rule generate_features:
+    input:
+        bam=lambda wc: expand(
+            "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+            folder=config["data_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[str(wc.sample)],
+        ),
+        bai=lambda wc: expand(
+            "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
+            folder=config["data_location"],
+            sample=wc.sample,
+            cell=cell_per_sample[str(wc.sample)],
+        ),
+        plot=expand(
+            "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+            plottype=plottype_counts,
+        ),
+    output:
+        "{folder}/{sample}/predictions/ashleys_features.tsv",
+    log:
+        "{folder}/log/ashleys/{sample}/features.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    threads: 64
+    params:
+        windows="5000000 2000000 1000000 800000 600000 400000 200000",
+        extension=".sort.mdup.bam",
+        folder=lambda wildcards, input: "{}bam".format(input.bam[0].split("bam")[0]),
+    resources:
+        mem_mb=get_mem_mb_heavy,
+        time="10:00:00",
+    shell:
+        "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+
+
+rule predict:
+    input:
+        folder="{folder}/{sample}/predictions/ashleys_features.tsv",
+    output:
+        "{folder}/{sample}/cell_selection/labels_raw.tsv",
+    log:
+        "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    params:
+        model_default="./workflow/ashleys_models/svc_default.pkl",
+        model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
+    resources:
+        mem_mb=get_mem_mb,
+        time="10:00:00",
+    shell:
+        "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
+
+
+if config["hand_selection"] is True:
 
     localrules:
         notebook_hand_selection,
@@ -250,8 +258,9 @@ elif config["hand_selection"] is True:
                 plottype=plottype_counts,
             ),
             info="{folder}/{sample}/counts/{sample}.info_raw",
+            ashleys_labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
         output:
-            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
+            folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
         log:
             "{folder}/log/hand_selection/{sample}/prediction_probabilities.log",
         params:
@@ -263,12 +272,39 @@ elif config["hand_selection"] is True:
         notebook:
             "../notebooks/hand_selection.py.ipynb"
 
+else:
+
+    rule copy_labels:
+        input:
+            labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
+        output:
+            folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+        log:
+            "{folder}/log/positive_control_bypass/{sample}.log",
+        conda:
+            "../envs/ashleys_base.yaml"
+        shell:
+            "cp {input} {output}"
+
 
 if config["use_light_data"] is False:
 
-    rule tune_predictions_based_on_threshold:
+    rule positive_control_bypass:
         input:
-            "{folder}/{sample}/cell_selection/labels_raw.tsv",
+            labels="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+            counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        output:
+            labels_corrected="{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+        log:
+            "{folder}/log/positive_control_bypass/{sample}.log",
+        conda:
+            "../envs/ashleys_base.yaml"
+        script:
+            "../scripts/utils/positive_control_bypass.py"
+
+    checkpoint tune_predictions_based_on_threshold:
+        input:
+            "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
         output:
             "{folder}/{sample}/cell_selection/labels.tsv",
         log:
@@ -280,20 +316,20 @@ if config["use_light_data"] is False:
 
     rule plot_plate:
         input:
-            labels = "{folder}/{sample}/cell_selection/labels.tsv",
+            labels="{folder}/{sample}/cell_selection/labels.tsv",
         output:
             predictions=report(
                 "{folder}/{sample}/plots/plate/ashleys_plate_predictions.pdf",
                 category="Ashleys plate plots",
                 subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "Predictions"},
-            ),   
+            ),
             probabilities=report(
                 "{folder}/{sample}/plots/plate/ashleys_plate_probabilities.pdf",
                 category="Ashleys plate plots",
                 subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "Probabilities"},
-            ),   
+            ),
         log:
             "{folder}/log/plot_plate/{sample}.log",
         conda:
@@ -301,13 +337,11 @@ if config["use_light_data"] is False:
         script:
             "../scripts/plotting/plot_plate.R"
 
-
-
 elif config["use_light_data"] is True:
 
     rule dev_all_cells_correct:
         input:
-            folder="{folder}/{sample}/cell_selection/labels_raw.tsv",
+            folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
         output:
             folder="{folder}/{sample}/cell_selection/labels.tsv",
         log:
@@ -316,4 +350,3 @@ elif config["use_light_data"] is True:
             "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
-
