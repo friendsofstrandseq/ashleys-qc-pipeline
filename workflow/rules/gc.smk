@@ -16,12 +16,13 @@ if config["GC_analysis"] is True:
 
     rule mergeBams:
         input:
-            lambda wc: expand(
-                "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
+            # lambda wc: expand(
+            #     "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+            #     folder=config["data_location"],
+            #     sample=wc.sample,
+            #     cell=cell_per_sample[str(wc.sample)],
+            # ),
+            aggregate_correct_cells_bam,
         output:
             "{folder}/{sample}/merged_bam/merged.raw.bam",
         log:
@@ -161,8 +162,6 @@ if config["GC_analysis"] is True:
             alfred qc -r {input.fasta} -j {output.alfred_json} -o {output.alfred_tsv} {input.bam}
             """
 
-
-
     rule alfred_plate_row:
         input:
             bam="{folder}/{sample}/merged_bam/PLATE_ROW/{row}.platerow.bam",
@@ -268,15 +267,16 @@ if config["GC_analysis"] is True:
 
     rule alfred_aggregate:
         input:
-            lambda wc: expand(
-                "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[wc.sample],
-                alfred_plot=config["alfred_plots"],
-            )
+            # lambda wc: expand(
+            #     "{folder}/{sample}/plots/alfred/{cell}_gc_{alfred_plot}.png",
+            #     folder=config["data_location"],
+            #     sample=wc.sample,
+            #     cell=cell_per_sample[wc.sample],
+            #     alfred_plot=config["alfred_plots"],
+            # )
+            aggregate_correct_cells_plot,
         output:
-            touch("{folder}/{sample}/config/alfred_output_touch.txt")
+            touch("{folder}/{sample}/config/alfred_output_touch.txt"),
 
     rule alfred_plot_merge:
         input:
@@ -286,13 +286,21 @@ if config["GC_analysis"] is True:
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_dist.merge.png",
                 category="GC analysis",
                 subcategory="{sample}",
-                labels={"Sample": "{sample}", "Plot Type": "GC distribution", "Cell/Row/Plate": "Plate"},
+                labels={
+                    "Sample": "{sample}",
+                    "Plot Type": "GC distribution",
+                    "Cell/Row/Plate": "Plate",
+                },
             ),
             gcdevi_plot=report(
                 "{folder}/{sample}/plots/alfred/MERGE/merged_bam_gc_devi.merge.png",
                 category="GC analysis",
                 subcategory="{sample}",
-                labels={"Sample": "{sample}", "Plot Type": "GC deviation", "Cell/Row/Plate": "Plate"},
+                labels={
+                    "Sample": "{sample}",
+                    "Plot Type": "GC deviation",
+                    "Cell/Row/Plate": "Plate",
+                },
             ),
         log:
             "{folder}/{sample}/log/alfred_plot/merge_bam.log",
@@ -313,7 +321,7 @@ if config["GC_analysis"] is True:
                 subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Plot Type": "GC distribution", 
+                    "Plot Type": "GC distribution",
                     "Cell/Row/Plate": "Row {row}",
                 },
             ),
