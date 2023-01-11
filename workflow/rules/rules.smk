@@ -295,6 +295,7 @@ if config["use_light_data"] is False:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
         output:
             labels_corrected="{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+            bypass_cell="{folder}/{sample}/config/bypass_cell.txt",
         log:
             "{folder}/log/positive_control_bypass/{sample}.log",
         conda:
@@ -350,3 +351,20 @@ elif config["use_light_data"] is True:
             "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/dev_all_cells_correct.py"
+
+
+if config["publishdir"] != "":
+
+    rule publishdir_outputs:
+        input:
+            list_publishdir = publishdir_fct(),
+        output:
+            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
+        log:
+            "{folder}/log/publishdir_outputs/{sample}.log",
+        params:
+            publishdir=config["publishdir"],
+        conda:
+            "../envs/ashleys_base.yaml"
+        script:
+            "../scripts/utils/publishdir.py"
