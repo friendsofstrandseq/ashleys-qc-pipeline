@@ -459,7 +459,35 @@ def get_final_output():
                 ]
             )
 
+    if config["publishdir"] != "":
+        final_list.extend(
+            expand("{folder}/{sample}/config/publishdir_outputs.ok",
+                folder=config["data_location"], sample=samples
+            )
+        )
+
     # print(final_list)
+    print(final_list)
+    return final_list
+
+
+def publishdir_fct():
+    list_files_to_copy = [
+        "{folder}/{sample}/cell_selection/labels_raw.tsv",
+        "{folder}/{sample}/cell_selection/labels.tsv",
+        "{folder}/{sample}/counts/{sample}.info_raw",
+        "{folder}/{sample}/counts/{sample}.txt.raw.gz",
+    ]
+    final_list = [
+        expand(e, folder=config["data_location"], sample=samples)
+        for e in list_files_to_copy
+    ]
+    final_list.extend(
+        expand("{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+            folder=config["data_location"], sample=samples, plottype_counts=plottype_counts
+        )
+    )
+    print(final_list)
     return final_list
 
 

@@ -412,7 +412,7 @@ Instructions listed in the notebook are also listed here:
 
 ![nb1](docs/images/nb_1.png)
 
-![nb3](docs/images/nb_2.png)
+![nb3](docs/images/nb_3.png)
 
 However, as the previous command point to a specific output file related to the Jupyter Notebook snakemake rule, the snakemake command need to be runned again as the following to complete its execution (current snakemake limitation (7.9.0)).
 
