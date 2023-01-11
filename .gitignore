@@ -200,3 +200,4 @@ config/samples.tsv
 log.txt
 .vscode/launch.json
 .tests/data_CHR17/RPE-BM510/merged_bam/
+.tests/data_CHR17_publishdir/

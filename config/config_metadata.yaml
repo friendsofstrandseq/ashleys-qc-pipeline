@@ -101,3 +101,9 @@ samples_to_process:
   required: True
   default: "[]"
   lint_check: False
+publishdir:
+  desc: If specified, will copy important data (stats, plots, counts file) to a second place 
+  type: str
+  required: False
+  default: ""
+  lint_check: False
