@@ -80,6 +80,9 @@ def pipeline_aesthetic_start(config):
     print("\033[1m{}\033[0m".format("Reference genome & Chromosomes options:"))
     l = [
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("List of chromosomes processed", ": " + ",".join(config["chromosomes"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "List of chromosomes to exclude", ": " + ",".join(config["chromosomes_to_exclude"])
+        ),
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Reference genome selected", ": " + str(config["reference"])),
         # f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Reference FASTA file", ": " + str(config["references_data"][config["reference"]]["reference_file_location"])),
     ]

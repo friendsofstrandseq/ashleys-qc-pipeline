@@ -64,10 +64,23 @@ rule mosaic_count:
         > {log} 2>&1
         """
 
+rule populate_counts:
+    input:
+        bin_bed="workflow/data/bin_200kb_all.bed",
+        counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+    output:
+        populated_counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
+    log:
+        "{folder}/log/plot_mosaic_counts/{sample}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    script:
+        "../scripts/utils/populated_counts_for_qc_plot.py"
+
 
 rule plot_mosaic_counts:
     input:
-        counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
         info="{folder}/{sample}/counts/{sample}.info_raw",
     output:
         "{folder}/{sample}/plots/counts/CountComplete.classic.pdf",

@@ -292,7 +292,7 @@ if config["use_light_data"] is False:
     rule positive_control_bypass:
         input:
             labels="{folder}/{sample}/cell_selection/labels_notebook.tsv",
-            counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+            info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
             labels_corrected="{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
             bypass_cell="{folder}/{sample}/config/bypass_cell.txt",

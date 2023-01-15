@@ -75,11 +75,15 @@ window:
     - 200000
     - 100000
 chromosomes:
-  desc: List of chromosomes to used in the GC_analysis
+  desc: List of chromosomes to be processed in the pipeline
   type: list
   required: True
   default: "[chr1..22,chrX]"
-  lint_check: False
+chromosomes_to_exclude:
+  desc: List of chromosomes to be excluded
+  type: list
+  required: True
+  default: "[]"
 genecore:
   desc: Enable / Disable genecore option to work on GeneCore folder. Required genecore_date_folder
   type: bool
@@ -102,7 +106,7 @@ samples_to_process:
   default: "[]"
   lint_check: False
 publishdir:
-  desc: If specified, will copy important data (stats, plots, counts file) to a second place 
+  desc: If specified, will copy important data (stats, plots, counts file) to a second place
   type: str
   required: False
   default: ""
