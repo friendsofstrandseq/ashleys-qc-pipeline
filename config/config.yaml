@@ -76,6 +76,8 @@ chromosomes:
   - chrX
   - chrY
 
+chromosomes_to_exclude: []
+
 # GENECORE
 genecore: False
 samples_to_process: []
@@ -87,5 +89,5 @@ genecore_prefix: "/g/korbel/shared/genecore"
 # Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
 use_light_data: False
 
-# If specified, will copy important data (stats, plots, counts file) to a second place 
+# If specified, will copy important data (stats, plots, counts file) to a second place
 publishdir: ""

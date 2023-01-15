@@ -2,9 +2,17 @@ import pandas as pd
 import os, sys
 import collections
 import yaml
-
+import subprocess
 
 if config["mosaicatcher_pipeline"] == False:
+
+
+
+    if config["chromosomes_to_exclude"]:
+        chroms_init = config["chromosomes"]
+        chroms = [e for e in chroms_init if e not in config["chromosomes_to_exclude"]]
+        config["chromosomes"] = chroms
+
     from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
 
     if config["list_commands"] is True:
@@ -12,7 +20,12 @@ if config["mosaicatcher_pipeline"] == False:
 
     onstart:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
-
+        subprocess.Popen(
+            "rsync --ignore-existing -avzh config/config.yaml {folder_path}/config".format(folder_path=config["data_location"]),
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
+        
     def onsuccess_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
         shell(
@@ -477,6 +490,7 @@ def publishdir_fct():
         "{folder}/{sample}/cell_selection/labels.tsv",
         "{folder}/{sample}/counts/{sample}.info_raw",
         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        "config/config.yaml"
     ]
     final_list = [
         expand(e, folder=config["data_location"], sample=samples)
