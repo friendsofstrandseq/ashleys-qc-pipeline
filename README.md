@@ -182,6 +182,7 @@ The list of parameters is available through the command: `snakemake -c1 --config
 | Parameter            | Comment                                                                                                                                                        | Default            | Experimental | Other choices |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ------------- |
 | `data_location`      | Path to parent folder containing samples                                                                                                                       | .tests/data_CHR17/ |              |               |
+| `publishdir`         | If specified, will copy important data (stats, plots, counts file) to a second place                                                                           | ""                 |              |               |
 | `email`              | Email address for completion summary                                                                                                                           | None               |              |               |
 | `reference`          | Reference genome                                                                                                                                               | hg38               |              | hg19, T2T     |
 | `hand_selection`     | Allow to identify manually high-quality strand-seq libraries.                                                                                                  | False              | X            |               |
@@ -354,6 +355,7 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 - [x] Jupyter Notebook update ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
 - [x] List of commands available through list_commands parameter ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
 - [x] `FastQC_analysis` boolean `GC_rowcol_analysis` parameters to enable/disable optional modules ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
+- [x] publishdir: If specified, will copy important data (stats, plots, counts file) to a second place ([1.4.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.4.1)
 
 ### Experimental feature: hand-selection of cells via Jupyter notebook
 
