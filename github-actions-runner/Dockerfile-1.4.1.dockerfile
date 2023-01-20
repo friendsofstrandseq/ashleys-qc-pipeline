@@ -1,4 +1,3 @@
-['.tests/data_CHR17/RPE-BM510/config/fastqc_output_touch.txt', '.tests/data_CHR17/RPE-BM510/cell_selection/labels.tsv', '.tests/data_CHR17/RPE-BM510/plots/counts/CountComplete.classic.pdf', '.tests/data_CHR17/RPE-BM510/plots/counts/CountComplete.GC_corrected.pdf', '.tests/data_CHR17/RPE-BM510/config/alfred_output_touch.txt', '.tests/data_CHR17/RPE-BM510/plots/alfred/MERGE/merged_bam_gc_dist.merge.png', '.tests/data_CHR17/RPE-BM510/plots/alfred/MERGE/merged_bam_gc_devi.merge.png']
 FROM condaforge/mambaforge:latest
 LABEL io.github.snakemake.containerized="true"
 LABEL io.github.snakemake.conda_env_hash="8277e702059ea8414c3b2fa5c5a29441bfa5e4d6e7af467f9c2014c5c0b1b168"
