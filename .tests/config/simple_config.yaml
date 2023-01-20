@@ -16,6 +16,7 @@ GC_rowcol_condition: False
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
 FastQC_analysis: False
+
 ############################################################################
 #                          ADVANCED PARAMETERS
 ############################################################################
@@ -74,6 +75,7 @@ chromosomes:
   - chr21
   - chr22
   - chrX
+  - chrY
 
 # GENECORE
 genecore: False
@@ -85,3 +87,6 @@ genecore_prefix: "/g/korbel/shared/genecore"
 
 # Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
 use_light_data: True
+
+# If specified, will copy important data (stats, plots, counts file) to a second place
+publishdir: ""

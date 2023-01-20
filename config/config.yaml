@@ -16,6 +16,7 @@ GC_rowcol_condition: False
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
 FastQC_analysis: False
+
 ############################################################################
 #                          ADVANCED PARAMETERS
 ############################################################################
