@@ -3,14 +3,17 @@ import pandas as pd
 import scipy
 
 
-# LOAD MOSAIC COUNTS
-counts = snakemake.input.counts
-counts_df = pd.read_csv(counts, sep="\t", compression="gzip")
-counts_df["cell"] = counts_df["cell"] + ".sort.mdup.bam"
+# LOAD MOSAIC COUNTS INFO
+# counts = snakemake.input.counts
+# counts_df = pd.read_csv(counts, sep="\t", compression="gzip")
+# counts_df["cell"] = counts_df["cell"] + ".sort.mdup.bam"
 
-# Groupby cell & sum reads
-counts_gb_df = counts_df.groupby("cell")[["c","w"]].sum()
-counts_gb_df["nb_reads"] = counts_gb_df["c"] + counts_gb_df["w"]
+# # Groupby cell & sum reads
+# counts_gb_df = counts_df.groupby("cell")[["c", "w"]].sum()
+# counts_gb_df["nb_reads"] = counts_gb_df["c"] + counts_gb_df["w"]
+info = snakemake.input.info
+info_df = pd.read_csv(info, sep="\t", skiprows=13)
+info_df["cell"] = info_df["cell"] + ".sort.mdup.bam"
 
 # Load ashleys predictions
 # labels = pd.read_csv(directory + "/cell_selection/labels_raw.tsv".format(sample=sample), sep="\t").sort_values(by="cell")
@@ -23,14 +26,18 @@ labels["sample"] = snakemake.wildcards.sample
 labels_corrected = labels.loc[labels["prediction"] == 1]
 
 # Merge counts & labels
-labels_corrected = pd.merge(counts_gb_df.reset_index()[["cell", "nb_reads"]], labels_corrected, on="cell")
+# labels_corrected = pd.merge(info_df.reset_index()[["cell", "good"]], labels_corrected, on="cell")
+labels_corrected = pd.merge(info_df[["cell", "good"]], labels_corrected, on="cell")
 # Compute z-score on reads nb
-labels_corrected["z_score"] = scipy.stats.zscore(labels_corrected["nb_reads"])
+labels_corrected["z_score"] = scipy.stats.zscore(labels_corrected["good"])
 
-# Correct outliers predictions & proba
+# Output, Correct outliers predictions & proba
+labels_corrected.loc[labels_corrected["z_score"] >= 5, "cell"].to_csv(snakemake.output.bypass_cell, index=False, sep="\t")
 labels_corrected.loc[labels_corrected["z_score"] >= 5, "new_prediction"] = 0
 labels_corrected.loc[labels_corrected["z_score"] >= 5, "new_probability"] = 0
-labels_corrected.loc[labels_corrected["z_score"] < 5, "new_probability"] = labels_corrected.loc[labels_corrected["z_score"] < 5, "probability"]
+labels_corrected.loc[labels_corrected["z_score"] < 5, "new_probability"] = labels_corrected.loc[
+    labels_corrected["z_score"] < 5, "probability"
+]
 labels_corrected["new_prediction"] = labels_corrected["new_prediction"].fillna(1)
 labels_corrected["new_prediction"] = labels_corrected["new_prediction"].astype(int)
 

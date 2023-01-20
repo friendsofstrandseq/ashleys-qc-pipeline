@@ -2,9 +2,15 @@ import pandas as pd
 import os, sys
 import collections
 import yaml
-
+import subprocess
 
 if config["mosaicatcher_pipeline"] == False:
+
+    if config["chromosomes_to_exclude"]:
+        chroms_init = config["chromosomes"]
+        chroms = [e for e in chroms_init if e not in config["chromosomes_to_exclude"]]
+        config["chromosomes"] = chroms
+
     from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
 
     if config["list_commands"] is True:
@@ -12,6 +18,13 @@ if config["mosaicatcher_pipeline"] == False:
 
     onstart:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
+        subprocess.Popen(
+            "rsync --ignore-existing -avzh config/config.yaml {folder_path}/config".format(
+                folder_path=config["data_location"]
+            ),
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
 
     def onsuccess_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
@@ -459,7 +472,69 @@ def get_final_output():
                 ]
             )
 
+    if config["publishdir"] != "":
+        final_list.extend(
+            expand(
+                "{folder}/{sample}/config/publishdir_outputs.ok",
+                folder=config["data_location"],
+                sample=samples,
+            )
+        )
+
     # print(final_list)
+    return final_list
+
+
+def publishdir_fct():
+    """
+    Restricted for ASHLEYS at the moment
+    Backup files on a secondary location
+    """
+    list_files_to_copy = [
+        "{folder}/{sample}/cell_selection/labels_raw.tsv",
+        "{folder}/{sample}/cell_selection/labels.tsv",
+        "{folder}/{sample}/counts/{sample}.info_raw",
+        "{folder}/{sample}/counts/{sample}.txt.raw.gz",
+        "config/config.yaml",
+    ]
+    final_list = [
+        expand(e, folder=config["data_location"], sample=samples)
+        for e in list_files_to_copy
+    ]
+    final_list.extend(
+        expand(
+            "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+            folder=config["data_location"],
+            sample=samples,
+            plottype_counts=plottype_counts,
+        )
+    )
+
+    if config["use_light_data"] is False:
+
+        final_list.extend(
+            expand(
+                "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
+                folder=config["data_location"],
+                sample=samples,
+                plate_plot=["predictions", "probabilities"],
+            )
+        )
+        final_list.extend(
+            expand(
+                "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+                folder=config["data_location"],
+                sample=samples,
+            )
+        )
+        final_list.extend(
+            expand(
+                "{folder}/{sample}/config/bypass_cell.txt",
+                folder=config["data_location"],
+                sample=samples,
+            )
+        )
+
     return final_list
 
 
