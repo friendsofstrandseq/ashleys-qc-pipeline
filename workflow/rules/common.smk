@@ -503,12 +503,12 @@ def publishdir_fct():
         for e in list_files_to_copy
     ]
     final_list.extend(
-        expand("{folder}/{sample}/plots/counts/CountComplete.{plate_plot}.pdf",
+        expand("{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
             folder=config["data_location"], sample=samples, plottype_counts=plottype_counts
         )
     )
     final_list.extend(
-        expand("{folder}/{sample}/plots/plate/ashleys_plate_{plottype_counts}.pdf",
+        expand("{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
             folder=config["data_location"], sample=samples, plate_plot=["predictions", "probabilities"]
         )
     )
