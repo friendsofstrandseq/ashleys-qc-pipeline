@@ -355,7 +355,7 @@ elif config["use_light_data"] is True:
 
 if config["publishdir"] != "":
 
-    rule publishdir_outputs:
+    rule publishdir_outputs_ashleys:
         input:
             list_publishdir = publishdir_fct(),
         output:
