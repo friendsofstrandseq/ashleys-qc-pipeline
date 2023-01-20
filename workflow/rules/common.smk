@@ -485,9 +485,15 @@ def get_final_output():
 
 
 def publishdir_fct():
+    """
+    Restricted for ASHLEYS at the moment
+    Backup files on a secondary location
+    """
     list_files_to_copy = [
         "{folder}/{sample}/cell_selection/labels_raw.tsv",
         "{folder}/{sample}/cell_selection/labels.tsv",
+        "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+        "{folder}/{sample}/config/bypass_cell.txt",
         "{folder}/{sample}/counts/{sample}.info_raw",
         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
         "config/config.yaml"
@@ -497,11 +503,15 @@ def publishdir_fct():
         for e in list_files_to_copy
     ]
     final_list.extend(
-        expand("{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+        expand("{folder}/{sample}/plots/counts/CountComplete.{plate_plot}.pdf",
             folder=config["data_location"], sample=samples, plottype_counts=plottype_counts
         )
     )
-    print(final_list)
+    final_list.extend(
+        expand("{folder}/{sample}/plots/plate/ashleys_plate_{plottype_counts}.pdf",
+            folder=config["data_location"], sample=samples, plate_plot=["predictions", "probabilities"]
+        )
+    )
     return final_list
 
 
