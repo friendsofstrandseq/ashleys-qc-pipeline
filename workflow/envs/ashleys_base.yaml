@@ -13,4 +13,5 @@ dependencies:
   - alfred
   - ashleys-qc
   - pandas
-  # - pysam
+  # PUBLISHDIR
+  - rsync
