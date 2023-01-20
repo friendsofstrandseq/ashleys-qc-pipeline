@@ -1,4 +1,4 @@
-version: 1.3.6
+version: 1.4.1
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
@@ -16,6 +16,7 @@ GC_rowcol_condition: False
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
 FastQC_analysis: False
+
 ############################################################################
 #                          ADVANCED PARAMETERS
 ############################################################################
@@ -74,6 +75,9 @@ chromosomes:
   - chr21
   - chr22
   - chrX
+  - chrY
+
+chromosomes_to_exclude: []
 
 # GENECORE
 genecore: False
@@ -85,3 +89,6 @@ genecore_prefix: "/g/korbel/shared/genecore"
 
 # Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
 use_light_data: False
+
+# If specified, will copy important data (stats, plots, counts file) to a second place
+publishdir: ""
