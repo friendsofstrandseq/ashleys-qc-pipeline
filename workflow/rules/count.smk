@@ -64,6 +64,7 @@ rule mosaic_count:
         > {log} 2>&1
         """
 
+
 rule populate_counts:
     input:
         bin_bed="workflow/data/bin_200kb_all.bed",

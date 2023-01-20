@@ -357,7 +357,7 @@ if config["publishdir"] != "":
 
     rule publishdir_outputs_ashleys:
         input:
-            list_publishdir = publishdir_fct(),
+            list_publishdir=publishdir_fct(),
         output:
             touch("{folder}/{sample}/config/publishdir_outputs.ok"),
         log:
