@@ -1,4 +1,4 @@
-version: 1.4.1
+version: 1.4.2
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
@@ -84,6 +84,7 @@ genecore: False
 samples_to_process: []
 genecore_date_folder: ""
 genecore_prefix: "/g/korbel/shared/genecore"
+genecore_regex_element: "PE20"
 
 ##### DEV only
 
