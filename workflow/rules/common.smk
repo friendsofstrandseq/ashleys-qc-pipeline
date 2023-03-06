@@ -101,14 +101,14 @@ class HandleInput:
             if (j + 1) % 192 == 0:
                 common_element = findstem(sub_l)
                 l_elems = common_element.split("lane1")
-                # print(sub_l)
-                # print(common_element)
-                # print(l_elems)
-                # print(l_elems[1].split("PE20"))
+                print(sub_l)
+                print(common_element)
+                print(l_elems)
+                # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
                 prefix = l_elems[0]
                 # technician_name = l_elems[0].split("_")[-2]
-                sample = l_elems[1].split("PE20")[0]
-                index = l_elems[1].split("PE20")[1]
+                sample = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[0]
+                index = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[1]
                 # pe_index = common_element[-1]
                 sub_l = list()
 
@@ -132,9 +132,10 @@ class HandleInput:
 
         genecore_list = [
             expand(
-                "{data_location}/{sample}/fastq/{sample}PE20{cell_nb}.{pair}.fastq.gz",
+                "{data_location}/{sample}/fastq/{sample}{regex_element}{cell_nb}.{pair}.fastq.gz",
                 data_location=config["data_location"],
                 sample=sample,
+                regex_element=config["genecore_regex_element"],
                 # index=d_master[sample]["index"],
                 cell_nb=list(
                     range(
