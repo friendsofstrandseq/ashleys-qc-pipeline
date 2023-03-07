@@ -10,7 +10,7 @@ dependencies:
   - bwa
   - sambamba
   - mosaicatcher
-  - alfred
+  # - alfred
   - ashleys-qc
   - pandas
   # PUBLISHDIR
