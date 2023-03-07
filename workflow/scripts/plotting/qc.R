@@ -89,6 +89,8 @@ d <- d[, chrom := sub("^chr", "", chrom)][]
 d <- d[grepl("^([1-9]|[12][0-9]|X|Y)$", chrom), ]
 d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
 
+# d[, c(6, 7)] <- sapply(d[, c(6, 7)], as.double)
+
 
 message("* Writing plot ", pdf_out)
 
@@ -119,7 +121,7 @@ if (add_overview_plot == T) {
 
 
     # coverage
-    ov_coverage <- ggplot(d[, .(total = sum(w + c)), by = .(sample, cell)]) +
+    ov_coverage <- ggplot(d[, .(total = sum(as.double(w) + as.double(c))), by = .(sample, cell)]) +
         geom_histogram(aes(total, fill = sample), bins = 50) +
         scale_x_continuous(
             breaks = pretty_breaks(5),
@@ -271,7 +273,7 @@ for (s in unique(d$sample))
             geom_histogram(binwidth = 1, position = position_dodge(), alpha = 0.9) +
             scale_x_continuous(limits = c(-1, plt_hist_xlim), breaks = pretty_breaks(5), labels = comma) +
             theme(text = element_text(size = 10), axis.text = element_text(size = 8)) +
-            scale_fill_manual(values = c(w = "sandybrown", c = "paleturquoise4")) +
+            scale_fill_manual(values = c(w = "#F4A460", c = "#668B8B")) +
             guides(fill = FALSE, col = FALSE) +
             ylab("bin count") +
             xlab("reads per bin") +
