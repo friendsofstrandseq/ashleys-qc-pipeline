@@ -339,24 +339,24 @@ plottype_counts = (
 )
 
 # Special row/column mode for GC analysis of a 96-well plate
-if config["GC_analysis"] is True and config["GC_rowcol_condition"] is True:
+# if config["GC_analysis"] is True and config["GC_rowcol_condition"] is True:
 
-    import string
-    import collections
-    import numpy as np
+#     import string
+#     import collections
+#     import numpy as np
 
-    # Instanciate a dict of dict
-    d = collections.defaultdict(dict)
-    # Select orientation based on config file (landscape/portrait)
-    orientation = (8, 12) if config["plate_orientation"] == "landscape" else (12, 8)
-    for sample in samples:
-        # If sample contains 96 files
-        if len(cell_per_sample[sample]) == 96:
-            # Create dict for each row/column & save it into d
-            for j, e in enumerate(
-                np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)
-            ):
-                d[sample][list(string.ascii_uppercase)[j]] = e
+#     # Instanciate a dict of dict
+#     d = collections.defaultdict(dict)
+#     # Select orientation based on config file (landscape/portrait)
+#     orientation = (8, 12) if config["plate_orientation"] == "landscape" else (12, 8)
+#     for sample in samples:
+#         # If sample contains 96 files
+#         if len(cell_per_sample[sample]) == 96:
+#             # Create dict for each row/column & save it into d
+#             for j, e in enumerate(
+#                 np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)
+#             ):
+#                 d[sample][list(string.ascii_uppercase)[j]] = e
 
 
 def get_final_output():
@@ -397,60 +397,60 @@ def get_final_output():
             ),
         )
 
-    if config["GC_analysis"] is True:
+    # if config["GC_analysis"] is True:
 
-        # ALFRED for each single cell
+    #     # ALFRED for each single cell
 
-        final_list.extend(
-            expand(
-                "{path}/{sample}/config/alfred_output_touch.txt",
-                path=config["data_location"],
-                sample=samples,
-            ),
-        )
+    #     final_list.extend(
+    #         expand(
+    #             "{path}/{sample}/config/alfred_output_touch.txt",
+    #             path=config["data_location"],
+    #             sample=samples,
+    #         ),
+    #     )
 
-        # ALFRED for the complete plate
-        final_list.extend(
-            (
-                [
-                    sub_e
-                    for e in [
-                        expand(
-                            "{path}/{sample}/plots/alfred/MERGE/merged_bam_gc_{alfred_plot}.merge.png",
-                            path=config["data_location"],
-                            sample=sample,
-                            alfred_plot=config["alfred_plots"],
-                        )
-                        for sample in samples
-                    ]
-                    for sub_e in e
-                ]
-            )
-        )
+    #     # ALFRED for the complete plate
+    #     final_list.extend(
+    #         (
+    #             [
+    #                 sub_e
+    #                 for e in [
+    #                     expand(
+    #                         "{path}/{sample}/plots/alfred/MERGE/merged_bam_gc_{alfred_plot}.merge.png",
+    #                         path=config["data_location"],
+    #                         sample=sample,
+    #                         alfred_plot=config["alfred_plots"],
+    #                     )
+    #                     for sample in samples
+    #                 ]
+    #                 for sub_e in e
+    #             ]
+    #         )
+    #     )
 
         # ALFRED for each row/column
-        if config["GC_rowcol_condition"] is True:
+        # if config["GC_rowcol_condition"] is True:
 
-            if d:
-                final_list.extend(
-                    (
-                        [
-                            sub_e
-                            for e in [
-                                expand(
-                                    "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
-                                    path=config["data_location"],
-                                    sample=sample,
-                                    row=list(string.ascii_uppercase)[: orientation[0]],
-                                    alfred_plot=config["alfred_plots"],
-                                )
-                                for sample in samples
-                                if len(cell_per_sample[sample]) == 96
-                            ]
-                            for sub_e in e
-                        ]
-                    )
-                )
+        #     if d:
+        #         final_list.extend(
+        #             (
+        #                 [
+        #                     sub_e
+        #                     for e in [
+        #                         expand(
+        #                             "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
+        #                             path=config["data_location"],
+        #                             sample=sample,
+        #                             row=list(string.ascii_uppercase)[: orientation[0]],
+        #                             alfred_plot=config["alfred_plots"],
+        #                         )
+        #                         for sample in samples
+        #                         if len(cell_per_sample[sample]) == 96
+        #                     ]
+        #                     for sub_e in e
+        #                 ]
+        #             )
+        #         )
 
     # Plate plots
 
