@@ -68,12 +68,12 @@ if config["GC_analysis"] is True:
             "../scripts/GC/counts_scaling.R"
 
         
-    rule populate_counts:
+    rule populate_counts_GC:
         input:
             bin_bed="workflow/data/bin_200kb_all.bed",
             counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.gz",
         output:
-            populated_counts="{folder}/{sample}/counts/{sample}.txt.VST.GC.scaled.populated.gz",
+            populated_counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.populated.gz",
         log:
             "{folder}/log/plot_mosaic_counts/{sample}.log",
         conda:
