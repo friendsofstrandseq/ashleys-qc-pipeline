@@ -102,8 +102,8 @@ class HandleInput:
                 common_element = findstem(sub_l)
                 l_elems = common_element.split("lane1")
                 # print(sub_l)
-                print(common_element)
-                print(l_elems)
+                # print(common_element)
+                # print(l_elems)
                 # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
                 prefix = l_elems[0]
                 # technician_name = l_elems[0].split("_")[-2]
@@ -116,8 +116,8 @@ class HandleInput:
                 # d_master[sample]["technician_name"] = technician_name
                 d_master[sample]["index"] = index
                 d_master[sample]["common_element"] = common_element
-        from pprint import pprint
-        pprint(d_master)
+        # from pprint import pprint
+        # pprint(d_master)
         # exit()
         samples_to_process = (
             config["samples_to_process"]
@@ -144,7 +144,7 @@ class HandleInput:
             if sample in samples_to_process
         ]
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-        pprint(genecore_list)
+        # pprint(genecore_list)
         complete_df_list = list()
 
         for sample in d_master:

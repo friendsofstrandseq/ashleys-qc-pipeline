@@ -30,7 +30,8 @@ df = pd.read_csv(snakemake.input.counts, sep=sep)
 df["ID"] = df["chrom"] + "_" + df["start"].astype(str) + "_" + df["end"].astype(str)
 df["w"] = df["w"].round(0).astype(int)
 df["c"] = df["c"].round(0).astype(int)
-df["tot_count"] = df["tot_count"].round(0).astype(int)
+if sep == ",":
+    df["tot_count"] = df["tot_count"].round(0).astype(int)
 
 ## Populate counts df for each cell in order to have all bins represented
 l = list()
