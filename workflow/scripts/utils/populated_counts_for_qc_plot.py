@@ -8,13 +8,7 @@ binbed = pd.read_csv(
     sep="\t",
     names=["chrom", "start", "end", "bin_id"],
 )
-binbed["ID"] = (
-    binbed["chrom"]
-    + "_"
-    + binbed["start"].astype(str)
-    + "_"
-    + binbed["end"].astype(str)
-)
+binbed["ID"] = binbed["chrom"] + "_" + binbed["start"].astype(str) + "_" + binbed["end"].astype(str)
 
 # Turn chrom into categorical
 binbed["chrom"] = pd.Categorical(
@@ -34,6 +28,9 @@ binbed["w"], binbed["c"], binbed["class"] = 0, 0, None
 sep = "," if "GC" in snakemake.input.counts else "\t"
 df = pd.read_csv(snakemake.input.counts, sep=sep)
 df["ID"] = df["chrom"] + "_" + df["start"].astype(str) + "_" + df["end"].astype(str)
+df["w"] = df["w"].round(0).astype(int)
+df["c"] = df["c"].round(0).astype(int)
+df["tot_count"] = df["tot_count"].round(0).astype(int)
 
 ## Populate counts df for each cell in order to have all bins represented
 l = list()
@@ -44,9 +41,7 @@ for cell in df.cell.unique().tolist():
     # Outer join to retrieve both real count values from specified chromosome and empty bins
     tmp_df = pd.concat(
         [
-            binbed.loc[
-                ~binbed["ID"].isin(df.loc[df["cell"] == cell].ID.values.tolist())
-            ],
+            binbed.loc[~binbed["ID"].isin(df.loc[df["cell"] == cell].ID.values.tolist())],
             df.loc[df["cell"] == cell],
         ]
     )
@@ -59,6 +54,4 @@ for cell in df.cell.unique().tolist():
 # Concat list of DF and output
 populated_df = pd.concat(l).sort_values(by=["cell", "chrom", "start"])
 # populated_df.to_csv("test.txt.gz", compression="gzip", sep="\t", index=False)
-populated_df.to_csv(
-    snakemake.output.populated_counts, compression="gzip", sep="\t", index=False
-)
+populated_df.to_csv(snakemake.output.populated_counts, compression="gzip", sep="\t", index=False)

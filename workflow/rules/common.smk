@@ -101,7 +101,7 @@ class HandleInput:
             if (j + 1) % 192 == 0:
                 common_element = findstem(sub_l)
                 l_elems = common_element.split("lane1")
-                print(sub_l)
+                # print(sub_l)
                 print(common_element)
                 print(l_elems)
                 # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
@@ -116,8 +116,8 @@ class HandleInput:
                 # d_master[sample]["technician_name"] = technician_name
                 d_master[sample]["index"] = index
                 d_master[sample]["common_element"] = common_element
-        # from pprint import pprint
-        # pprint(d_master)
+        from pprint import pprint
+        pprint(d_master)
         # exit()
         samples_to_process = (
             config["samples_to_process"]
@@ -132,24 +132,19 @@ class HandleInput:
 
         genecore_list = [
             expand(
-                "{data_location}/{sample}/fastq/{sample}{regex_element}{cell_nb}.{pair}.fastq.gz",
+                "{data_location}/{sample}/fastq/{sample}{regex_element}{index}{cell_nb}.{pair}.fastq.gz",
                 data_location=config["data_location"],
                 sample=sample,
                 regex_element=config["genecore_regex_element"],
-                # index=d_master[sample]["index"],
-                cell_nb=list(
-                    range(
-                        (int(d_master[sample]["index"]) * 100) + 1,
-                        (int(d_master[sample]["index"]) * 100) + 97,
-                    )
-                ),
+                index=d_master[sample]["index"],
+                cell_nb=[str(e).zfill(2) for e in list(range(1,97))],
                 pair=["1", "2"],
             )
             for sample in d_master
             if sample in samples_to_process
         ]
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-
+        pprint(genecore_list)
         complete_df_list = list()
 
         for sample in d_master:
