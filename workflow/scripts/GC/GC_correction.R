@@ -6,12 +6,12 @@ library(data.table)
 # args[2] <- '/data/r-workspace/strandseq_utils/GC_matrix_200000.txt'
 print(snakemake@params[["gc_matrix"]])
 # open files
-counts <- data.table::fread(snakemake@input[["counts_vst"]], header = T)
+counts <- data.table::fread(snakemake@input[["counts_scaled"]], header = T)
 # counts <- data.table::fread(args[1], header = T)
 GC_matrix <- data.table::fread(snakemake@params[["gc_matrix"]], header = T)
 print(GC_matrix)
 # GC_matrix <- data.table::fread(args[2], header = T)
-save_path <- snakemake@output[["counts_vst_gc"]]
+save_path <- snakemake@output[["counts_scaled_gc"]]
 # save_path <- args[3]
 
 # check GC plots

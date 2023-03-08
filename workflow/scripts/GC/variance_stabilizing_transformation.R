@@ -2,17 +2,16 @@ library(edgeR)
 library(ggplot2)
 
 # fetch arguments
-args <- commandArgs(trailingOnly = T)
+# args = commandArgs(trailingOnly = T)
 
-filter <- ifelse("filter" %in% args, TRUE, FALSE)
-chosen_transform <- ifelse("anscombe" %in% args, "anscombe",
-  ifelse("laubschner" %in% args, "laubschner", "anscombe")
-)
+# filter <- ifelse('filter' %in% args, TRUE, FALSE)
+filter <- TRUE
+chosen_transform = "anscombe"
+# chosen_transform <- ifelse('anscombe' %in% args, 'anscombe',
+#                            ifelse('laubschner' %in% args, 'laubschner', 'anscombe'))
 
 # open count file
-# args[1] <- '/data/strandseq_datasets/lib_test/HCLLVAFX3_iPSCs.200000.LIB.txt.gz'
-# counts_raw <- data.table::fread(args[1])
-counts_raw <- data.table::fread(snakemake@input[["counts"]])
+counts_raw <- data.table::fread(snakemake@input[["counts_scaled_gc"]])
 
 # force cell column to factor
 counts_raw$cell <- as.factor(counts_raw$cell)
@@ -29,7 +28,6 @@ colnames(sum_counts) <- c("cell", "sum")
 
 
 # centromere read spikes exclusion
-
 exclude_centromeres <- function(counts_raw, exclusion_list) {
   exclusion_list <- GenomicRanges::GRanges(seqnames = exclusion_list$chrom, ranges = IRanges::IRanges(start = exclusion_list$start, end = exclusion_list$end))
   counts_iranges <- GenomicRanges::GRanges(seqnames = counts_raw$chrom, ranges = IRanges::IRanges(start = counts_raw$start, end = counts_raw$end))
@@ -40,15 +38,12 @@ exclude_centromeres <- function(counts_raw, exclusion_list) {
   return(counts)
 }
 
-# args[3] <- '/data/r-workspace/strandseq_utils/large_centromere_blacklist.csv'
-
 # if (!is.na(args[3])) {
-if ((!is.na(args[3])) & file.exists(args[3])) {
-  message("blacklisting...")
-  counts <- exclude_centromeres(counts_raw, data.table::fread(args[3]))
-} else {
-  counts <- counts_raw
-}
+#   message('blacklisting...')
+#   counts <- exclude_centromeres(counts_raw, data.table::fread(args[3]))
+# } else {
+# }
+counts <- counts_raw
 
 # convert to bin count matrix
 to_matrix <- function(counts) {
@@ -93,7 +88,7 @@ estimate_dispersion <- function(y) {
   )
   phi <- disp$common.dispersion
   message(paste("phi =", phi))
-  write(paste(args[1], phi, sep = "\t"), "./log.txt", append = TRUE)
+  # write(paste(args[1], phi, sep="\t"), './log.txt', append=TRUE)
 
   return(phi)
 }
@@ -112,12 +107,11 @@ anscombe_transform <- function(x, phi) {
   a <- x + (3 / 8)
   b <- (1 / phi) - (3 / 4)
   c <- sqrt(a / b)
-  y <- sinh(c)
+  y <- asinh(c)
   return(y)
 }
 laubscher_transform <- function(x, phi) {
   a <- sqrt(phi)
-  # b <- sinh(sqrt(x / phi))
   b <- asinh(sqrt(x / phi))
   c <- sqrt(phi - 1)
   d <- anscombe_transform(x, phi)
@@ -166,22 +160,18 @@ merged$w <- merged$w * merged$ratio
 merged$c <- merged$c * merged$ratio
 merged$w[is.na(merged$w)] <- 0
 merged$c[is.na(merged$c)] <- 0
-merged$tot_count <- merged$tot_count_corr
+
+# scaling counts to original range
+k <- mean(merged$tot_count) / mean(merged$tot_count_corr)
+scaled <- merged$tot_count_corr * k
+merged$w <- (merged$w / merged$tot_count) * scaled
+merged$c <- (merged$c / merged$tot_count) * scaled
+merged$w[is.na(merged$w)] <- 0
+merged$c[is.na(merged$c)] <- 0
+merged$tot_count <- scaled
+# merged$tot_count <- merged$tot_count_corr
 
 message("saving...")
 df <- data.table::data.table(merged[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
 
-# s1 <- aggregate(counts_raw$tot_count, by= list(counts_raw$cell), FUN = sum)
-# s2 <- aggregate(df$tot_count, by= list(df$cell), FUN = sum)
-# s3 <- merge(s1, s2, by=c('Group.1'), all.x=T)
-# s3$d <- s3['x.x'] - s3['x.y']
-# df
-
-# args[2] <- '/data/r-workspace/strandseq_utils/vst_test.txt.gz'
-# data.table::fwrite(df, args[2])
-data.table::fwrite(df, snakemake@output[["counts_vst"]])
-
-# scTRIPmultiplot::multiplot(args[2], chromosome = 'chr8', cell_id = 'MNIx260521x01PE20505')
-# scTRIPmultiplot::multiplot(args[1], chromosome = 'chr8', cell_id = 'MNIx260521x01PE20505')
-# path <- '/data/strandseq_datasets/H22WGAFX3_MNIx260521.200000.VST.txt.gz'
-# scTRIPmultiplot::multiplot(path, chromosome = 'chr8', cell_id = 'MNIx260521x01PE20505')
+data.table::fwrite(df, snakemake@output[["counts_scaled_gc_vst"]])

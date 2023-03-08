@@ -12,25 +12,27 @@
 
 if config["GC_analysis"] is True:
 
-    rule VST_correction:
+
+    rule library_size_normalisation:
         input:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
         output:
-            counts_vst="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.gz",
+            counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
         log:
-            "{folder}/{sample}/log/VST_correction/{sample}.log",
+            "{folder}/{sample}/log/counts_scaling/{sample}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
         script:
-            "../scripts/GC/variance_stabilizing_transformation.R"
+            "../scripts/GC/library_size_normalisation.R"
+
 
     rule GC_correction:
         input:
-            counts_vst="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.gz",
+            counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
         output:
-            counts_vst_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.gz",
+            counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
             plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_result_distribution.png",
                 category="GC analysis",
                 subcategory="{sample}",
@@ -53,27 +55,28 @@ if config["GC_analysis"] is True:
         script:
             "../scripts/GC/GC_correction.R"
 
-    rule counts_scaling:
+
+    rule VST_correction:
         input:
-            counts_vst_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.gz",
+            counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
         output:
-            counts_vst_gc_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.gz",
+            counts_scaled_gc_vst="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.gz",
         log:
-            "{folder}/{sample}/log/counts_scaling/{sample}.log",
+            "{folder}/{sample}/log/VST_correction/{sample}.log",
         resources:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
         script:
-            "../scripts/GC/counts_scaling.R"
+            "../scripts/GC/variance_stabilizing_transformation.R"
 
         
     rule populate_counts_GC:
         input:
             bin_bed="workflow/data/bin_200kb_all.bed",
-            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.gz",
+            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.gz",
         output:
-            populated_counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.populated.gz",
+            populated_counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.populated.gz",
         log:
             "{folder}/log/plot_mosaic_counts/{sample}.log",
         conda:
@@ -85,7 +88,7 @@ if config["GC_analysis"] is True:
 
     rule plot_mosaic_gc_norm_counts:
         input:
-            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.VST.GC.scaled.populated.gz",
+            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.populated.gz",
             info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
             "{folder}/{sample}/plots/counts/CountComplete.GC_corrected.pdf",
