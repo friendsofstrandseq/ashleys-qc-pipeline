@@ -74,13 +74,17 @@ counts <- merge(counts, GC_matrix[, c("chrom", "start", "GC%")], by = c("chrom",
 
 # filter data for subsampling
 c <- counts[counts$tot_count >= min_reads]
+if (dim(c)[[1]] == 0) {
+  stop(paste("there are no bins with more than", min_reads, "reads"))
+}
 c$`GC%` <- as.numeric(c$`GC%`)
 c$log_count_norm <- log(c$tot_count) - log(median(c$tot_count))
 not.na <- !is.na(c$`GC%`)
 s <- c[not.na]
 
 # subsample from quantiles
-s$GC_bin <- cut(s$`GC%`, breaks = c(quantile(s$`GC%`, probs = seq(0, 1, by = 1 / 10))), labels = seq(10))
+s$GC_bin <- cut(s$`GC%`, breaks = c(quantile(s$`GC%`, probs = seq(0, 1, by = 1 / 10))), labels = seq(1, 10, by = 1), include.lowest = TRUE)
+# s$GC_bin <- cut(s$`GC%`, breaks = c(quantile(s$`GC%`, probs = seq(0, 1, by = 1 / 10))), labels = seq(0, 1, by = 1 / 10))
 
 subsample <- data.frame()
 for (i in seq(10)) {

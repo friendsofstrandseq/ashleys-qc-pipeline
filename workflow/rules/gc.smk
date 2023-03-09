@@ -20,6 +20,8 @@ if config["GC_analysis"] is True:
             counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
         log:
             "{folder}/{sample}/log/counts_scaling/{sample}.log",
+        params:
+            gc_min_reads=config["GC_options"]["GC_min_reads_cell"],
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -33,21 +35,20 @@ if config["GC_analysis"] is True:
             counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
         output:
             counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
-            plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_result_distribution.png",
+            plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_lowess.png",
                 category="GC analysis",
                 subcategory="{sample}",
                 labels={
                     "Sample": "{sample}",
-                    "Plot Type": "GC distribution",
-                    "Cell/Row/Plate": "Row {row}",
+                    "Plot Type": "Lowess",
                 },
             ),
         log:
             "{folder}/{sample}/log/GC_correction/{sample}.log",
         params:
             gc_matrix="workflow/data/GC/GC_matrix_200000.txt",
-            gc_min_reads=5,
-            gc_n_subsample=1000,
+            gc_min_reads=config["GC_options"]["GC_min_reads_bin"],
+            gc_n_subsample=config["GC_options"]["GC_n_subsample"],
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -61,6 +62,14 @@ if config["GC_analysis"] is True:
             counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
         output:
             counts_scaled_gc_vst="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.gz",
+            plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_VST_hist.png",
+                category="GC analysis",
+                subcategory="{sample}",
+                labels={
+                    "Sample": "{sample}",
+                    "Plot Type": "VST",
+                },
+            ),
         log:
             "{folder}/{sample}/log/VST_correction/{sample}.log",
         resources:
