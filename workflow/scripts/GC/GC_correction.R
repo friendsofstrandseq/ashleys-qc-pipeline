@@ -75,6 +75,9 @@ counts <- merge(counts, GC_matrix[,c('chrom', 'start', 'GC%')], by=c('chrom', 's
 
 # filter data for subsampling
 c <- counts[counts$tot_count >= min_reads]
+if (dim(c)[[1]] == 0) {
+  stop(paste('there are no bins with more than', min_reads, 'reads'))
+}
 c$`GC%` <- as.numeric(c$`GC%`) 
 c$log_count_norm <- log(c$tot_count) - log(median(c$tot_count))
 not.na <-!is.na(c$`GC%`)

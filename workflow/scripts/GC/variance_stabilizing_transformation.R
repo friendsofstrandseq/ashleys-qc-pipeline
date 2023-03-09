@@ -7,6 +7,7 @@ args = commandArgs(trailingOnly = T)
 filter <- ifelse('filter' %in% args, TRUE, FALSE)
 chosen_transform <- ifelse('anscombe' %in% args, 'anscombe', 
                            ifelse('laubschner' %in% args, 'laubschner', 'anscombe'))
+plot <- ifelse(is.na(args[2]), FALSE, TRUE)
 
 # open count file
 counts_raw <- data.table::fread(snakemake@input[["counts"]])
@@ -172,3 +173,24 @@ message('saving...')
 df <- data.table::data.table(merged[,c('chrom', 'start', 'end', 'sample', 'cell', 'w', 'c', 'class', 'tot_count')])
 
 data.table::fwrite(df, snakemake@output[["counts_vst"]])
+
+if (plot) {
+  library(ggplot2)
+  library(ggpubr)
+  
+  p1 <- ggplot(counts_raw, aes(x=tot_count)) + 
+    geom_histogram(bins=256) +
+    ggtitle("raw") +
+    xlab('read count') +
+    ylab('bin count')
+  
+  p2 <- ggplot(df, aes(x=tot_count)) + 
+    geom_histogram(bins=256) +
+    ggtitle(paste(chosen_transform, "VST")) +
+    xlab('read count') +
+    ylab('bin count')
+  
+  corr_plot <- ggarrange(p1, p2)
+  
+  ggsave(args[2], corr_plot, width=12, height=6)
+}
