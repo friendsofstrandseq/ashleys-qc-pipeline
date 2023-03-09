@@ -10,6 +10,8 @@ chosen_transform = "anscombe"
 # chosen_transform <- ifelse('anscombe' %in% args, 'anscombe',
 #                            ifelse('laubschner' %in% args, 'laubschner', 'anscombe'))
 
+plot <- TRUE
+
 # open count file
 counts_raw <- data.table::fread(snakemake@input[["counts_scaled_gc"]])
 
@@ -175,3 +177,24 @@ message("saving...")
 df <- data.table::data.table(merged[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
 
 data.table::fwrite(df, snakemake@output[["counts_scaled_gc_vst"]])
+
+if (plot) {
+  library(ggplot2)
+  library(ggpubr)
+
+  p1 <- ggplot(counts_raw, aes(x = tot_count)) +
+    geom_histogram(bins = 256) +
+    ggtitle("raw") +
+    xlab("read count") +
+    ylab("bin count")
+
+  p2 <- ggplot(df, aes(x = tot_count)) +
+    geom_histogram(bins = 256) +
+    ggtitle(paste(chosen_transform, "VST")) +
+    xlab("read count") +
+    ylab("bin count")
+
+  corr_plot <- ggarrange(p1, p2)
+
+  ggsave(snakemake@output[["plot"]], corr_plot, width = 12, height = 6)
+}

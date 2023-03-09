@@ -18,6 +18,7 @@
 # open files
 counts <- data.table::fread(snakemake@input[["counts"]], header = T)
 save_path <- snakemake@output[["counts_scaled"]]
+min_reads <- snakemake@params[["gc_min_reads"]]
 
 #################
 # Preprocessing #
@@ -28,6 +29,15 @@ counts$cell <- as.factor(counts$cell)
 
 # add tot counts
 counts$tot_count <- counts$c + counts$w
+
+
+# filter cells with too low counts
+counts_bycell <- as.data.frame(aggregate(counts$tot_count, by = list(Category = counts$cell), FUN = sum))
+sel_cells <- counts_bycell[counts_bycell$x >= as.integer(min_reads), "Category"]
+if (length(sel_cells) == 0) {
+    stop(paste("there are no cells with more than", min_reads, "total reads"))
+}
+counts <- counts[counts$cell %in% sel_cells, ]
 
 # convert to bin matrix
 count_matrix_raw <- reshape2::dcast(counts, chrom + start + end ~ cell, value.var = "tot_count")
@@ -46,6 +56,9 @@ count_matrix$mean_log_count <- apply(count_matrix[4:ncol(count_matrix)], MARGIN 
 
 # filter out infinity
 count_matrix <- count_matrix[!is.infinite(count_matrix$mean_log_count), ]
+if (dim(count_matrix)[[1]] == 0) {
+    stop("there are no common non-zero bins available across all cells.")
+}
 
 # log of counts over mean per bin
 count_matrix[4:ncol(count_matrix)] <- count_matrix[4:ncol(count_matrix)] - count_matrix$mean_log_count
