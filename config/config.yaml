@@ -93,3 +93,9 @@ use_light_data: False
 
 # If specified, will copy important data (stats, plots, counts file) to a second place
 publishdir: ""
+
+# GC advanced parameters
+GC_options:
+  GC_min_reads_bin: 5
+  GC_n_subsample: 1000
+  GC_min_reads_cell: 100000

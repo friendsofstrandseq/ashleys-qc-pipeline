@@ -88,6 +88,7 @@ invisible(assert_that(
 d <- d[, chrom := sub("^chr", "", chrom)][]
 d <- d[grepl("^([1-9]|[12][0-9]|X|Y)$", chrom), ]
 d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+# d[, c(6, 7)] <- sapply(d[, c(6, 7)], as.double)
 
 
 message("* Writing plot ", pdf_out)
@@ -119,7 +120,7 @@ if (add_overview_plot == T) {
 
 
     # coverage
-    ov_coverage <- ggplot(d[, .(total = sum(w + c)), by = .(sample, cell)]) +
+    ov_coverage <- ggplot(d[, .(total = sum(as.double(w) + as.double(c))), by = .(sample, cell)]) +
         geom_histogram(aes(total, fill = sample), bins = 50) +
         scale_x_continuous(
             breaks = pretty_breaks(5),
@@ -182,26 +183,51 @@ if (add_overview_plot == T) {
 # Plot all cells
 for (s in unique(d$sample))
 {
+    # for (ce in unique(d[sample == s, ]$cell)[1])
     for (ce in unique(d[sample == s, ]$cell))
     {
         message(paste("* Plotting sample", s, "cell", ce))
 
+
         e <- d[sample == s & cell == ce, ]
+        e$total <- e$c + e$w
+        # print(e)
+
+        library(dplyr)
+        # e_sum <- e %>%
+        #     group_by(chrom) %>%
+        #     summarise(total = sum(total))
+
+        # print(e_sum, n = 40)
 
 
-        # Calculate some information
-        info_binwidth <- median(e$end - e$start)
-        info_reads_per_bin <- median(e$w + e$c)
+        # e_sum <- e_sum[e_sum$total > 0, ]$chrom
+
+        # print(e_sum)
+
+        # e_lite <- filter(e, chrom %in% e_sum)
+        # print(e_lite, n = 40)
+
+        e_lite <- filter(e, bin_id == "")
+        print(e_lite)
+
+
+
+        # Calculate some informationxx
+        info_binwidth <- median(e_lite$end - e_lite$start)
+        info_reads_per_bin <- median(e_lite$w + e_lite$c)
         if (!is.integer(info_reads_per_bin)) info_reads_per_bin <- round(info_reads_per_bin, 2)
-        info_chrom_sizes <- e[, .(xend = max(end)), by = chrom]
-        info_num_bins <- nrow(e)
-        info_total_reads <- sum(e$c + e$w)
+        info_chrom_sizes <- e_lite[, .(xend = max(end)), by = chrom]
+        info_num_bins <- nrow(e_lite)
+        info_total_reads <- sum(e_lite$c + e_lite$w)
         info_y_limit <- 2 * info_reads_per_bin + 1
-        if (!is.integer(info_y_limit)) info_y_limit <- round(info_y_limit, 2)
-        info_sample_name <- substr(s, 1, 25)
-        if (nchar(s) > 25) info_sample_name <- paste0(info_sample_name, "...")
-        info_cell_name <- substr(ce, 1, 25)
-        if (nchar(ce) > 25) info_cell_name <- paste0(info_cell_name, "...")
+        info_sample_name <- s
+        info_cell_name <- ce
+        # if (!is.integer(info_y_limit)) info_y_limit <- round(info_y_limit, 2)
+        # info_sample_name <- substr(s, 1, 25)
+        # if (nchar(s) > 25) info_sample_name <- paste0(info_sample_name, "...")
+        # info_cell_name <- substr(ce, 1, 25)
+        # if (nchar(ce) > 25) info_cell_name <- paste0(info_cell_name, "...")
 
         # start main plot:
         plt <- ggplot(e) +
@@ -212,6 +238,7 @@ for (s in unique(d$sample))
         consecutive <- cumsum(c(0, abs(diff(as.numeric(as.factor(e$class))))))
         e$consecutive <- consecutive
         f <- e[, .(start = min(start), end = max(end), class = class[1]), by = .(consecutive, chrom)][]
+        print(f)
 
         plt <- plt +
             geom_rect(data = f, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = class), inherit.aes = F, alpha = 0.2) +
@@ -314,24 +341,25 @@ for (s in unique(d$sample))
 
 
         plot_hst_width <- .03 + .13 * length(unique(e$class))
+        x <- 0.25
         all <- ggdraw() + draw_plot(plt) +
             draw_plot(plt_hist, x = .45, y = .76, width = plot_hst_width, height = .23) +
-            draw_label(paste("Sample:", info_sample_name), x = .29, y = .97, vjust = 1, hjust = 0, size = 14) +
-            draw_label(paste("Cell:", info_cell_name), x = .29, y = .94, vjust = 1, hjust = 0, size = 12) +
+            draw_label(paste("Sample:", info_sample_name), x = x, y = .97, vjust = 1, hjust = 0, size = 9) +
+            draw_label(paste("Cell:", info_cell_name), x = x, y = .94, vjust = 1, hjust = 0, size = 8) +
             draw_label(paste("Median binwidth:", format(round(info_binwidth / 1000, 0), big.mark = ",", scientific = F), "kb"),
-                x = .29, y = .91, vjust = 1, hjust = 0, size = 10
+                x = x, y = .91, vjust = 1, hjust = 0, size = 8
             ) +
             draw_label(paste("Number bins:", format(info_num_bins, big.mark = ",")),
-                x = .29, y = .89, vjust = 1, hjust = 0, size = 10
+                x = x, y = .89, vjust = 1, hjust = 0, size = 8
             ) +
             draw_label(paste("Total number of reads:", format(info_total_reads, big.mark = ",")),
-                x = .29, y = .87, vjust = 1, hjust = 0, size = 10
+                x = x, y = .87, vjust = 1, hjust = 0, size = 8
             ) +
             draw_label(paste("Median reads/bin (dotted):", info_reads_per_bin),
-                x = .29, y = .85, vjust = 1, hjust = 0, size = 10
+                x = x, y = .85, vjust = 1, hjust = 0, size = 8
             ) +
             draw_label(paste0("Plot limits: [-", info_y_limit, ",", info_y_limit, "]"),
-                x = .29, y = .83, vjust = 1, hjust = 0, size = 10
+                x = x, y = .83, vjust = 1, hjust = 0, size = 8
             )
         # If available, add additional info like duplicate rate and NB params!
         if (!is.null(info)) {
@@ -339,12 +367,12 @@ for (s in unique(d$sample))
             if (nrow(Ie) == 1) {
                 all <- all +
                     draw_label(paste0("Duplicate rate: ", round(Ie$dupl / Ie$mapped, 2) * 100, "%"),
-                        x = .29, y = .80, vjust = 1, hjust = 0, size = 10
+                        x = x, y = .80, vjust = 1, hjust = 0, size = 8
                     )
                 if (Ie$pass1 == 1) {
                     all <- all +
                         draw_label(paste0("NB parameters (p,r,a): ", round(Ie$nb_p, 2), ",", round(Ie$nb_r, 2), ",", round(Ie$nb_a, 2)),
-                            x = .29, y = .78, vjust = 1, hjust = 0, size = 10
+                            x = x, y = .78, vjust = 1, hjust = 0, size = 8
                         )
                 }
             }
@@ -355,7 +383,7 @@ for (s in unique(d$sample))
             sces_local <- sces[sample == s & cell == ce][, .SD[.N > 1], by = chrom]
             if (nrow(sces_local) > 0) sces_local <- sces_local[, .(pos = (end[1:(.N - 1)] + start[2:(.N)]) / 2), by = chrom]
             all <- all + draw_label(paste("SCEs detected:", nrow(sces_local)),
-                x = .29, y = .76, vjust = 1, hjust = 0, size = 10
+                x = x, y = .76, vjust = 1, hjust = 0, size = 8
             )
         }
 

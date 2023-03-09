@@ -79,7 +79,7 @@ def pipeline_aesthetic_start(config):
         print_chroms = ",".join(config["chromosomes"])
     print("\033[1m{}\033[0m".format("Reference genome & Chromosomes options:"))
     l = [
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("List of chromosomes processed", ": " + ",".join(config["chromosomes"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("List of chromosomes processed", ": " + print_chroms),
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
             "List of chromosomes to exclude", ": " + ",".join(config["chromosomes_to_exclude"])
         ),
