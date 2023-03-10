@@ -38,8 +38,8 @@ FastQC_analysis:
   options:
     - True
     - False
-GC_analysis:
-  desc: "Enable / Disable GC analysis"
+multistep_normalisation_analysis:
+  desc: "Enable / Disable multistep normalisation"
   type: bool
   required: False
   default: False
@@ -47,12 +47,6 @@ GC_analysis:
   options:
     - True
     - False
-GC_rowcol_condition:
-  desc: "Enable / Disable GC row condition analysis"
-  type: bool
-  required: False
-  default: False
-  lint_check: False
 ashleys_threshold:
   desc: "Ashleys-qc binary classification threshold"
   type: bool
@@ -78,7 +72,7 @@ chromosomes:
   desc: List of chromosomes to be processed in the pipeline
   type: list
   required: True
-  default: "[chr1..22,chrX]"
+  default: "[chr1..22,chrX,chrY]"
 chromosomes_to_exclude:
   desc: List of chromosomes to be excluded
   type: list
