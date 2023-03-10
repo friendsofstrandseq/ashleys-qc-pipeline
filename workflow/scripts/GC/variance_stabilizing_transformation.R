@@ -123,58 +123,78 @@ laubscher_transform <- function(x, phi) {
 transform_list <- list("anscombe" = anscombe_transform, "laubscher" = laubscher_transform)
 transform <- transform_list[[chosen_transform]]
 
+
 message(paste("Transforming data with", chosen_transform, "VST"))
-# ans <- transform(y$counts, phi)
-ans <- transform(to_matrix(counts_raw), phi)
 
-# convert to count table
-ans <- as.data.frame(ans)
-ans$bin <- rownames(ans)
-d <- reshape2::melt(ans, id.vars = "bin", measure.vars = colnames(ans), variable.name = "cell", value.name = "tot_count_corr")
+counts$w_corr <- transform(counts$w, phi)
+counts$c_corr <- transform(counts$c, phi)
+counts$w_corr <- counts$w_corr - min(counts$w_corr)
+counts$c_corr <- counts$c_corr - min(counts$c_corr)
+counts$tot_count_corr <- counts$w_corr + counts$c_corr
 
-sum2 <- apply(ans[, 1:ncol(ans) - 1], MARGIN = 2, FUN = sum)
-sum2 <- data.table::data.table(cell = names(sum2), sum2 = sum2)
-sum_counts <- merge(sum_counts, sum2, by = c("cell"), all.x = T)
-sum_counts$f <- sum_counts$sum / sum_counts$sum2
+# # ans <- transform(y$counts, phi)
+# ans <- transform(to_matrix(counts_raw), phi)
 
-d <- merge(d, sum_counts[, c("cell", "f")], by = c("cell"), all.x = T)
-d$tot_count_corr <- as.numeric(d$tot_count_corr) * d$f
-d <- d[, c("cell", "bin", "tot_count_corr")]
+# # convert to count table
+# ans <- as.data.frame(ans)
+# ans$bin <- rownames(ans)
+# d <- reshape2::melt(ans, id.vars = "bin", measure.vars = colnames(ans), variable.name = "cell", value.name = "tot_count_corr")
 
-bins <- stringr::str_split_fixed(d$bin, "_", 3)
-colnames(bins) <- c("chrom", "start", "end")
-d[c("chrom", "start", "end")] <- bins
-d$start <- as.numeric(d$start)
-d$end <- as.numeric(d$end)
+# sum2 <- apply(ans[, 1:ncol(ans) - 1], MARGIN = 2, FUN = sum)
+# sum2 <- data.table::data.table(cell = names(sum2), sum2 = sum2)
+# sum_counts <- merge(sum_counts, sum2, by = c("cell"), all.x = T)
+# sum_counts$f <- sum_counts$sum / sum_counts$sum2
 
-merged.raw <- merge(counts_raw, d[c("chrom", "start", "end", "cell", "tot_count_corr")],
-  by = c("chrom", "start", "end", "cell"), all.x = T
-)
+# d <- merge(d, sum_counts[, c("cell", "f")], by = c("cell"), all.x = T)
+# d$tot_count_corr <- as.numeric(d$tot_count_corr) * d$f
+# d <- d[, c("cell", "bin", "tot_count_corr")]
 
-fil <- apply(merged.raw, MARGIN = 1, FUN = (function(x) any(is.na(x))))
-# merged.raw[fil, 'tot_count_corr'] <- 0
-merged <- data.table::data.table(merged.raw)
+# bins <- stringr::str_split_fixed(d$bin, "_", 3)
+# colnames(bins) <- c("chrom", "start", "end")
+# d[c("chrom", "start", "end")] <- bins
+# d$start <- as.numeric(d$start)
+# d$end <- as.numeric(d$end)
 
-# adjust W and C counts to corrected tot_counts
-merged$tot_count_corr <- as.numeric(merged$tot_count_corr)
-merged$ratio <- merged$tot_count_corr / merged$tot_count
-merged$w <- merged$w * merged$ratio
-merged$c <- merged$c * merged$ratio
-merged$w[is.na(merged$w)] <- 0
-merged$c[is.na(merged$c)] <- 0
+# merged.raw <- merge(counts_raw, d[c("chrom", "start", "end", "cell", "tot_count_corr")],
+#   by = c("chrom", "start", "end", "cell"), all.x = T
+# )
+
+# fil <- apply(merged.raw, MARGIN = 1, FUN = (function(x) any(is.na(x))))
+# # merged.raw[fil, 'tot_count_corr'] <- 0
+# merged <- data.table::data.table(merged.raw)
+
+# # adjust W and C counts to corrected tot_counts
+# merged$tot_count_corr <- as.numeric(merged$tot_count_corr)
+# merged$ratio <- merged$tot_count_corr / merged$tot_count
+# merged$w <- merged$w * merged$ratio
+# merged$c <- merged$c * merged$ratio
+# merged$w[is.na(merged$w)] <- 0
+# merged$c[is.na(merged$c)] <- 0
 
 # scaling counts to original range
-k <- mean(merged$tot_count) / mean(merged$tot_count_corr)
-scaled <- merged$tot_count_corr * k
-merged$w <- (merged$w / merged$tot_count) * scaled
-merged$c <- (merged$c / merged$tot_count) * scaled
-merged$w[is.na(merged$w)] <- 0
-merged$c[is.na(merged$c)] <- 0
-merged$tot_count <- scaled
+
+k <- mean(counts$tot_count) / mean(counts$tot_count_corr)
+scaled <- counts$tot_count_corr * k
+counts$w <- (counts$w_corr / counts$tot_count_corr) * scaled
+counts$c <- (counts$c_corr / counts$tot_count_corr) * scaled
+counts$w[is.na(counts$w)] <- 0
+counts$c[is.na(counts$c)] <- 0
+counts$tot_count <- scaled
+
+
+# k <- mean(merged$tot_count) / mean(merged$tot_count_corr)
+# scaled <- merged$tot_count_corr * k
+# merged$w <- (merged$w / merged$tot_count) * scaled
+# merged$c <- (merged$c / merged$tot_count) * scaled
+# merged$w[is.na(merged$w)] <- 0
+# merged$c[is.na(merged$c)] <- 0
+# merged$tot_count <- scaled
 # merged$tot_count <- merged$tot_count_corr
 
 message("saving...")
-df <- data.table::data.table(merged[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
+df <- data.table::data.table(counts[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
+
+# df <- data.table::data.table(merged[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
 
 data.table::fwrite(df, snakemake@output[["counts_scaled_gc_vst"]])
 

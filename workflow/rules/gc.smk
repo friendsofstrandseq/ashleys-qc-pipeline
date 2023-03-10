@@ -3,25 +3,22 @@
 ## mergeBams/mergeBams_plate_row: merge all/fraction of bams
 ## mergeSortBams/mergeSortBams_plate_row: sort merged bam file
 ## index_merged_bam/index_merged_bam_plate_row: index merged bam file
-## alfred_plate_row/alfred_merged/alfred_sc: alfred QC to retrieve stats on bam files
-## alfred_table_plate_row/alfred_table_merged/alfred_table_sc: extract only GC rows
-## alfred_plot_plate_row/alfred_plot_merged/alfred_plot_sc: plot statistics using R script
-## VST_correction/GC_correction/counts_scaling: variance stabilizing transformation, GC correction & counts scaling based @MarcoCosenza method
+## VST_correction/multistep_normalisation/library_size_normalisation: variance stabilizing transformation, GC correction & counts scaling based @MarcoCosenza method
 ## plot_mosaic_gc_norm_counts: plots QC counts plot after correction
 
 
-if config["GC_analysis"] is True:
+if config["multistep_normalisation"] is True:
 
 
     rule library_size_normalisation:
         input:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
         output:
-            counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
+            counts_scaled="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.gz",
         log:
             "{folder}/{sample}/log/counts_scaling/{sample}.log",
         params:
-            gc_min_reads=config["GC_options"]["GC_min_reads_cell"],
+            gc_min_reads=config["multistep_normalisation_options"]["min_reads_cell"],
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -32,10 +29,10 @@ if config["GC_analysis"] is True:
 
     rule GC_correction:
         input:
-            counts_scaled="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.gz",
+            counts_scaled="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.gz",
         output:
-            counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
-            plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_lowess.png",
+            counts_scaled_gc="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.gz",
+            plot=report("{folder}/{sample}/plots/multistep_normalisation/GC_correction_lowess.png",
                 category="GC analysis",
                 subcategory="{sample}",
                 labels={
@@ -44,11 +41,11 @@ if config["GC_analysis"] is True:
                 },
             ),
         log:
-            "{folder}/{sample}/log/GC_correction/{sample}.log",
+            "{folder}/{sample}/log/multistep_normalisation/{sample}.log",
         params:
             gc_matrix="workflow/data/GC/GC_matrix_200000.txt",
-            gc_min_reads=config["GC_options"]["GC_min_reads_bin"],
-            gc_n_subsample=config["GC_options"]["GC_n_subsample"],
+            gc_min_reads=config["multistep_normalisation_options"]["min_reads_bin"],
+            gc_n_subsample=config["multistep_normalisation_options"]["n_subsample"],
         resources:
             mem_mb=get_mem_mb,
         conda:
@@ -59,10 +56,10 @@ if config["GC_analysis"] is True:
 
     rule VST_correction:
         input:
-            counts_scaled_gc="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.gz",
+            counts_scaled_gc="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.gz",
         output:
-            counts_scaled_gc_vst="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.gz",
-            plot=report("{folder}/{sample}/plots/GC_correction/GC_correction_VST_hist.png",
+            counts_scaled_gc_vst="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz",
+            plot=report("{folder}/{sample}/plots/multistep_normalisation/GC_correction_VST_hist.png",
                 category="GC analysis",
                 subcategory="{sample}",
                 labels={
@@ -83,9 +80,9 @@ if config["GC_analysis"] is True:
     rule populate_counts_GC:
         input:
             bin_bed="workflow/data/bin_200kb_all.bed",
-            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.gz",
+            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz",
         output:
-            populated_counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.populated.gz",
+            populated_counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
         log:
             "{folder}/log/plot_mosaic_counts/{sample}.log",
         conda:
@@ -97,7 +94,7 @@ if config["GC_analysis"] is True:
 
     rule plot_mosaic_gc_norm_counts:
         input:
-            counts="{folder}/{sample}/counts/GC_correction/{sample}.txt.scaled.GC.VST.populated.gz",
+            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
             info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
             "{folder}/{sample}/plots/counts/CountComplete.GC_corrected.pdf",
