@@ -75,6 +75,8 @@ rule populate_counts:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    resources:
+        mem_mb=get_mem_mb,
     script:
         "../scripts/utils/populated_counts_for_qc_plot.py"
 

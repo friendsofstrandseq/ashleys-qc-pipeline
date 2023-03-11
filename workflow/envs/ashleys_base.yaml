@@ -2,15 +2,13 @@ name: ashleys_base
 channels:
   - conda-forge
   - bioconda
-  - anaconda
-  - defaults
 dependencies:
   - samtools
   - tabix
   - bwa
   - sambamba
   - mosaicatcher
-  - alfred
+  # - alfred
   - ashleys-qc
   - pandas
   # PUBLISHDIR

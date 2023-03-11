@@ -1,4 +1,4 @@
-version: 1.4.1
+version: 2.0.0
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
@@ -8,10 +8,8 @@ data_location: ".tests/data_CHR17"
 # reference: sandbox.zenodo.org/record/1074721/files/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 # Enable / Disable download of external files (1000G SNV & Fasta ref genome)
 dl_external_files: False
-# Enable / Disable GC analysis
-GC_analysis: False
-# Enable / Disable GC row condition analysis
-GC_rowcol_condition: False
+# Enable / Disable multistep normalisation analysis
+multistep_normalisation: False
 # Ashleys-qc binary classification threshold
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
@@ -84,6 +82,7 @@ genecore: False
 samples_to_process: []
 genecore_date_folder: ""
 genecore_prefix: "/g/korbel/shared/genecore"
+genecore_regex_element: "PE20"
 
 ##### DEV only
 
@@ -92,3 +91,9 @@ use_light_data: False
 
 # If specified, will copy important data (stats, plots, counts file) to a second place
 publishdir: ""
+
+# Multi-step normalisation advanced parameters
+multistep_normalisation_options:
+  min_reads_bin: 5
+  n_subsample: 1000
+  min_reads_cell: 100000

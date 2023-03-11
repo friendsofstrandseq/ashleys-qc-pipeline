@@ -43,3 +43,6 @@ dependencies:
   - r-dplyr
   - r-platetools
   - r-viridis
+  # GC_correction
+  - r-tidyr
+  - r-ggpubr

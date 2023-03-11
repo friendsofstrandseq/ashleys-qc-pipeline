@@ -104,11 +104,11 @@ class HandleInput:
                 # print(sub_l)
                 # print(common_element)
                 # print(l_elems)
-                # print(l_elems[1].split("PE20"))
+                # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
                 prefix = l_elems[0]
                 # technician_name = l_elems[0].split("_")[-2]
-                sample = l_elems[1].split("PE20")[0]
-                index = l_elems[1].split("PE20")[1]
+                sample = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[0]
+                index = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[1]
                 # pe_index = common_element[-1]
                 sub_l = list()
 
@@ -132,23 +132,19 @@ class HandleInput:
 
         genecore_list = [
             expand(
-                "{data_location}/{sample}/fastq/{sample}PE20{cell_nb}.{pair}.fastq.gz",
+                "{data_location}/{sample}/fastq/{sample}{regex_element}{index}{cell_nb}.{pair}.fastq.gz",
                 data_location=config["data_location"],
                 sample=sample,
-                # index=d_master[sample]["index"],
-                cell_nb=list(
-                    range(
-                        (int(d_master[sample]["index"]) * 100) + 1,
-                        (int(d_master[sample]["index"]) * 100) + 97,
-                    )
-                ),
+                regex_element=config["genecore_regex_element"],
+                index=d_master[sample]["index"],
+                cell_nb=[str(e).zfill(2) for e in list(range(1,97))],
                 pair=["1", "2"],
             )
             for sample in d_master
             if sample in samples_to_process
         ]
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-
+        # pprint(genecore_list)
         complete_df_list = list()
 
         for sample in d_master:
@@ -333,29 +329,9 @@ cell_per_sample = (
 # Plottype options for QC count plot
 plottype_counts = (
     config["plottype_counts"]
-    if config["GC_analysis"] is True
+    if config["multistep_normalisation"] is True
     else config["plottype_counts"][0]
 )
-
-# Special row/column mode for GC analysis of a 96-well plate
-if config["GC_analysis"] is True and config["GC_rowcol_condition"] is True:
-
-    import string
-    import collections
-    import numpy as np
-
-    # Instanciate a dict of dict
-    d = collections.defaultdict(dict)
-    # Select orientation based on config file (landscape/portrait)
-    orientation = (8, 12) if config["plate_orientation"] == "landscape" else (12, 8)
-    for sample in samples:
-        # If sample contains 96 files
-        if len(cell_per_sample[sample]) == 96:
-            # Create dict for each row/column & save it into d
-            for j, e in enumerate(
-                np.reshape(np.array(sorted(cell_per_sample[sample])), orientation)
-            ):
-                d[sample][list(string.ascii_uppercase)[j]] = e
 
 
 def get_final_output():
@@ -385,7 +361,7 @@ def get_final_output():
             )
         )
 
-        # QC count plots (classic only or classic + corrected based on config GC_analysis option)
+        # QC count plots (classic only or classic + corrected based on config multistep_normalisation option)
 
         final_list.extend(
             expand(
@@ -395,61 +371,6 @@ def get_final_output():
                 plottype_counts=plottype_counts,
             ),
         )
-
-    if config["GC_analysis"] is True:
-
-        # ALFRED for each single cell
-
-        final_list.extend(
-            expand(
-                "{path}/{sample}/config/alfred_output_touch.txt",
-                path=config["data_location"],
-                sample=samples,
-            ),
-        )
-
-        # ALFRED for the complete plate
-        final_list.extend(
-            (
-                [
-                    sub_e
-                    for e in [
-                        expand(
-                            "{path}/{sample}/plots/alfred/MERGE/merged_bam_gc_{alfred_plot}.merge.png",
-                            path=config["data_location"],
-                            sample=sample,
-                            alfred_plot=config["alfred_plots"],
-                        )
-                        for sample in samples
-                    ]
-                    for sub_e in e
-                ]
-            )
-        )
-
-        # ALFRED for each row/column
-        if config["GC_rowcol_condition"] is True:
-
-            if d:
-                final_list.extend(
-                    (
-                        [
-                            sub_e
-                            for e in [
-                                expand(
-                                    "{path}/{sample}/plots/alfred/PLATE_ROW/{row}_gc_{alfred_plot}.row.png",
-                                    path=config["data_location"],
-                                    sample=sample,
-                                    row=list(string.ascii_uppercase)[: orientation[0]],
-                                    alfred_plot=config["alfred_plots"],
-                                )
-                                for sample in samples
-                                if len(cell_per_sample[sample]) == 96
-                            ]
-                            for sub_e in e
-                        ]
-                    )
-                )
 
     # Plate plots
 
