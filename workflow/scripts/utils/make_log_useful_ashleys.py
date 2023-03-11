@@ -44,7 +44,7 @@ def make_log_useful(log_path, status, config):
         _ = logfile.write("\n===[{}]===\n".format("Workflow information"))
         _ = logfile.write("smk-wf-catalog/ashleys-qc-pipeline v{version}\n".format(version=str(config["version"])))
         _ = logfile.write("Folder to processed : {}\n".format(str(config["data_location"])))
-        _ = logfile.write("GC analysis : {}\n".format(str(config["GC_analysis"])))
+        _ = logfile.write("Multistep normalisation module : {}\n".format(str(config["library_size_normalisation"])))
         _ = logfile.write("Binning window size : {}\n".format(str(config["window"])))
         _ = logfile.write("List of chromosomes processed : {}\n".format(str(config["chromosomes"])))
         _ = logfile.write("Reference genome selected : {}\n".format(config["reference"]))
