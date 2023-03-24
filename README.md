@@ -38,13 +38,22 @@ git clone --recurse-submodules https://github.com/friendsofstrandseq/ashleys-qc-
 3. Run on example data on only one small chromosome (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 
 ```bash
-snakemake --cores 6 --configfile .tests/config/simple_config.yaml --profile workflow/snakemake_profiles/local/conda_singularity --singularity-args "-B /<disk>:/<disk>"
+snakemake \
+    --cores 6 \
+    --configfile .tests/config/simple_config.yaml \
+    --profile workflow/snakemake_profiles/local/conda_singularity \
+    --singularity-args "-B /<disk>:/<disk>"
 ```
 
 4. Run your own analysis **locally** (`<disk>` must be replaced by your disk letter/name, `/g` or `/scratch` at EMBL for example)
 
 ```bash
-snakemake --cores 6 --config data_location=<PATH> --profile workflow/snakemake_profiles/local/conda_singularity --singularity-args "-B /<disk>:/<disk>" --latency-wait 60
+snakemake \
+    --cores 6 \
+    --config \
+        data_location=<PATH> \
+    --profile workflow/snakemake_profiles/local/conda_singularity \
+    --singularity-args "-B /<disk>:/<disk>"
 ```
 
 ---
@@ -98,6 +107,14 @@ Parent_folder
 
 Thus, in a `Parent_Folder`, create a subdirectory `Parent_Folder/sampleName/` for each `sample`. Each Strand-seq FASTQ files of this sample need to go into the `fastq` folder and respect the following syntax: `<CELL>.<1|2>.fastq.gz`, `1|2` corresponding to the pair identifier.
 
+---
+
+**⚠️ Warnings**
+
+- We advice to limit to the number of 2 the "_" characters in your file names (Ashleys-qc ML tool will react weidly with more than 3 "_")
+
+---
+
 ## Execution
 
 The `--profile` argument will define whether you want to execute the workflow locally on your laptop/desktop (`workflow/snakemake_profiles/local/conda_singularity/`), or if you want to run it on HPC. A generic slurm profile is available (`workflow/snakemake_profiles/HPC/slurm_generic/`).
@@ -106,7 +123,9 @@ Local execution (not HPC or cloud):
 
 ```bash
 snakemake \
-    --cores <N> --config data_location=<DATA_FOLDER> \
+    --cores <N> \
+    --config \
+        data_location=<DATA_FOLDER> \
     --profile workflow/snakemake_profiles/local/conda_singularity/ \
     --singularity-args "-B /<disk>:/<disk>"
 ```
@@ -115,7 +134,8 @@ HPC execution (require first that you modify the workflow/snakemake_profiles/HPC
 
 ```bash
 snakemake \
-    --config data_location=<DATA_FOLDER> \
+    --config \
+        data_location=<DATA_FOLDER> \
     --profile workflow/snakemake_profiles/HPC/slurm_generic/ \
     --singularity-args "-B /<disk>:/<disk>"
 ```
@@ -124,7 +144,8 @@ EMBL HPC execution (disks binding points already set in the snakemake profile)
 
 ```bash
 snakemake \
-    --config data_location=<DATA_FOLDER> \
+    --config \
+        data_location=<DATA_FOLDER> \
     --profile workflow/snakemake_profiles/HPC/slurm_EMBL/
 ```
 
@@ -150,9 +171,9 @@ If you already use a previous version of mosaicatcher-pipeline, here is a short 
 
 `git fetch --all`
 
-- Jump to a new version (here 1.3.5) & pull code:
+- Jump to a new version (for example 2.1.0) & pull code:
 
-`git checkout 1.3.5 && git pull`
+`git checkout 2.1.0 && git pull`
 
 Then, to initiate or update git snakemake_profiles submodule:
 
@@ -179,28 +200,28 @@ All these arguments can be specified in two ways:
 
 The list of parameters is available through the command: `snakemake -c1 --config list_commands=True`
 
-| Parameter                 | Comment                                                                                                                                                                    | Default            | Experimental | Other choices |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ------------- |
-| `data_location`           | Path to parent folder containing samples                                                                                                                                   | .tests/data_CHR17/ |              |               |
-| `publishdir`              | If specified, will copy important data (stats, plots, counts file) to a second place                                                                                       | ""                 |              |               |
-| `email`                   | Email address for completion summary                                                                                                                                       | None               |              |               |
-| `reference`               | Reference genome                                                                                                                                                           | hg38               |              | hg19, T2T     |
-| `hand_selection`          | Allow to identify manually high-quality strand-seq libraries.                                                                                                              | False              | X            |               |
-| `multistep_normalisation` | Enable/Disabl multistep normsaliation including GC correction of Strand-Seq libraries libraries.                                                                                               | False              |              |               |
-| `GC_rowcol_analysis`      | Enable / Disable GC row condition analysis                                                                                                                                 | False              |              |               |
-| `FastQC_analysis`         | Enable / Disable FastQC analysis                                                                                                                                           | False              |              |               |
-| `plate_orientation`       | If multistep_normalisation enabled and conditions tested by rows/columns, set the orientation (landscape/portrait) to perform a row/column-wise analysis of the libraries. | landscape          |              |               |
-| `ashleys_threshold`       | Ashleys-qc threshold for binary classification of low/good quality cells                                                                                                   | 0.5                |              |               |
-| `window`                  | Window size used for binning by mosaic count (Can be of high importance regarding library coverage)                                                                        | 200000             |              |               |
-| `chromosomes`             | List of chromosomes to be processed in the pipeline                                                                                                                        | chr1..22,chrX      |              |               |
+| Parameter                 | Comment                                                                                             | Default            | Experimental | Other choices |
+| ------------------------- | --------------------------------------------------------------------------------------------------- | ------------------ | ------------ | ------------- |
+| `data_location`           | Path to parent folder containing samples                                                            | .tests/data_CHR17/ |              |               |
+| `publishdir`              | If specified, will copy important data (stats, plots, counts file) to a second place                | ""                 |              |               |
+| `email`                   | Email address for completion summary                                                                | None               |              |               |
+| `reference`               | Reference genome                                                                                    | hg38               |              | hg19, T2T     |
+| `hand_selection`          | Allow to identify manually high-quality strand-seq libraries.                                       | False              | X            |               |
+| `multistep_normalisation` | Enable/Disabl multistep normsaliation including GC correction of Strand-Seq libraries libraries.    | False              |              |               |
+| `FastQC_analysis`         | Enable / Disable FastQC analysis                                                                    | False              |              |               |
+| `ashleys_threshold`       | Ashleys-qc threshold for binary classification of low/good quality cells                            | 0.5                |              |               |
+| `window`                  | Window size used for binning by mosaic count (Can be of high importance regarding library coverage) | 200000             |              |               |
+| `chromosomes`             | List of chromosomes to be processed in the pipeline                                                 | chr1..22,chrX      |              |               |
 
 ### EMBL parameters
 
-| Parameter              | Comment                                                                                                                             | Parameter type | Default |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- |
-| `genecore`             | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                        | Boolean        | False   |
-| `genecore_date_folder` | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                     | String         | ""      |
-| `samples_to_process`   | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []      |
+| Parameter                | Comment                                                                                                                             | Parameter type | Default                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------- | --- |
+| `genecore`               | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                        | Boolean        | False                                         |
+| `genecore_date_folder`   | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                     | String         | ""                                            |
+| `genecore_prefix`        | Genecore prefix name to retrieve the date folder specified                                                                          | String         | "/g/korbel/STOCKS/Data/Assay/sequencing/2023" |
+| `genecore_regex_element` | Regex element used to distinguish cell name from cell number (Ex: "iTRUE                                                            | PE20")         | String                                        | ""  |
+| `samples_to_process`     | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []                                            |
 
 ## Snakemake arguments
 
@@ -345,6 +366,7 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 - [x] Multiple FASTA reference ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
 - [x] (EMBL) GeneCore mode of execution: allow selection and execution directly by specifying genecore run folder (2022-11-02-H372MAFX5 for instance) ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
 - [x] Automatic bypass of the positive control in ashleys labels (through z-score distribution analysis) ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
+- [x] Multistep normalisation to replace GC analysis module (library size normalisation, GC correction, Variance Stabilising Transformation) ([2.0.0](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.0.0))
 
 ### Minor features
 
