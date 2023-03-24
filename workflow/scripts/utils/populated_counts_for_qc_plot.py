@@ -25,7 +25,7 @@ binbed["w"], binbed["c"], binbed["class"] = 0, 0, None
 # Read SV file
 # df = pd.read_csv("../../../../mosaicatcher-update/.tests/data_CHR17/RPE-BM510/counts/RPE-BM510.txt.raw.gz", sep="\t")
 
-sep = "," if "GC" in snakemake.input.counts else "\t"
+sep = "," if "/multistep_normalisation/" in snakemake.input.counts else "\t"
 df = pd.read_csv(snakemake.input.counts, sep=sep)
 df["ID"] = df["chrom"] + "_" + df["start"].astype(str) + "_" + df["end"].astype(str)
 df["w"] = df["w"].round(0).astype(int)
