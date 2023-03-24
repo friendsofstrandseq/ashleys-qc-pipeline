@@ -20,6 +20,8 @@ labels_corrected = pd.merge(info_df[["cell", "good"]], labels_corrected, on="cel
 # Compute z-score on reads nb
 labels_corrected["z_score"] = scipy.stats.zscore(labels_corrected["good"])
 
+print(labels_corrected )
+
 # Output, Correct outliers predictions & proba
 z_score_cutoff = 5
 labels_corrected.loc[labels_corrected["z_score"] >= z_score_cutoff, "cell"].to_csv(snakemake.output.bypass_cell, index=False, sep="\t")
