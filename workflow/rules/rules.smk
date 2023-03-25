@@ -172,45 +172,43 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
-if config["use_light_data"] == True:
+# if config["use_light_data"] == True:
 
-    rule samtools_idxstats:
-        input:
-            bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-            bai="{folder}/{sample}/bam/{cell}.sort.mdup.bai",
-        output:
-            "{folder}/{sample}/bam_stats/{cell}.txt",
-        log:
-            "{folder}/{sample}/log/samtools_idxstats/{cell}.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/ashleys_base.yaml"
-        shell:
-            "samtools idxstats {input.bam} > {output} 2>&1 > {log}"
+#     rule samtools_idxstats:
+#         input:
+#             bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+#             bai="{folder}/{sample}/bam/{cell}.sort.mdup.bai",
+#         output:
+#             "{folder}/{sample}/bam_stats/{cell}.txt",
+#         log:
+#             "{folder}/{sample}/log/samtools_idxstats/{cell}.log",
+#         resources:
+#             mem_mb=get_mem_mb,
+#         conda:
+#             "../envs/ashleys_base.yaml"
+#         shell:
+#             "samtools idxstats {input.bam} > {output} 2>&1 > {log}"
 
         
-    rule samtools_idxstats_aggr:
-        input:
-            bam=lambda wc: expand(
-                "{folder}/{sample}/samtools_idxstats/{cell}.txt",
-                folder=config["data_location"],
-                sample=wc.sample,
-                cell=cell_per_sample[str(wc.sample)],
-            ),
-        output:
-            "{folder}/{sample}/bam_stats/{sample}.txt",
-        log:
-            "{folder}/{sample}/log/samtools_idxstats_aggr/{cell}.log",
-        resources:
-            mem_mb=get_mem_mb,
-        conda:
-            "../envs/ashleys_base.yaml"
-        script:
-            ""
+#     rule samtools_idxstats_aggr:
+#         input:
+#             bam=lambda wc: expand(
+#                 "{folder}/{sample}/samtools_idxstats/{cell}.txt",
+#                 folder=config["data_location"],
+#                 sample=wc.sample,
+#                 cell=cell_per_sample[str(wc.sample)],
+#             ),
+#         output:
+#             "{folder}/{sample}/bam_stats/{sample}.txt",
+#         log:
+#             "{folder}/{sample}/log/samtools_idxstats_aggr/{cell}.log",
+#         resources:
+#             mem_mb=get_mem_mb,
+#         conda:
+#             "../envs/ashleys_base.yaml"
+#         script:
+#             ""
 
-
-    
 
 
 
