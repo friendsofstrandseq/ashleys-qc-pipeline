@@ -83,6 +83,18 @@ if config["multistep_normalisation"] is True:
             mem_mb=get_mem_mb,
         script:
             "../scripts/utils/populated_counts_for_qc_plot.py"
+            
+    rule reformat_ms_norm:
+        input:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz"
+        output:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
+        conda:
+            "../envs/mc_base.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        script:
+            "../scripts/utils/reformat_ms_norm.py"
 
     rule plot_mosaic_gc_norm_counts:
         input:
