@@ -327,7 +327,7 @@ else:
 
 if config["use_light_data"] is False:
 
-    rule positive_control_bypass:
+    rule positive_negative_control_bypass:
         input:
             labels="{folder}/{sample}/cell_selection/labels_notebook.tsv",
             info="{folder}/{sample}/counts/{sample}.info_raw",
@@ -339,7 +339,7 @@ if config["use_light_data"] is False:
         conda:
             "../envs/ashleys_base.yaml"
         script:
-            "../scripts/utils/positive_control_bypass.py"
+            "../scripts/utils/positive_negative_control_bypass.py"
 
     checkpoint tune_predictions_based_on_threshold:
         input:
