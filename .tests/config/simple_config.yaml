@@ -1,4 +1,4 @@
-version: 2.0.0
+version: 2.1.0
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
