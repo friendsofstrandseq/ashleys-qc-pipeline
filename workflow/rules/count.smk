@@ -25,7 +25,7 @@ rule generate_exclude_file_for_mosaic_count:
         "../scripts/utils/generate_exclude_file.py"
 
 
-rule mosaic_count:
+checkpoint mosaic_count:
     input:
         bam=lambda wc: expand(
             "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -63,6 +63,8 @@ rule mosaic_count:
             {input.bam} \
         > {log} 2>&1
         """
+
+
 
 
 rule populate_counts:
