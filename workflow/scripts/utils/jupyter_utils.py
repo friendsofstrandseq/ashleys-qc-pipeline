@@ -2,6 +2,7 @@
 from ipysheet import sheet, column, to_dataframe
 import ipywidgets as w
 import pandas as pd
+import numpy as np
 
 
 def get_ipysheet(cell_per_sample, sample, mosaic_info, ashleys_labels):
