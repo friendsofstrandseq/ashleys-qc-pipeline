@@ -18,7 +18,11 @@
 # open files
 counts <- data.table::fread(snakemake@input[["counts"]], header = T)
 save_path <- snakemake@output[["counts_scaled"]]
-min_reads <- snakemake@params[["gc_min_reads"]]
+# min_reads <- snakemake@params[["gc_min_reads"]]
+
+info_raw <- data.table::fread(snakemake@input[["info_raw"]], skip = 13, header = T, sep = "\t")
+
+min_reads <- min(info_raw[info_raw$pass1 == 1, ]$good) - 1
 
 #################
 # Preprocessing #
