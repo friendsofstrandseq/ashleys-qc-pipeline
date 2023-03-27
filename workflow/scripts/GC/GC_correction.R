@@ -2,11 +2,13 @@
 # args <- commandArgs(trailingOnly = T)
 
 library(data.table)
+library(dplyr)
 # args[1] <- '/data/r-workspace/strandseq_utils/H3JNHAFX3_MNIphotoconverted_200000_fixed.norm.txt.gz'
 # args[2] <- '/data/r-workspace/strandseq_utils/GC_matrix_200000.txt'
 print(snakemake@params[["gc_matrix"]])
 # open files
 counts <- data.table::fread(snakemake@input[["counts_scaled"]], header = T)
+
 # counts <- data.table::fread(args[1], header = T)
 GC_matrix <- data.table::fread(snakemake@params[["gc_matrix"]], header = T)
 print(GC_matrix)
@@ -24,6 +26,9 @@ if (plot) {
 }
 
 
+# counts <- dplyr::inner_join(counts, GC_matrix, by = c("chrom", "start", "end"))
+
+
 # check files
 if (!all(c("cell", "chrom", "start", "end", "w", "c") %in% colnames(counts))) {
   message("count file does not contain required columns: 'cell', 'chrom', 'start', 'end', 'w', 'c'")
@@ -38,7 +43,7 @@ if (!all(c("chrom", "start", "end", "GC%") %in% colnames(GC_matrix))) {
 if (!(all(unique(counts$chrom) %in% unique(GC_matrix$chrom)) &
   all(unique(counts$start) %in% unique(GC_matrix$start)) &
   all(unique(counts$end) %in% unique(GC_matrix$end)))) {
-  message("bin features ('crhom', 'start', 'end') do not match between count file and GC matrix")
+  message("bin features ('chrom', 'start', 'end') do not match between count file and GC matrix")
   message("make sure to choose files with identical bin sizes")
 }
 
@@ -54,6 +59,7 @@ message("preprocessing...\n")
 # Preprocessing #
 #################
 min_reads <- snakemake@params[["gc_min_reads"]]
+# min_reads <- min(info_raw[info_raw$pass1 == 1, ]$good) - 1
 n_subsample <- snakemake@params[["gc_n_subsample"]]
 # min_reads <- ifelse(is.na(args[5]), 5, args[5])
 # n_subsample <- ifelse(is.na(args[6]), 1000, args[6])

@@ -1,18 +1,10 @@
-## Rules to perform GC analysis & correction on Strand-Seq libraries
-## ---------------------------------------------------------------
-## mergeBams/mergeBams_plate_row: merge all/fraction of bams
-## mergeSortBams/mergeSortBams_plate_row: sort merged bam file
-## index_merged_bam/index_merged_bam_plate_row: index merged bam file
-## VST_correction/multistep_normalisation/library_size_normalisation: variance stabilizing transformation, GC correction & counts scaling based @MarcoCosenza method
-## plot_mosaic_gc_norm_counts: plots QC counts plot after correction
-
-
 if config["multistep_normalisation"] is True:
 
 
     rule library_size_normalisation:
         input:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+            info_raw = "{folder}/{sample}/counts/{sample}.info_raw"
         output:
             counts_scaled="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.gz",
         log:
@@ -43,7 +35,7 @@ if config["multistep_normalisation"] is True:
         log:
             "{folder}/{sample}/log/multistep_normalisation/{sample}.log",
         params:
-            gc_matrix="workflow/data/GC/GC_matrix_200000.txt",
+            gc_matrix=ancient("workflow/data/GC/GC_matrix_200000.txt"),
             gc_min_reads=config["multistep_normalisation_options"]["min_reads_bin"],
             gc_n_subsample=config["multistep_normalisation_options"]["n_subsample"],
         resources:
@@ -91,6 +83,18 @@ if config["multistep_normalisation"] is True:
             mem_mb=get_mem_mb,
         script:
             "../scripts/utils/populated_counts_for_qc_plot.py"
+            
+    rule reformat_ms_norm:
+        input:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz"
+        output:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
+        conda:
+            "../envs/mc_base.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        script:
+            "../scripts/utils/reformat_ms_norm.py"
 
     rule plot_mosaic_gc_norm_counts:
         input:

@@ -172,6 +172,29 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
+# if config["use_light_data"] == True:
+
+#     rule samtools_idxstats_aggr:
+#         input:
+#             bam=lambda wc: expand(
+#                 "{folder}/{sample}/samtools_idxstats/{cell}.txt",
+#                 folder=config["data_location"],
+#                 sample=wc.sample,
+#                 cell=cell_per_sample[str(wc.sample)],
+#             ),
+#         output:
+#             "{folder}/{sample}/bam_stats/{sample}.txt",
+#         log:
+#             "{folder}/{sample}/log/samtools_idxstats_aggr/{cell}.log",
+#         resources:
+#             mem_mb=get_mem_mb,
+#         conda:
+#             "../envs/ashleys_base.yaml"
+#         script:
+#             ""
+
+
+
 
 if config["mosaicatcher_pipeline"] is False:
 
@@ -190,21 +213,36 @@ if config["mosaicatcher_pipeline"] is False:
 
 # if config["hand_selection"] is False:
 
+rule symlink_bam_ashleys:
+    input:
+        bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+        bai="{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
+    output:
+        bam="{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
+        bai="{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
+    log:
+        "{folder}/log/symlink_selected_bam/{sample}/{cell}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    script:
+        "../scripts/utils/symlink_selected_bam.py"
+
 
 rule generate_features:
     input:
-        bam=lambda wc: expand(
-            "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[str(wc.sample)],
-        ),
-        bai=lambda wc: expand(
-            "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[str(wc.sample)],
-        ),
+        bam = selected_input_bam,
+        # bam=lambda wc: expand(
+        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
+        #     folder=config["data_location"],
+        #     sample=wc.sample,
+        #     cell=cell_per_sample[str(wc.sample)],
+        # ),
+        # bai=lambda wc: expand(
+        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
+        #     folder=config["data_location"],
+        #     sample=wc.sample,
+        #     cell=cell_per_sample[str(wc.sample)],
+        # ),
         plot=expand(
             "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
             plottype=plottype_counts,
@@ -219,7 +257,7 @@ rule generate_features:
     params:
         windows="5000000 2000000 1000000 800000 600000 400000 200000",
         extension=".sort.mdup.bam",
-        folder=lambda wildcards, input: "{}bam".format(input.bam[0].split("bam")[0]),
+        folder=lambda wildcards, input: "{}bam_ashleys".format(input.bam[0].split("bam_ashleys")[0]),
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
@@ -289,7 +327,7 @@ else:
 
 if config["use_light_data"] is False:
 
-    rule positive_control_bypass:
+    rule positive_negative_control_bypass:
         input:
             labels="{folder}/{sample}/cell_selection/labels_notebook.tsv",
             info="{folder}/{sample}/counts/{sample}.info_raw",
@@ -301,7 +339,7 @@ if config["use_light_data"] is False:
         conda:
             "../envs/ashleys_base.yaml"
         script:
-            "../scripts/utils/positive_control_bypass.py"
+            "../scripts/utils/positive_negative_control_bypass.py"
 
     checkpoint tune_predictions_based_on_threshold:
         input:

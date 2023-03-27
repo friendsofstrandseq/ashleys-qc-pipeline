@@ -1,6 +1,7 @@
 import os, sys
 import pandas as pd
 import scipy
+
 pd.options.display.max_rows = 100
 
 
@@ -22,9 +23,9 @@ info_df["cell"] = info_df["cell"] + ".sort.mdup.bam"
 # labels_path = "/scratch/tweber/DATA/MC_DATA/PAPER/LCL/cell_selection/labels_notebook.tsv"
 labels_path = snakemake.input.labels
 labels = pd.read_csv(labels_path, sep="\t").sort_values(by="cell")
-sample = "RPE1-WT"
-labels["sample"] = sample
-# labels["sample"] = snakemake.wildcards.sample
+# sample = "RPE1-WT"
+# labels["sample"] = sample
+labels["sample"] = snakemake.wildcards.sample
 print(labels)
 # Retrieve correct prediction
 labels_corrected = labels.loc[labels["prediction"] == 1]
