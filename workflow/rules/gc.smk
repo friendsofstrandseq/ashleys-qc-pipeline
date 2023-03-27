@@ -90,7 +90,7 @@ if config["multistep_normalisation"] is True:
         output:
             "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
         conda:
-            "../envs/mc_base.yaml"
+            "../envs/ashleys_base.yaml"
         resources:
             mem_mb=get_mem_mb,
         script:
