@@ -23,6 +23,26 @@ def aggregate_correct_cells_bam(wildcards):
         )
 
 
+def selected_input_bam(wildcards):
+    df = pd.read_csv(
+        checkpoints.mosaic_count.get(
+            sample=wildcards.sample, folder=config["data_location"]
+        ).output.info,
+        skiprows=13,
+        sep="\t",
+    )
+    df = df.loc[df["mapped"] > 0]
+    cell_list = df.cell.tolist()
+    # # print(cell_list)
+
+    return expand(
+        "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
+        folder=config["data_location"],
+        sample=wildcards.sample,
+        cell=cell_list,
+    )
+
+
 def aggregate_correct_cells_plot(wildcards):
     if config["use_light_data"] is False:
         df = pd.read_csv(
