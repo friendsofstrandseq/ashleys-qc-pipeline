@@ -174,22 +174,6 @@ rule mark_duplicates:
 
 # if config["use_light_data"] == True:
 
-#     rule samtools_idxstats:
-#         input:
-#             bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-#             bai="{folder}/{sample}/bam/{cell}.sort.mdup.bai",
-#         output:
-#             "{folder}/{sample}/bam_stats/{cell}.txt",
-#         log:
-#             "{folder}/{sample}/log/samtools_idxstats/{cell}.log",
-#         resources:
-#             mem_mb=get_mem_mb,
-#         conda:
-#             "../envs/ashleys_base.yaml"
-#         shell:
-#             "samtools idxstats {input.bam} > {output} 2>&1 > {log}"
-
-        
 #     rule samtools_idxstats_aggr:
 #         input:
 #             bam=lambda wc: expand(
@@ -229,21 +213,36 @@ if config["mosaicatcher_pipeline"] is False:
 
 # if config["hand_selection"] is False:
 
+rule symlink_bam_ashleys:
+    input:
+        bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
+        bai="{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
+    output:
+        bam="{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
+        bai="{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
+    log:
+        "{folder}/log/symlink_selected_bam/{sample}/{cell}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    script:
+        "../scripts/utils/symlink_selected_bam.py"
+
 
 rule generate_features:
     input:
-        bam=lambda wc: expand(
-            "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[str(wc.sample)],
-        ),
-        bai=lambda wc: expand(
-            "{folder}/{sample}/bam/{cell}.sort.mdup.bam.bai",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[str(wc.sample)],
-        ),
+        bam = selected_input_bam,
+        # bam=lambda wc: expand(
+        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
+        #     folder=config["data_location"],
+        #     sample=wc.sample,
+        #     cell=cell_per_sample[str(wc.sample)],
+        # ),
+        # bai=lambda wc: expand(
+        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
+        #     folder=config["data_location"],
+        #     sample=wc.sample,
+        #     cell=cell_per_sample[str(wc.sample)],
+        # ),
         plot=expand(
             "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
             plottype=plottype_counts,
@@ -258,7 +257,7 @@ rule generate_features:
     params:
         windows="5000000 2000000 1000000 800000 600000 400000 200000",
         extension=".sort.mdup.bam",
-        folder=lambda wildcards, input: "{}bam".format(input.bam[0].split("bam")[0]),
+        folder=lambda wildcards, input: "{}bam_ashleys".format(input.bam[0].split("bam_ashleys")[0]),
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
