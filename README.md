@@ -1,7 +1,7 @@
 ![logo](docs/images/logo.png)
 
 [![Workflow checks](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml/badge.svg)](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/actions/workflows/main.yaml)
-[![Snakemake](https://img.shields.io/badge/snakemake-≥7.14.0-brightgreen.svg)](https://snakemake.github.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥7.12.0-brightgreen.svg)](https://snakemake.github.io)
 
 ---
 
