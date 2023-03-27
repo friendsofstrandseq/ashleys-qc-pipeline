@@ -19,9 +19,13 @@ def get_ipysheet(cell_per_sample, sample, mosaic_info, ashleys_labels):
 
     # Retrieve low-coverage information from mosaic count "info" file
     mosaic_info_df = pd.read_csv(mosaic_info, sep="\t", skiprows=13)
+    print(mosaic_info_df)
+
     mosaic_info_df["%dupl"] = 100 * (mosaic_info_df["dupl"] / mosaic_info_df["mapped"])
     mosaic_info_df["%dupl"] = mosaic_info_df["%dupl"].round(0)
     mosaic_info_df["good"] = mosaic_info_df["good"].astype(str)
+    print(mosaic_info_df)
+
     mosaic_info_df["%dupl"] = mosaic_info_df["%dupl"].astype(int).astype(str)
     mosaic_info_df["pass1"] = mosaic_info_df["pass1"].astype(bool)
     mosaic_info_cells = mosaic_info_df["pass1"].values.tolist()
