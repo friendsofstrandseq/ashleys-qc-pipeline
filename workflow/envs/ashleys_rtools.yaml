@@ -46,3 +46,5 @@ dependencies:
   # GC_correction
   - r-tidyr
   - r-ggpubr
+  # SOLVE R lib issue
+  - r-stringi=1.7.12
