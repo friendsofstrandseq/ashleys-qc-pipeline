@@ -39,8 +39,8 @@ hand_selection: False
 window: 200000
 
 plottype_counts:
-  - "classic"
-  - "GC_corrected"
+  - "raw"
+  - "normalised"
 
 alfred_plots:
   - "dist"
