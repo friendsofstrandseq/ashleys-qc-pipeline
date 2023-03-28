@@ -21,7 +21,7 @@ reference:
     - hg38
     - T2T
 hand_selection:
-  desc: "Enable / Disable low-quality libraries hand selection through Jupyter Notebook"
+  desc: "Enable / Disable low-quality libraries hand selection through Jup NB"
   type: bool
   required: False
   default: False
@@ -38,7 +38,7 @@ FastQC_analysis:
   options:
     - True
     - False
-multistep_normalisation_analysis:
+multistep_normalisation:
   desc: "Enable / Disable multistep normalisation"
   type: bool
   required: False
@@ -53,12 +53,6 @@ ashleys_threshold:
   required: False
   default: 0.5
   lint_check: False
-plate_orientation:
-  desc: "Plate orientation for GC analysis (landscape/portrait)"
-  type: string
-  required: False
-  lint_check: False
-  default: landscape
 window:
   desc: "Mosaic bin window size"
   type: int
@@ -79,7 +73,7 @@ chromosomes_to_exclude:
   required: True
   default: "[]"
 genecore:
-  desc: Enable / Disable genecore option to work on GeneCore folder. Required genecore_date_folder
+  desc: Enable / Disable genecore option. Required genecore_date_folder
   type: bool
   required: False
   default: False
@@ -94,13 +88,13 @@ genecore_date_folder:
   default: '""'
   lint_check: False
 samples_to_process:
-  desc: Optional list of samples to be specifically processed in genecore_date_folder
+  desc: List of samples to be specifically processed in genecore_date_folder
   type: list
   required: True
   default: "[]"
   lint_check: False
 publishdir:
-  desc: If specified, will copy important data (stats, plots, counts file) to a second place
+  desc: If specified, will copy important data to a second place
   type: str
   required: False
   default: ""
