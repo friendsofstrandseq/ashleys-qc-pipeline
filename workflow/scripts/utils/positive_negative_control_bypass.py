@@ -26,7 +26,7 @@ if info_df_neg_control.shape[0] > 0:
 print(labels)
 
 # Retrieve correct prediction
-labels_corrected = labels.loc[labels["prediction"] == 1]
+labels_corrected = labels.loc[labels["prediction"] == 1].sort_values(by="cell")
 
 # Merge counts & labels
 labels_corrected = pd.merge(info_df[["cell", "good"]], labels_corrected, on="cell")
@@ -51,4 +51,4 @@ labels.loc[labels["cell"].isin(labels_corrected.cell.values.tolist()), "predicti
 labels.loc[labels["cell"].isin(labels_corrected.cell.values.tolist()), "probability"] = labels_corrected.new_probability.values.tolist()
 
 # Output
-labels.to_csv(snakemake.output.labels_corrected, index=False, sep="\t")
+labels.sort_values(by="cell").to_csv(snakemake.output.labels_corrected, index=False, sep="\t")
