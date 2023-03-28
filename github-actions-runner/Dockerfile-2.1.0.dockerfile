@@ -1,6 +1,6 @@
 FROM condaforge/mambaforge:latest
 LABEL io.github.snakemake.containerized="true"
-LABEL io.github.snakemake.conda_env_hash="8218e447f828781a9e09b1817a5661f56dc5414816667a509782efe59e5dbb69"
+LABEL io.github.snakemake.conda_env_hash="a40b39fa80f6b26b3e112e901c49d956656e92ac4db1795eec1694ac01b449ca"
 
 # Step 1: Retrieve conda environments
 
@@ -51,7 +51,7 @@ COPY workflow/envs/ashleys_base.yaml /conda-envs/6c6d3e92c1c97170f4d531b908ca85c
 
 # Conda environment:
 #   source: workflow/envs/ashleys_rtools.yaml
-#   prefix: /conda-envs/413cc1031d64cf89e8b32aaa9a29fdbf
+#   prefix: /conda-envs/9b847fc31baae8e01dfb7ce438a56b71
 #   name: rtools
 #   channels:
 #     - conda-forge
@@ -100,13 +100,15 @@ COPY workflow/envs/ashleys_base.yaml /conda-envs/6c6d3e92c1c97170f4d531b908ca85c
 #     # GC_correction
 #     - r-tidyr
 #     - r-ggpubr
-RUN mkdir -p /conda-envs/413cc1031d64cf89e8b32aaa9a29fdbf
-COPY workflow/envs/ashleys_rtools.yaml /conda-envs/413cc1031d64cf89e8b32aaa9a29fdbf/environment.yaml
+#     # SOLVE R lib issue
+#     - r-stringi=1.7.12
+RUN mkdir -p /conda-envs/9b847fc31baae8e01dfb7ce438a56b71
+COPY workflow/envs/ashleys_rtools.yaml /conda-envs/9b847fc31baae8e01dfb7ce438a56b71/environment.yaml
 
 # Step 2: Generate conda environments
 
 RUN mamba env create --prefix /conda-envs/5681728a49bd83ceed09ba194330c858 --file /conda-envs/5681728a49bd83ceed09ba194330c858/environment.yaml && \
     mamba env create --prefix /conda-envs/08d4368302a4bdf7eda6b536495efe7d --file /conda-envs/08d4368302a4bdf7eda6b536495efe7d/environment.yaml && \
     mamba env create --prefix /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf --file /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf/environment.yaml && \
-    mamba env create --prefix /conda-envs/413cc1031d64cf89e8b32aaa9a29fdbf --file /conda-envs/413cc1031d64cf89e8b32aaa9a29fdbf/environment.yaml && \
+    mamba env create --prefix /conda-envs/9b847fc31baae8e01dfb7ce438a56b71 --file /conda-envs/9b847fc31baae8e01dfb7ce438a56b71/environment.yaml && \
     mamba clean --all -y
