@@ -88,7 +88,7 @@ rule plot_mosaic_counts:
         counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
         info="{folder}/{sample}/counts/{sample}.info_raw",
     output:
-        "{folder}/{sample}/plots/counts/CountComplete.classic.pdf",
+        "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:
