@@ -16,11 +16,14 @@
 # args[1] <- '/data/projects/strandseq_segmentation/dataset/counts/H3JNHAFX3_MNIphotoconverted_200000_fixed.txt.gz'
 
 # open files
+# counts <- data.table::fread(args[1])
 counts <- data.table::fread(snakemake@input[["counts"]], header = T)
 save_path <- snakemake@output[["counts_scaled"]]
+# save_path <- args[3]
 # min_reads <- snakemake@params[["gc_min_reads"]]
 
 info_raw <- data.table::fread(snakemake@input[["info_raw"]], skip = 13, header = T, sep = "\t")
+# info_raw <- data.table::fread(args[2])
 
 min_reads <- min(info_raw[info_raw$pass1 == 1, ]$good) - 1
 
