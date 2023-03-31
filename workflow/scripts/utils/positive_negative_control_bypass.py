@@ -20,7 +20,7 @@ if info_df_neg_control.shape[0] > 0:
     info_df_neg_control["prediction"] = 0
     info_df_neg_control["probability"] = 0
     info_df_neg_control["sample"] = snakemake.wildcards.sample
-    labels_neg_control = info_df_neg_control[["cell", "prediction", "probability"]]
+    labels_neg_control = info_df_neg_control[["cell", "prediction", "probability", "sample"]]
     print(labels_neg_control)
     labels = pd.concat([labels, labels_neg_control]).sort_values(by="cell")
 print(labels)
