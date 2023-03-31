@@ -3,7 +3,7 @@ input_path <- snakemake@input[["counts_scaled_gc"]]
 save_path <- snakemake@output[["counts_scaled_gc_vst"]]
 chosen_transform <- "anscombe"
 plot <- TRUE
-
+rescale <- TRUE
 
 # PRE-PROCESSING DATA
 # open count file
@@ -54,20 +54,13 @@ laubscher_transform <- function(x, phi) {
 }
 transform_data <- function(counts, transform, phi) {
   cols <- colnames(counts)
-  counts$w_corr <- transform(counts$w, phi)
-  counts$c_corr <- transform(counts$c, phi)
-  counts$w_corr <- counts$w_corr - min(counts$w_corr) # shift values to start from zero
-  counts$c_corr <- counts$c_corr - min(counts$c_corr)
-  counts$tot_count_corr <- counts$w_corr + counts$c_corr
-  # rescale around original mean
-  k <- mean(counts$tot_count) / mean(counts$tot_count_corr)
-  scaled <- counts$tot_count_corr * k
-  counts$w <- (counts$w_corr / counts$tot_count_corr) * scaled
-  counts$c <- (counts$c_corr / counts$tot_count_corr) * scaled
-  counts$w[is.na(counts$w)] <- 0
-  counts$c[is.na(counts$c)] <- 0
-  counts$tot_count <- scaled
+  counts$tot_count_corr <- transform(counts$tot_count, phi)
+  counts$f <- counts$tot_count_corr / counts$tot_count
+  counts$w <- counts$w * counts$f
+  counts$c <- counts$c * counts$f
+  counts$tot_count <- counts$tot_count_corr
   counts <- counts[, ..cols]
+  
   return(counts)
 }
 transform_list <- list("anscombe" = anscombe_transform, "laubscher" = laubscher_transform)
@@ -96,6 +89,19 @@ message(paste("Estimated dispersion - phi: ", phi))
 corr_counts <- transform_data(counts, transform, phi)
 corr_counts <- data.table::data.table(corr_counts[, c("chrom", "start", "end", "sample", "cell", "w", "c", "class", "tot_count")])
 
+rescale_data <- function(counts_original, counts_transformed) {
+  rescaled <- counts_transformed
+  f <- counts_original$tot_count/rescaled$tot_count
+  rescaled$tot_count <- rescaled$tot_count * f
+  rescaled$w <- rescaled$w * f
+  rescaled$c <- rescaled$c * f
+  return(rescaled)  
+}
+
+if (rescale == TRUE) {
+  corr_counts <- rescale_data(counts_raw, corr_counts)
+} 
+
 message("saving...")
 data.table::fwrite(corr_counts, save_path)
 
@@ -103,6 +109,43 @@ if (plot) {
   library(ggplot2)
   library(ggpubr)
 
+  merge_bins <- function(df, bin_size=3e6) {
+    
+    df <- df[with(df, order(cell,chrom, start))]
+    
+    df$bin_group <- df$start %/% bin_size
+    
+    
+    w <- aggregate(df$w, by=list(df$cell, df$chrom, df$bin_group), FUN = sum)
+    c <- aggregate(df$c, by=list(df$cell, df$chrom, df$bin_group), FUN = sum)
+    s <- aggregate(df$start, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[1]])
+    e <- aggregate(df$end, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[length(x)]])
+    cl <- aggregate(df$class, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) names(sort(table(x), decreasing = TRUE))[[1]])
+    
+    m <- merge(w, c,by=c('Group.1', 'Group.2', 'Group.3'))
+    m <- merge(m, s,by=c('Group.1', 'Group.2', 'Group.3'))
+    m <- merge(m, e,by=c('Group.1', 'Group.2', 'Group.3'))
+    m <- merge(m, cl,by=c('Group.1', 'Group.2', 'Group.3'))
+    colnames(m) <- c('cell', 'chrom', 'bin_group', 'w', 'c', 'start', 'end', 'class')
+    m$sample <- unique(df$sample)[[1]]
+    m <- data.table::as.data.table(m)
+    m <- m[with(m, order(cell,chrom, start))]
+    
+    m$tot_count <- m$w + m$c
+    return(m)
+  }
+  
+  wf_plot <- function(m) {
+    m$wf <- m$w / m$tot_count
+    
+    p1 <- ggplot(m, aes(x = tot_count, y = wf)) +
+      geom_point(size=1, alpha=.1, shape=16) +
+      xlab("tot count") +
+      ylab("watson fraction") +
+      ylim(0,1)
+    return(p1)
+  }
+  
   p1 <- ggplot(counts_raw, aes(x = tot_count)) +
     geom_histogram(bins = 256) +
     ggtitle("raw") +
@@ -114,8 +157,15 @@ if (plot) {
     ggtitle(paste(chosen_transform, "VST")) +
     xlab("read count") +
     ylab("bin count")
+  
+  m <- merge_bins(counts_raw)
+  p3 <- wf_plot(m) + ggtitle('raw')
+  
+  n <- merge_bins(corr_counts)
+  p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
 
-  corr_plot <- ggarrange(p1, p2)
+
+  corr_plot <- ggarrange(p1,p2,p3,p4)
 
   ggsave(snakemake@output[["plot"]], corr_plot, width = 12, height = 6)
 }
