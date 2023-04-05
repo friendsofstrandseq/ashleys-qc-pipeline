@@ -14,7 +14,7 @@ if config["genecore"] is True and config["genecore_date_folder"]:
     if config["mosaicatcher_pipeline"] is False:
 
         localrules:
-            genecore_symlink,
+            genecore_symlink, 
 
     rule genecore_symlink:
         input:
@@ -35,6 +35,8 @@ if config["genecore"] is True and config["genecore_date_folder"]:
 
     ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
 
+localrules:
+    symlink_bam_ashleys
 
 rule fastqc:
     input:
