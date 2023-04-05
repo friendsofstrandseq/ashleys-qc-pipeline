@@ -69,22 +69,6 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
         script:
             "../scripts/GC/variance_stabilizing_transformation.R"
 
-        
-    rule populate_counts_GC:
-        input:
-            bin_bed="workflow/data/bin_200kb_all.bed",
-            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz",
-        output:
-            populated_counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
-        log:
-            "{folder}/log/plot_mosaic_counts/{sample}.log",
-        conda:
-            "../envs/ashleys_base.yaml"
-        resources:
-            mem_mb=get_mem_mb,
-        script:
-            "../scripts/utils/populated_counts_for_qc_plot.py"
-            
     rule reformat_ms_norm:
         input:
             "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz"
@@ -96,6 +80,23 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             mem_mb=get_mem_mb,
         script:
             "../scripts/utils/reformat_ms_norm.py"
+       
+    rule populate_counts_GC:
+        input:
+            bin_bed="workflow/data/bin_200kb_all.bed",
+            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
+        output:
+            populated_counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
+        log:
+            "{folder}/log/plot_mosaic_counts/{sample}.log",
+        conda:
+            "../envs/ashleys_base.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        script:
+            "../scripts/utils/populated_counts_for_qc_plot.py"
+            
+
 
     rule plot_mosaic_gc_norm_counts:
         input:
