@@ -69,7 +69,7 @@ checkpoint mosaic_count:
 
 rule populate_counts:
     input:
-        bin_bed=ancient("workflow/data/bin_200kb_all.bed"),
+        bin_bed=ancient(select_binbed),
         counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
     output:
         populated_counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
@@ -91,11 +91,13 @@ rule plot_mosaic_counts:
         "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
+    params:
+        mouse_assembly=True if config["reference"] == "mm10" else False
     conda:
         "../envs/ashleys_rtools.yaml"
     resources:
         mem_mb=get_mem_mb,
     shell:
         """
-        LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+        LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output}  > {log} 2>&1
         """
