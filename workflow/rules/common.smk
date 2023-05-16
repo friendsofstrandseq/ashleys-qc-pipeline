@@ -6,6 +6,31 @@ import subprocess
 
 if config["mosaicatcher_pipeline"] == False:
 
+    exclude = [
+        "._.DS_Store",
+        ".DS_Store",
+        "all",
+        "ashleys_counts",
+        "bam",
+        "cell_selection",
+        "config",
+        "counts",
+        "fastq",
+        "fastqc",
+        "haplotag",
+        "log",
+        "merged_bam",
+        "mosaiclassifier",
+        "normalizations",
+        "ploidy",
+        "plots",
+        "predictions",
+        "segmentation",
+        "snv_calls",
+        "stats",
+        "strandphaser",
+    ]
+
     if config["chromosomes_to_exclude"]:
         chroms_init = config["chromosomes"]
         chroms = [e for e in chroms_init if e not in config["chromosomes_to_exclude"]]
@@ -25,6 +50,15 @@ if config["mosaicatcher_pipeline"] == False:
             shell=True,
             stdout=subprocess.PIPE,
         )
+
+
+
+    
+    # for sample in [e for e in os.listdir(config["data_location"]) if e not in exclude]:
+    #     print(sample)
+    #     if len(sample.split("_")) == 4:
+    #         assert len(sample.split("_")) != 4, "Your sample name is using 4 times the '_' character, which is currently not supported by ashleys-qc"
+
 
     def onsuccess_fct(log):
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
@@ -238,6 +272,7 @@ class HandleInput:
                 if f.endswith(ext)
             ]
 
+            # print(l_files_all)
             # Dataframe creation
             df = pd.DataFrame([{"File": f} for f in l_files_all])
             df["File"] = df["File"].str.replace(ext, "", regex=True)
@@ -342,10 +377,10 @@ def get_final_output():
 
     # FASTQC outputs
 
-    if config["FastQC_analysis"] is True:
+    if config["MultiQC"] is True:
         final_list.extend(
             expand(
-                "{path}/{sample}/config/fastqc_output_touch.txt",
+                "{path}/{sample}/multiqc/multiqc_report.html",
                 path=config["data_location"],
                 sample=samples,
             ),
