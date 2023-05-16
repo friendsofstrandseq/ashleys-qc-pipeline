@@ -15,15 +15,18 @@ add_overview_plot <- T
 
 
 args <- commandArgs(trailingOnly = T)
+print(args)
 if (length(args) < 2 || length(args) > 4 || !grepl("\\.pdf$", args[length(args)]) || any(!file.exists(args[1:(length(args) - 1)]))) {
     warning("Usage: Rscript R/qc.R input-file [SCE-file] [cell-info-file] output-pdf")
     quit(status = 1)
 }
 f_in <- args[1]
-pdf_out <- args[length(args)]
+info <- args[2]
+pdf_out <- args[3]
+
+
 
 # Detect info or SCE file.
-info <- NULL
 sces <- NULL
 is_sce_file <- function(x) {
     all(c("sample", "cell", "chrom", "start", "end", "state") %in% colnames(x))
@@ -41,7 +44,7 @@ if (length(args) > 2) {
         info <- x
     }
     if (length(args) > 3) {
-        x <- fread(args[3])
+        assembly <- fread(args[3])
         if (is_sce_file(x)) {
             message("* Using SCE file ", args[3])
             sces <- x
@@ -51,10 +54,14 @@ if (length(args) > 2) {
         }
     }
 }
-if (!is.null(sces)) {
-    sces[, chrom := sub("^chr", "", chrom)]
-    sces[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
-}
+
+
+
+
+# if (!is.null(sces)) {
+#     sces[, chrom := sub("^chr", "", chrom)]
+#     sces[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+# }
 
 
 
@@ -71,6 +78,17 @@ if (substr(f_in, nchar(f_in) - 2, nchar(f_in)) == ".gz") {
 
 # Read counts & filter chromosomes (this is human-specific)
 d <- fread(f_in)
+print(d)
+mouse_bool <- any(d$chrom == "chr22")
+if (mouse_bool == FALSE) {
+    chrom_levels <- as.character(c(1:19, "X", "Y"))
+} else {
+    chrom_levels <- as.character(c(1:22, "X", "Y"))
+}
+print(chrom_levels)
+
+print(info)
+# stop()
 
 # Check that correct files are given:
 invisible(assert_that(
@@ -87,9 +105,11 @@ invisible(assert_that(
 # Re-name and -order chromosomes - this is human-specific
 d <- d[, chrom := sub("^chr", "", chrom)][]
 d <- d[grepl("^([1-9]|[12][0-9]|X|Y)$", chrom), ]
-d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+# d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+d <- d[, chrom := factor(chrom, levels = chrom_levels, ordered = T)]
 # d[, c(6, 7)] <- sapply(d[, c(6, 7)], as.double)
 
+print(d)
 
 message("* Writing plot ", pdf_out)
 
@@ -183,7 +203,7 @@ if (add_overview_plot == T) {
 # Plot all cells
 for (s in unique(d$sample))
 {
-    # for (ce in unique(d[sample == s, ]$cell)[1])
+    # for (ce in unique(d[sample == s, ]$cell)[3])
     for (ce in unique(d[sample == s, ]$cell))
     {
         message(paste("* Plotting sample", s, "cell", ce))
@@ -208,7 +228,8 @@ for (s in unique(d$sample))
         # e_lite <- filter(e, chrom %in% e_sum)
         # print(e_lite, n = 40)
 
-        e_lite <- filter(e, bin_id == "")
+        e_lite <- e
+        # e_lite <- filter(e, bin_id == "")
         print(e_lite)
 
 
