@@ -8,6 +8,8 @@ binbed = pd.read_csv(
     sep="\t",
     names=["chrom", "start", "end", "bin_id"],
 )
+binbed["bin_id"] = ["bin_200kb_{i}".format(i=i) for i in range(1, binbed.shape[0] + 1)]
+print(binbed)
 binbed["ID"] = binbed["chrom"] + "_" + binbed["start"].astype(str) + "_" + binbed["end"].astype(str)
 
 # Turn chrom into categorical
@@ -20,7 +22,6 @@ binbed["chrom"] = pd.Categorical(
 # Sort & filter out chrY #TMP / can be changed
 binbed = binbed.sort_values(by=["chrom", "start", "end"]).reset_index(drop=True)
 binbed["w"], binbed["c"], binbed["class"] = 0, 0, None
-
 
 # Read SV file
 # df = pd.read_csv("../../../../mosaicatcher-update/.tests/data_CHR17/RPE-BM510/counts/RPE-BM510.txt.raw.gz", sep="\t")
@@ -39,7 +40,6 @@ l = list()
 
 # Loop over cells
 for cell in df.cell.unique().tolist():
-
     # Outer join to retrieve both real count values from specified chromosome and empty bins
     tmp_df = pd.concat(
         [
