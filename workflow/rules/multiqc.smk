@@ -122,7 +122,11 @@ rule multiqc:
         samtools_flagstats="{folder}/{sample}/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok",
     output:
         report="{folder}/{sample}/multiqc/multiqc_report.html",
-        outdir=directory("{folder}/{sample}/multiqc")
+        outdir=report(
+            directory("{folder}/{sample}/multiqc"),
+            htmlindex="multiqc_report.html",
+            category="MultiQC", subcategory="{sample}",
+        ),
     params: 
         dirs = lambda wc, input: ["/".join(e.split("/")[:-2]) for e in list(input)]
     conda:
