@@ -92,10 +92,16 @@ corr_counts <- data.table::data.table(corr_counts[, c("chrom", "start", "end", "
 
 rescale_data <- function(counts_original, counts_transformed) {
   rescaled <- counts_transformed
-  f <- counts_original$tot_count / rescaled$tot_count
-  rescaled$tot_count <- rescaled$tot_count * f
-  rescaled$w <- rescaled$w * f
-  rescaled$c <- rescaled$c * f
+  rescaled_med <- aggregate(rescaled$tot_count, list(rescaled$cell), FUN = median)
+  original_med <- aggregate(counts_original$tot_count, list(counts_original$cell), FUN = median)
+  m <- merge(x = original_med, y = rescaled_med, by = "Group.1", suffixes = c("_raw", "_norm"))
+  m[["f"]] <- m[["x_raw"]] / m[["x_norm"]]
+
+  rescaled <- merge(rescaled, m[c("Group.1", "f")], by.x = "cell", by.y = "Group.1")
+
+  rescaled$tot_count <- rescaled$tot_count * rescaled$f
+  rescaled$w <- rescaled$w * rescaled$f
+  rescaled$c <- rescaled$c * rescaled$f
   return(rescaled)
 }
 

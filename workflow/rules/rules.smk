@@ -38,41 +38,6 @@ if config["genecore"] is True and config["genecore_date_folder"]:
 localrules:
     symlink_bam_ashleys
 
-rule fastqc:
-    input:
-        "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
-    output:
-        html=report(
-            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-            category="FastQC",
-            subcategory="{sample}",
-            labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
-        ),
-        zip="{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
-    params:
-        "--quiet",
-    log:
-        "{folder}/log/fastqc/{sample}/{cell}_{pair}.log",
-    threads: 1
-    resources:
-        mem_mb=get_mem_mb,
-    wrapper:
-        "v1.7.0/bio/fastqc"
-
-
-rule fastqc_aggregate:
-    input:
-        lambda wc: expand(
-            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[wc.sample],
-            pair=[1, 2],
-        ),
-    output:
-        touch("{folder}/{sample}/config/fastqc_output_touch.txt"),
-
-
 rule bwa_index:
     input:
         ancient(config["references_data"][config["reference"]]["reference_fasta"]),
