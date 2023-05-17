@@ -35,9 +35,11 @@ if config["mosaicatcher_pipeline"] == False:
         chroms_init = config["chromosomes"]
         chroms = [e for e in chroms_init if e not in config["chromosomes_to_exclude"]]
         config["chromosomes"] = chroms
-    
+
     if config["reference"] == "mm10":
-        config["chromosomes"] = ["chr"+ str(e) for e in list(range(1,20)) + ["X", "Y"]]
+        config["chromosomes"] = [
+            "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
+        ]
 
     from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
 
@@ -48,19 +50,16 @@ if config["mosaicatcher_pipeline"] == False:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
         subprocess.Popen(
             "rsync --ignore-existing -avzh config/config.yaml {folder_path}/config".format(
-                folder_path=config["data_location"]
-            ),
-            shell=True,
-            stdout=subprocess.PIPE,
-        )
+                    folder_path=config["data_location"]
+                ),
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
 
-
-
-    
-    # for sample in [e for e in os.listdir(config["data_location"]) if e not in exclude]:
-    #     print(sample)
-    #     if len(sample.split("_")) == 4:
-    #         assert len(sample.split("_")) != 4, "Your sample name is using 4 times the '_' character, which is currently not supported by ashleys-qc"
+            # for sample in [e for e in os.listdir(config["data_location"]) if e not in exclude]:
+            #     print(sample)
+            #     if len(sample.split("_")) == 4:
+            #         assert len(sample.split("_")) != 4, "Your sample name is using 4 times the '_' character, which is currently not supported by ashleys-qc"
 
 
     def onsuccess_fct(log):
@@ -144,8 +143,16 @@ class HandleInput:
                 # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
                 prefix = l_elems[0]
                 # technician_name = l_elems[0].split("_")[-2]
-                sample = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[0]
-                index = l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))[1]
+                sample = l_elems[1].split(
+                    "{regex_element}".format(
+                        regex_element=config["genecore_regex_element"]
+                    )
+                )[0]
+                index = l_elems[1].split(
+                    "{regex_element}".format(
+                        regex_element=config["genecore_regex_element"]
+                    )
+                )[1]
                 # pe_index = common_element[-1]
                 sub_l = list()
 
@@ -174,7 +181,7 @@ class HandleInput:
                 sample=sample,
                 regex_element=config["genecore_regex_element"],
                 index=d_master[sample]["index"],
-                cell_nb=[str(e).zfill(2) for e in list(range(1,97))],
+                cell_nb=[str(e).zfill(2) for e in list(range(1, 97))],
                 pair=["1", "2"],
             )
             for sample in d_master
