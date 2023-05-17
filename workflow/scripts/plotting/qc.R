@@ -120,6 +120,7 @@ if (add_overview_plot == T) {
     n_cells <- nrow(unique(d[, .(sample, cell)]))
     n_bins <- nrow(unique(d[, .(chrom, start, end)]))
     mean_bin <- unique(d[, .(chrom, start, end)])[, mean(end - start)]
+    print(d)
     n_excl <- nrow(d[, .N, by = .(chrom, start, end, class)][class == "None" & N == n_cells, ])
 
     # Bin sizes
@@ -153,24 +154,36 @@ if (add_overview_plot == T) {
 
     # Overview mean / variance
     d_mv <- d[class != "None", .(mean = mean(w + c), var = var(w + c)), by = .(sample, cell)]
-    d_p <- d_mv[, .(p = sum(mean * mean) / sum(mean * var)), by = sample]
-    ov_meanvar <- ggplot(d_mv) +
-        geom_point(aes(mean, var), alpha = 0.4) +
-        facet_wrap(~sample, nrow = 1) +
-        theme_minimal() +
-        geom_abline(data = d_p, aes(slope = 1 / p, intercept = 0), col = "dodgerblue") +
-        geom_label(data = d_p, aes(x = 0, y = Inf, label = paste("p =", round(p, 3))), hjust = 0, vjust = 1) +
-        ggtitle("Mean variance relationship of reads per bin") +
-        xlab("Mean") +
-        ylab("Variance")
+    print(d_mv)
 
-
-    # Arranging overview plot
-    content <- ggdraw() +
-        draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
-        draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
-        draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33) +
-        draw_plot(ov_meanvar, x = 0, y = 0, width = min(n_samples / 3, 1), height = .33)
+    if(nrow(d_mv) > 0) {
+        d_p <- d_mv[, .(p = sum(mean * mean) / sum(mean * var)), by = sample]
+        
+        ov_meanvar <- ggplot(d_mv) +
+            geom_point(aes(mean, var), alpha = 0.4) +
+            facet_wrap(~sample, nrow = 1) +
+            theme_minimal() +
+            geom_abline(data = d_p, aes(slope = 1 / p, intercept = 0), col = "dodgerblue") +
+            geom_label(data = d_p, aes(x = 0, y = Inf, label = paste("p =", round(p, 3))), hjust = 0, vjust = 1) +
+            ggtitle("Mean variance relationship of reads per bin") +
+            xlab("Mean") +
+            ylab("Variance")
+        
+        # Arranging overview plot
+        content <- ggdraw() +
+            draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
+            draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
+            draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33) +
+            draw_plot(ov_meanvar, x = 0, y = 0, width = min(n_samples / 3, 1), height = .33)
+    } else {
+        print("d_mv is empty. Skipping the overview mean/variance plot...")
+        
+        # Arranging overview plot without ov_meanvar
+        content <- ggdraw() +
+            draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
+            draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
+            draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33)
+    }
 
 
     # Add duplicate rates if available
