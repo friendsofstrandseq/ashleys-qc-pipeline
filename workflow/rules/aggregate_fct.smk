@@ -69,6 +69,7 @@ def aggregate_correct_cells_plot(wildcards):
             alfred_plot=config["alfred_plots"],
         )
 
+
 def select_binbed(wildcards):
     if config["reference"] != "mm10":
         return "workflow/data/bin_200kb_all.bed"

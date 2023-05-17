@@ -14,7 +14,7 @@ if config["genecore"] is True and config["genecore_date_folder"]:
     if config["mosaicatcher_pipeline"] is False:
 
         localrules:
-            genecore_symlink, 
+            genecore_symlink,
 
     rule genecore_symlink:
         input:
@@ -35,8 +35,10 @@ if config["genecore"] is True and config["genecore_date_folder"]:
 
     ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
 
+
 localrules:
-    symlink_bam_ashleys
+    symlink_bam_ashleys,
+
 
 rule bwa_index:
     input:
@@ -139,6 +141,7 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
+
 # if config["use_light_data"] == True:
 
 #     rule samtools_idxstats_aggr:
@@ -161,8 +164,6 @@ rule mark_duplicates:
 #             ""
 
 
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     rule samtools_index:
@@ -179,6 +180,7 @@ if config["mosaicatcher_pipeline"] is False:
 
 
 # if config["hand_selection"] is False:
+
 
 rule symlink_bam_ashleys:
     input:
@@ -197,7 +199,7 @@ rule symlink_bam_ashleys:
 
 rule generate_features:
     input:
-        bam = selected_input_bam,
+        bam=selected_input_bam,
         # bam=lambda wc: expand(
         #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
         #     folder=config["data_location"],
@@ -224,7 +226,9 @@ rule generate_features:
     params:
         windows="5000000 2000000 1000000 800000 600000 400000 200000",
         extension=".sort.mdup.bam",
-        folder=lambda wildcards, input: "{}bam_ashleys".format(input.bam[0].split("bam_ashleys")[0]),
+        folder=lambda wildcards, input: "{}bam_ashleys".format(
+            input.bam[0].split("bam_ashleys")[0]
+        ),
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",

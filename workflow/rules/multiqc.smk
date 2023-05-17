@@ -58,8 +58,9 @@ rule samtools_idxstats_aggr:
             cell=cell_per_sample[wc.sample],
         ),
     output:
-        touch("{folder}/{sample}/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok"),
-
+        touch(
+            "{folder}/{sample}/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok"
+        ),
 
 
 rule samtools_flagstats:
@@ -86,7 +87,10 @@ rule samtools_flagstats_aggr:
             cell=cell_per_sample[wc.sample],
         ),
     output:
-        touch("{folder}/{sample}/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok"),
+        touch(
+            "{folder}/{sample}/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok"
+        ),
+
 
 rule samtools_stats:
     input:
@@ -112,7 +116,10 @@ rule samtools_stats_aggr:
             cell=cell_per_sample[wc.sample],
         ),
     output:
-        touch("{folder}/{sample}/multiqc/samtools_stats/config/samtools_stats_aggr_touch.ok"),
+        touch(
+            "{folder}/{sample}/multiqc/samtools_stats/config/samtools_stats_aggr_touch.ok"
+        ),
+
 
 rule multiqc:
     input:
@@ -120,13 +127,14 @@ rule multiqc:
         samtools_idxstats="{folder}/{sample}/multiqc/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok",
         samtools_stats="{folder}/{sample}/multiqc/samtools_stats/config/samtools_stats_aggr_touch.ok",
         samtools_flagstats="{folder}/{sample}/multiqc/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok",
-        multiqc_input = "{folder}/{sample}/multiqc/"
+        multiqc_input="{folder}/{sample}/multiqc/",
     output:
         report="{folder}/{sample}/multiqc/multiqc_report.html",
         outdir=report(
             directory("{folder}/{sample}/multiqc"),
             htmlindex="multiqc_report.html",
-            category="MultiQC", subcategory="{sample}",
+            category="MultiQC",
+            subcategory="{sample}",
         ),
     log:
         "{folder}/{sample}/log/multiqc/{sample}.log",
