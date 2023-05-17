@@ -152,6 +152,7 @@ sandbox.zenodo.org/
 # !.tests/external_data/1000G_chr21.vcf.gz
 
 .tests/data_CHR21/
+.tests/data_CHR17_NEGATIVE_CONTROL_MM10/
 .tests/data_CHR17_*/
 .tests/data_CHR17/RPE-BM510/all/
 .tests/data_CHR17_NEW/
