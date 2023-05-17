@@ -8,7 +8,7 @@ binbed = pd.read_csv(
     sep="\t",
     names=["chrom", "start", "end", "bin_id"],
 )
-binbed["bin_id"] = ["bin_200kb_{i}".format(i=i) for i in range(1, binbed.shape[0] + 1)]
+# binbed["bin_id"] = ["bin_200kb_{i}".format(i=i) for i in range(1, binbed.shape[0] + 1)]
 print(binbed)
 binbed["ID"] = binbed["chrom"] + "_" + binbed["start"].astype(str) + "_" + binbed["end"].astype(str)
 
