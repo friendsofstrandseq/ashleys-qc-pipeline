@@ -139,6 +139,6 @@ rule multiqc:
     log:
         "{folder}/{sample}/log/multiqc/{sample}.log",
     conda:
-        "multiqc_megaqc"
+        "../envs/ashleys_base.yaml"
     shell:
         "multiqc {input.multiqc_input} --outdir {output.outdir}"
