@@ -31,7 +31,7 @@ rule fastqc_aggregate:
             pair=[1, 2],
         ),
     output:
-        touch("{folder}/{sample}/fastqc/config/fastqc_output_touch.ok"),
+        touch("{folder}/{sample}/multiqc/fastqc/config/fastqc_output_touch.ok"),
 
 
 rule samtools_idxstats:
