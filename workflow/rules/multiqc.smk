@@ -59,7 +59,7 @@ rule samtools_idxstats_aggr:
         ),
     output:
         touch(
-            "{folder}/{sample}/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok"
+            "{folder}/{sample}/multiqc/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok"
         ),
 
 
@@ -88,7 +88,7 @@ rule samtools_flagstats_aggr:
         ),
     output:
         touch(
-            "{folder}/{sample}/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok"
+            "{folder}/{sample}/multiqc/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok"
         ),
 
 
