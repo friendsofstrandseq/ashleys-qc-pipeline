@@ -390,7 +390,7 @@ def get_final_output():
     if config["MultiQC"] is True:
         final_list.extend(
             expand(
-                "{path}/{sample}/multiqc/multiqc_report.html",
+                "{path}/{sample}/multiqc/multiqc_report/multiqc_report.html",
                 path=config["data_location"],
                 sample=samples,
             ),
