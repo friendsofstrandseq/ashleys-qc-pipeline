@@ -163,6 +163,7 @@ sandbox.zenodo.org/
 .tests/data_CHR17/RPE1-WT/
 .tests/data_CHR17/RPE-BM510/._.DS_Store
 .tests/data_CHR17/RPE-BM510/ashleys_counts/
+.tests/data_CHR17/RPE-BM510/*
 .tests/data_CHR17/RPE-BM510/plots/
 .tests/data_CHR17/RPE-BM510/fastqc/
 .tests/data_CHR17/RPE-BM510/predictions/
