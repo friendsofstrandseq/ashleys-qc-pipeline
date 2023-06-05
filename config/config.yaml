@@ -14,7 +14,8 @@ multistep_normalisation: False
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
 MultiQC: False
-
+# Others
+abs_path: "/"
 ############################################################################
 #                          ADVANCED PARAMETERS
 ############################################################################

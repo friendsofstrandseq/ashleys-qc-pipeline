@@ -139,7 +139,7 @@ rule multiqc:
     log:
         "{folder}/{sample}/log/multiqc/{sample}.log",
     params:
-        multiqc_input = lambda wc, input: "/".join(input.fastqc.split("/")[:-3])
+        multiqc_input = lambda wc, input: "{abs_path}".format(abs_path=config["abs_path"]).join(input.fastqc.split("/")[:-3])
     conda:
         "../envs/ashleys_base.yaml"
     shell:
