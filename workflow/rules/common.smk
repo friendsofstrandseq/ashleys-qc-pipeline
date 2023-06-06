@@ -385,7 +385,7 @@ def get_final_output():
     """
     final_list = list()
 
-    # FASTQC outputs
+    # MultiQC outputs
 
     if config["MultiQC"] is True:
         final_list.extend(
