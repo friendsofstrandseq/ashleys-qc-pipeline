@@ -1,4 +1,4 @@
-version: 2.1.0
+version: 2.1.1
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
@@ -34,6 +34,7 @@ references_data:
 mosaicatcher_pipeline: False
 ## Enable/Disable hand selection through Jupyter Notebook
 hand_selection: False
+
 
 # Window size used by mosaic binning algorithm
 window: 200000
@@ -94,3 +95,5 @@ multistep_normalisation_options:
   min_reads_bin: 5
   n_subsample: 1000
   min_reads_cell: 1000
+# Others
+abs_path: "/"

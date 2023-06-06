@@ -14,7 +14,7 @@ if config["genecore"] is True and config["genecore_date_folder"]:
     if config["mosaicatcher_pipeline"] is False:
 
         localrules:
-            genecore_symlink, 
+            genecore_symlink,
 
     rule genecore_symlink:
         input:
@@ -35,42 +35,9 @@ if config["genecore"] is True and config["genecore_date_folder"]:
 
     ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
 
+
 localrules:
-    symlink_bam_ashleys
-
-rule fastqc:
-    input:
-        "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
-    output:
-        html=report(
-            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-            category="FastQC",
-            subcategory="{sample}",
-            labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
-        ),
-        zip="{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
-    params:
-        "--quiet",
-    log:
-        "{folder}/log/fastqc/{sample}/{cell}_{pair}.log",
-    threads: 1
-    resources:
-        mem_mb=get_mem_mb,
-    wrapper:
-        "v1.7.0/bio/fastqc"
-
-
-rule fastqc_aggregate:
-    input:
-        lambda wc: expand(
-            "{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.html",
-            folder=config["data_location"],
-            sample=wc.sample,
-            cell=cell_per_sample[wc.sample],
-            pair=[1, 2],
-        ),
-    output:
-        touch("{folder}/{sample}/config/fastqc_output_touch.txt"),
+    symlink_bam_ashleys,
 
 
 rule bwa_index:
@@ -174,6 +141,7 @@ rule mark_duplicates:
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
+
 # if config["use_light_data"] == True:
 
 #     rule samtools_idxstats_aggr:
@@ -196,8 +164,6 @@ rule mark_duplicates:
 #             ""
 
 
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     rule samtools_index:
@@ -214,6 +180,7 @@ if config["mosaicatcher_pipeline"] is False:
 
 
 # if config["hand_selection"] is False:
+
 
 rule symlink_bam_ashleys:
     input:
@@ -232,7 +199,7 @@ rule symlink_bam_ashleys:
 
 rule generate_features:
     input:
-        bam = selected_input_bam,
+        bam=selected_input_bam,
         # bam=lambda wc: expand(
         #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
         #     folder=config["data_location"],
@@ -259,7 +226,9 @@ rule generate_features:
     params:
         windows="5000000 2000000 1000000 800000 600000 400000 200000",
         extension=".sort.mdup.bam",
-        folder=lambda wildcards, input: "{}bam_ashleys".format(input.bam[0].split("bam_ashleys")[0]),
+        folder=lambda wildcards, input: "{}bam_ashleys".format(
+            input.bam[0].split("bam_ashleys")[0]
+        ),
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",

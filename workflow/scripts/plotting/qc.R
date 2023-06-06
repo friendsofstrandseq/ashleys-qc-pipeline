@@ -15,15 +15,18 @@ add_overview_plot <- T
 
 
 args <- commandArgs(trailingOnly = T)
+print(args)
 if (length(args) < 2 || length(args) > 4 || !grepl("\\.pdf$", args[length(args)]) || any(!file.exists(args[1:(length(args) - 1)]))) {
     warning("Usage: Rscript R/qc.R input-file [SCE-file] [cell-info-file] output-pdf")
     quit(status = 1)
 }
 f_in <- args[1]
-pdf_out <- args[length(args)]
+info <- args[2]
+pdf_out <- args[3]
+
+
 
 # Detect info or SCE file.
-info <- NULL
 sces <- NULL
 is_sce_file <- function(x) {
     all(c("sample", "cell", "chrom", "start", "end", "state") %in% colnames(x))
@@ -41,7 +44,7 @@ if (length(args) > 2) {
         info <- x
     }
     if (length(args) > 3) {
-        x <- fread(args[3])
+        assembly <- fread(args[3])
         if (is_sce_file(x)) {
             message("* Using SCE file ", args[3])
             sces <- x
@@ -51,10 +54,14 @@ if (length(args) > 2) {
         }
     }
 }
-if (!is.null(sces)) {
-    sces[, chrom := sub("^chr", "", chrom)]
-    sces[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
-}
+
+
+
+
+# if (!is.null(sces)) {
+#     sces[, chrom := sub("^chr", "", chrom)]
+#     sces[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+# }
 
 
 
@@ -71,6 +78,17 @@ if (substr(f_in, nchar(f_in) - 2, nchar(f_in)) == ".gz") {
 
 # Read counts & filter chromosomes (this is human-specific)
 d <- fread(f_in)
+print(d)
+mouse_bool <- any(d$chrom == "chr22")
+if (mouse_bool == FALSE) {
+    chrom_levels <- as.character(c(1:19, "X", "Y"))
+} else {
+    chrom_levels <- as.character(c(1:22, "X", "Y"))
+}
+print(chrom_levels)
+
+print(info)
+# stop()
 
 # Check that correct files are given:
 invisible(assert_that(
@@ -87,9 +105,11 @@ invisible(assert_that(
 # Re-name and -order chromosomes - this is human-specific
 d <- d[, chrom := sub("^chr", "", chrom)][]
 d <- d[grepl("^([1-9]|[12][0-9]|X|Y)$", chrom), ]
-d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+# d <- d[, chrom := factor(chrom, levels = as.character(c(1:22, "X", "Y")), ordered = T)]
+d <- d[, chrom := factor(chrom, levels = chrom_levels, ordered = T)]
 # d[, c(6, 7)] <- sapply(d[, c(6, 7)], as.double)
 
+print(d)
 
 message("* Writing plot ", pdf_out)
 
@@ -100,6 +120,7 @@ if (add_overview_plot == T) {
     n_cells <- nrow(unique(d[, .(sample, cell)]))
     n_bins <- nrow(unique(d[, .(chrom, start, end)]))
     mean_bin <- unique(d[, .(chrom, start, end)])[, mean(end - start)]
+    print(d)
     n_excl <- nrow(d[, .N, by = .(chrom, start, end, class)][class == "None" & N == n_cells, ])
 
     # Bin sizes
@@ -133,24 +154,36 @@ if (add_overview_plot == T) {
 
     # Overview mean / variance
     d_mv <- d[class != "None", .(mean = mean(w + c), var = var(w + c)), by = .(sample, cell)]
-    d_p <- d_mv[, .(p = sum(mean * mean) / sum(mean * var)), by = sample]
-    ov_meanvar <- ggplot(d_mv) +
-        geom_point(aes(mean, var), alpha = 0.4) +
-        facet_wrap(~sample, nrow = 1) +
-        theme_minimal() +
-        geom_abline(data = d_p, aes(slope = 1 / p, intercept = 0), col = "dodgerblue") +
-        geom_label(data = d_p, aes(x = 0, y = Inf, label = paste("p =", round(p, 3))), hjust = 0, vjust = 1) +
-        ggtitle("Mean variance relationship of reads per bin") +
-        xlab("Mean") +
-        ylab("Variance")
+    print(d_mv)
 
-
-    # Arranging overview plot
-    content <- ggdraw() +
-        draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
-        draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
-        draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33) +
-        draw_plot(ov_meanvar, x = 0, y = 0, width = min(n_samples / 3, 1), height = .33)
+    if(nrow(d_mv) > 0) {
+        d_p <- d_mv[, .(p = sum(mean * mean) / sum(mean * var)), by = sample]
+        
+        ov_meanvar <- ggplot(d_mv) +
+            geom_point(aes(mean, var), alpha = 0.4) +
+            facet_wrap(~sample, nrow = 1) +
+            theme_minimal() +
+            geom_abline(data = d_p, aes(slope = 1 / p, intercept = 0), col = "dodgerblue") +
+            geom_label(data = d_p, aes(x = 0, y = Inf, label = paste("p =", round(p, 3))), hjust = 0, vjust = 1) +
+            ggtitle("Mean variance relationship of reads per bin") +
+            xlab("Mean") +
+            ylab("Variance")
+        
+        # Arranging overview plot
+        content <- ggdraw() +
+            draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
+            draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
+            draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33) +
+            draw_plot(ov_meanvar, x = 0, y = 0, width = min(n_samples / 3, 1), height = .33)
+    } else {
+        print("d_mv is empty. Skipping the overview mean/variance plot...")
+        
+        # Arranging overview plot without ov_meanvar
+        content <- ggdraw() +
+            draw_plot(ov_binsizes, x = 0, y = .66, width = .5, height = .33) +
+            draw_plot(ov_excbins, x = .5, y = .66, width = .5, height = .33) +
+            draw_plot(ov_coverage, x = 0, y = .33, width = .5, height = .33)
+    }
 
 
     # Add duplicate rates if available
@@ -183,7 +216,7 @@ if (add_overview_plot == T) {
 # Plot all cells
 for (s in unique(d$sample))
 {
-    # for (ce in unique(d[sample == s, ]$cell)[1])
+    # for (ce in unique(d[sample == s, ]$cell)[3])
     for (ce in unique(d[sample == s, ]$cell))
     {
         message(paste("* Plotting sample", s, "cell", ce))
@@ -208,6 +241,7 @@ for (s in unique(d$sample))
         # e_lite <- filter(e, chrom %in% e_sum)
         # print(e_lite, n = 40)
 
+        # e_lite <- e
         e_lite <- filter(e, bin_id == "")
         print(e_lite)
 

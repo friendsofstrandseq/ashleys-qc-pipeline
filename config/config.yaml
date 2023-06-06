@@ -13,8 +13,9 @@ multistep_normalisation: False
 # Ashleys-qc binary classification threshold
 ashleys_threshold: 0.5
 # Enable / Disable FastQC analysis
-FastQC_analysis: False
-
+MultiQC: False
+# Others
+abs_path: "/"
 ############################################################################
 #                          ADVANCED PARAMETERS
 ############################################################################
@@ -28,6 +29,8 @@ references_data:
     reference_fasta: "workflow/data/ref_genomes/hg19.fa"
   "T2T":
     reference_fasta: "workflow/data/ref_genomes/T2T.fa"
+  "mm10":
+    reference_fasta: "workflow/data/ref_genomes/mm10.fa"
 
 # Boolean parameters
 ## Is the pipeline called used as a submodule in mosaicatcher-pipeline?
