@@ -20,7 +20,31 @@ rule generate_exclude_file_for_mosaic_count:
     conda:
         "../envs/ashleys_base.yaml"
     params:
-        chroms=config["chromosomes"],
+        chroms=config["chromosomes"]
+        if config["reference"] != "mm10"
+        else [
+            "chr1",
+            "chr2",
+            "chr3",
+            "chr4",
+            "chr5",
+            "chr6",
+            "chr7",
+            "chr8",
+            "chr9",
+            "chr10",
+            "chr11",
+            "chr12",
+            "chr13",
+            "chr14",
+            "chr15",
+            "chr16",
+            "chr17",
+            "chr18",
+            "chr19",
+            "chrX",
+            "chrY",
+        ],
     script:
         "../scripts/utils/generate_exclude_file.py"
 
@@ -65,11 +89,9 @@ checkpoint mosaic_count:
         """
 
 
-
-
 rule populate_counts:
     input:
-        bin_bed=ancient("workflow/data/bin_200kb_all.bed"),
+        bin_bed=ancient(select_binbed),
         counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
     output:
         populated_counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
@@ -91,11 +113,13 @@ rule plot_mosaic_counts:
         "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
+    params:
+        mouse_assembly=True if config["reference"] == "mm10" else False,
     conda:
         "../envs/ashleys_rtools.yaml"
     resources:
         mem_mb=get_mem_mb,
     shell:
         """
-        LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output} > {log} 2>&1
+        LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output}  > {log} 2>&1
         """

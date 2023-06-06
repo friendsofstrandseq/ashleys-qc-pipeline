@@ -26,7 +26,7 @@ info_raw <- data.table::fread(snakemake@input[["info_raw"]], skip = 13, header =
 # info_raw <- data.table::fread(args[2])
 
 min_reads <- min(info_raw[info_raw$pass1 == 1, ]$good) - 1
-
+ 
 #################
 # Preprocessing #
 #################

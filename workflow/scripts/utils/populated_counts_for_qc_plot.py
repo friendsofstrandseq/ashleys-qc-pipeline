@@ -4,11 +4,13 @@ import pandas as pd
 
 binbed = pd.read_csv(
     snakemake.input.bin_bed,
-    # "../../../../mosaicatcher-update/workflow/data/bin_200kb_all.bed",
+    # "/g/korbel2/weber/workspace/ashleys-qc-pipeline/workflow/data/mm10.bin_200kb_all.bed",
     sep="\t",
     names=["chrom", "start", "end", "bin_id"],
 )
-binbed["ID"] = binbed["chrom"] + "_" + binbed["start"].astype(str) + "_" + binbed["end"].astype(str)
+# binbed["bin_id"] = ["bin_200kb_{i}".format(i=i) for i in range(1, binbed.shape[0] + 1)]
+print(binbed)
+binbed["ID"] = binbed["chrom"].astype(str) + "_" + binbed["start"].astype(str) + "_" + binbed["end"].astype(str)
 
 # Turn chrom into categorical
 binbed["chrom"] = pd.Categorical(
@@ -21,13 +23,13 @@ binbed["chrom"] = pd.Categorical(
 binbed = binbed.sort_values(by=["chrom", "start", "end"]).reset_index(drop=True)
 binbed["w"], binbed["c"], binbed["class"] = 0, 0, None
 
-
 # Read SV file
 # df = pd.read_csv("../../../../mosaicatcher-update/.tests/data_CHR17/RPE-BM510/counts/RPE-BM510.txt.raw.gz", sep="\t")
 
 # sep = "," if "/multistep_normalisation/" in snakemake.input.counts else "\t"
 sep = "\t"
 df = pd.read_csv(snakemake.input.counts, sep=sep, compression="gzip")
+# df = pd.read_csv("/scratch/tweber/DATA/MC_DATA/2023-05-15-HGFCJAFX5/PDAC60590/counts/multistep_normalisation/PDAC60590.txt.scaled.GC.VST.reformat.gz", sep=sep, compression="gzip")
 df["ID"] = df["chrom"] + "_" + df["start"].astype(str) + "_" + df["end"].astype(str)
 df["w"] = df["w"].round(0).astype(int)
 df["c"] = df["c"].round(0).astype(int)
@@ -39,7 +41,6 @@ l = list()
 
 # Loop over cells
 for cell in df.cell.unique().tolist():
-
     # Outer join to retrieve both real count values from specified chromosome and empty bins
     tmp_df = pd.concat(
         [
