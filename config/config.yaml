@@ -1,4 +1,4 @@
-version: 2.0.0
+version: 2.1.1
 # Option to display all potential options - listed in config_metadata.yaml
 list_commands: False
 ## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
@@ -39,8 +39,8 @@ hand_selection: False
 window: 200000
 
 plottype_counts:
-  - "classic"
-  - "GC_corrected"
+  - "raw"
+  - "normalised"
 
 alfred_plots:
   - "dist"
@@ -81,7 +81,8 @@ chromosomes_to_exclude: []
 genecore: False
 samples_to_process: []
 genecore_date_folder: ""
-genecore_prefix: "/g/korbel/shared/genecore"
+# genecore_prefix: "/g/korbel/shared/genecore"
+genecore_prefix: "/g/korbel/STOCKS/Data/Assay/sequencing/2023"
 genecore_regex_element: "PE20"
 
 ##### DEV only

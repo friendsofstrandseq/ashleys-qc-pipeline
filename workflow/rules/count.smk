@@ -25,7 +25,7 @@ rule generate_exclude_file_for_mosaic_count:
         "../scripts/utils/generate_exclude_file.py"
 
 
-rule mosaic_count:
+checkpoint mosaic_count:
     input:
         bam=lambda wc: expand(
             "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -65,9 +65,11 @@ rule mosaic_count:
         """
 
 
+
+
 rule populate_counts:
     input:
-        bin_bed="workflow/data/bin_200kb_all.bed",
+        bin_bed=ancient("workflow/data/bin_200kb_all.bed"),
         counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
     output:
         populated_counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
@@ -86,7 +88,7 @@ rule plot_mosaic_counts:
         counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
         info="{folder}/{sample}/counts/{sample}.info_raw",
     output:
-        "{folder}/{sample}/plots/counts/CountComplete.classic.pdf",
+        "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:

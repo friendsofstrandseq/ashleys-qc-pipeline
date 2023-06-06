@@ -131,12 +131,12 @@ def argparse_help(config):
     # group = parser.add_argument_group("--config")
     print(f"{fg.BLACK}\n\n\033[1mConfig options available (--config):\033[0m\n\n")
     l1 = [
-        f"{fg.BLACK}\033[1m       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}\033[0m".format(
+        f"{fg.BLACK}\033[1m       {{:<30}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}\033[0m".format(
             "Option", "Type", "Required", "Default", "Description"
         )
     ]
     l = [
-        f"{fg.BLACK}       {{:<20}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}".format(
+        f"{fg.BLACK}       {{:<30}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}".format(
             e,
             config_metadata[e]["type"],
             str(config_metadata[e]["required"]),
