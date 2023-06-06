@@ -130,6 +130,7 @@ rule multiqc:
         # multiqc_input="{folder}/{sample}/multiqc/",
     output:
         report="{folder}/{sample}/multiqc/multiqc_report/multiqc_report.html",
+        # outdir=directory("{folder}/{sample}/multiqc/multiqc_report/"),
         outdir=report(
             directory("{folder}/{sample}/multiqc/multiqc_report"),
             htmlindex="multiqc_report.html",
