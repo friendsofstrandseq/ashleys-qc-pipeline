@@ -1,18 +1,10 @@
-## Rules to perform GC analysis & correction on Strand-Seq libraries
-## ---------------------------------------------------------------
-## mergeBams/mergeBams_plate_row: merge all/fraction of bams
-## mergeSortBams/mergeSortBams_plate_row: sort merged bam file
-## index_merged_bam/index_merged_bam_plate_row: index merged bam file
-## VST_correction/multistep_normalisation/library_size_normalisation: variance stabilizing transformation, GC correction & counts scaling based @MarcoCosenza method
-## plot_mosaic_gc_norm_counts: plots QC counts plot after correction
-
-
-if config["multistep_normalisation"] is True:
+if config["multistep_normalisation"] is True and config["window"] == 200000:
 
 
     rule library_size_normalisation:
         input:
             counts="{folder}/{sample}/counts/{sample}.txt.raw.gz",
+            info_raw = "{folder}/{sample}/counts/{sample}.info_raw"
         output:
             counts_scaled="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.gz",
         log:
@@ -43,7 +35,8 @@ if config["multistep_normalisation"] is True:
         log:
             "{folder}/{sample}/log/multistep_normalisation/{sample}.log",
         params:
-            gc_matrix="workflow/data/GC/GC_matrix_200000.txt",
+            gc_matrix=ancient("workflow/data/GC/{assembly}.GC_matrix.txt.gz".format(assembly=config["reference"])),
+            # gc_matrix=ancient("workflow/data/GC/GC_matrix_200000.txt"),
             gc_min_reads=config["multistep_normalisation_options"]["min_reads_bin"],
             gc_n_subsample=config["multistep_normalisation_options"]["n_subsample"],
         resources:
@@ -76,11 +69,22 @@ if config["multistep_normalisation"] is True:
         script:
             "../scripts/GC/variance_stabilizing_transformation.R"
 
-        
+    rule reformat_ms_norm:
+        input:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz"
+        output:
+            "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
+        conda:
+            "../envs/ashleys_base.yaml"
+        resources:
+            mem_mb=get_mem_mb,
+        script:
+            "../scripts/utils/reformat_ms_norm.py"
+       
     rule populate_counts_GC:
         input:
             bin_bed="workflow/data/bin_200kb_all.bed",
-            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.gz",
+            counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz"
         output:
             populated_counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
         log:
@@ -91,13 +95,15 @@ if config["multistep_normalisation"] is True:
             mem_mb=get_mem_mb,
         script:
             "../scripts/utils/populated_counts_for_qc_plot.py"
+            
+
 
     rule plot_mosaic_gc_norm_counts:
         input:
             counts="{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.populated.gz",
             info="{folder}/{sample}/counts/{sample}.info_raw",
         output:
-            "{folder}/{sample}/plots/counts/CountComplete.GC_corrected.pdf",
+            "{folder}/{sample}/plots/counts/CountComplete.normalised.pdf",
         log:
             "{folder}/{sample}/log/plot_mosaic_counts/{sample}.log",
         conda:

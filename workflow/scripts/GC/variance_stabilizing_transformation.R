@@ -60,28 +60,31 @@ transform_data <- function(counts, transform, phi) {
   counts$c <- counts$c * counts$f
   counts$tot_count <- counts$tot_count_corr
   counts <- counts[, ..cols]
-  
+
   return(counts)
 }
 transform_list <- list("anscombe" = anscombe_transform, "laubscher" = laubscher_transform)
 transform <- transform_list[[chosen_transform]]
 
-disp_score <- function(counts, transform, phi, design=NULL){
+
+disp_score <- function(counts, transform, phi, design = NULL) {
   counts$tot_count <- transform(counts$tot_count, phi)
   mat <- to_matrix(counts)
   # if multiple samples are present design matrix can be used
-  if (is.null(design))
-    design <- matrix(1, ncol=1, nrow=ncol(mat))
+  if (is.null(design)) {
+    design <- matrix(1, ncol = 1, nrow = ncol(mat))
+  }
   res <- as.matrix(mat) %*% MASS::Null(design)
-  rsd <- sqrt(rowMeans(res*res))
-  score <- sd(rsd)/mean(rsd)
+  rsd <- sqrt(rowMeans(res * res))
+  score <- sd(rsd) / mean(rsd)
   return(score)
 }
 
 message(paste("Transforming data with", chosen_transform, "VST"))
 
 # estimate dispersion by residual variance
-opt <- optimize(disp_score, counts = counts, transform = transform, interval = c(0.00001,1))
+
+opt <- optimize(disp_score, counts = counts, transform = transform, interval = c(0.00001, 1))
 phi <- opt$minimum
 message(paste("Estimated dispersion - phi: ", phi))
 
@@ -102,11 +105,13 @@ rescale_data <- function(counts_original, counts_transformed) {
   rescaled$w <- rescaled$w * rescaled$f
   rescaled$c <- rescaled$c * rescaled$f
   return(rescaled)  
+
 }
 
 if (rescale == TRUE) {
   corr_counts <- rescale_data(counts_raw, corr_counts)
 } 
+
 
 message("saving...")
 data.table::fwrite(corr_counts, save_path)
@@ -115,43 +120,42 @@ if (plot) {
   library(ggplot2)
   library(ggpubr)
 
-  merge_bins <- function(df, bin_size=3e6) {
-    
-    df <- df[with(df, order(cell,chrom, start))]
-    
+  merge_bins <- function(df, bin_size = 3e6) {
+    df <- df[with(df, order(cell, chrom, start))]
+
     df$bin_group <- df$start %/% bin_size
-    
-    
-    w <- aggregate(df$w, by=list(df$cell, df$chrom, df$bin_group), FUN = sum)
-    c <- aggregate(df$c, by=list(df$cell, df$chrom, df$bin_group), FUN = sum)
-    s <- aggregate(df$start, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[1]])
-    e <- aggregate(df$end, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[length(x)]])
-    cl <- aggregate(df$class, by=list(df$cell, df$chrom, df$bin_group), FUN = function(x) names(sort(table(x), decreasing = TRUE))[[1]])
-    
-    m <- merge(w, c,by=c('Group.1', 'Group.2', 'Group.3'))
-    m <- merge(m, s,by=c('Group.1', 'Group.2', 'Group.3'))
-    m <- merge(m, e,by=c('Group.1', 'Group.2', 'Group.3'))
-    m <- merge(m, cl,by=c('Group.1', 'Group.2', 'Group.3'))
-    colnames(m) <- c('cell', 'chrom', 'bin_group', 'w', 'c', 'start', 'end', 'class')
+
+
+    w <- aggregate(df$w, by = list(df$cell, df$chrom, df$bin_group), FUN = sum)
+    c <- aggregate(df$c, by = list(df$cell, df$chrom, df$bin_group), FUN = sum)
+    s <- aggregate(df$start, by = list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[1]])
+    e <- aggregate(df$end, by = list(df$cell, df$chrom, df$bin_group), FUN = function(x) x[[length(x)]])
+    cl <- aggregate(df$class, by = list(df$cell, df$chrom, df$bin_group), FUN = function(x) names(sort(table(x), decreasing = TRUE))[[1]])
+
+    m <- merge(w, c, by = c("Group.1", "Group.2", "Group.3"))
+    m <- merge(m, s, by = c("Group.1", "Group.2", "Group.3"))
+    m <- merge(m, e, by = c("Group.1", "Group.2", "Group.3"))
+    m <- merge(m, cl, by = c("Group.1", "Group.2", "Group.3"))
+    colnames(m) <- c("cell", "chrom", "bin_group", "w", "c", "start", "end", "class")
     m$sample <- unique(df$sample)[[1]]
     m <- data.table::as.data.table(m)
-    m <- m[with(m, order(cell,chrom, start))]
-    
+    m <- m[with(m, order(cell, chrom, start))]
+
     m$tot_count <- m$w + m$c
     return(m)
   }
-  
+
   wf_plot <- function(m) {
     m$wf <- m$w / m$tot_count
-    
+
     p1 <- ggplot(m, aes(x = tot_count, y = wf)) +
-      geom_point(size=1, alpha=.1, shape=16) +
+      geom_point(size = 1, alpha = .1, shape = 16) +
       xlab("tot count") +
       ylab("watson fraction") +
-      ylim(0,1)
+      ylim(0, 1)
     return(p1)
   }
-  
+
   p1 <- ggplot(counts_raw, aes(x = tot_count)) +
     geom_histogram(bins = 256) +
     ggtitle("raw") +
@@ -171,7 +175,15 @@ if (plot) {
   p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
 
 
-  corr_plot <- ggarrange(p1,p2,p3,p4)
+
+  m <- merge_bins(counts_raw)
+  p3 <- wf_plot(m) + ggtitle("raw")
+
+  n <- merge_bins(corr_counts)
+  p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
+
+
+  corr_plot <- ggarrange(p1, p2, p3, p4)
 
   ggsave(snakemake@output[["plot"]], corr_plot, width = 12, height = 6)
 }
