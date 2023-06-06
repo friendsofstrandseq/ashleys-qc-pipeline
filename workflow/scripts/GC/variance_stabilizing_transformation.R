@@ -66,6 +66,7 @@ transform_data <- function(counts, transform, phi) {
 transform_list <- list("anscombe" = anscombe_transform, "laubscher" = laubscher_transform)
 transform <- transform_list[[chosen_transform]]
 
+
 disp_score <- function(counts, transform, phi, design = NULL) {
   counts$tot_count <- transform(counts$tot_count, phi)
   mat <- to_matrix(counts)
@@ -82,6 +83,7 @@ disp_score <- function(counts, transform, phi, design = NULL) {
 message(paste("Transforming data with", chosen_transform, "VST"))
 
 # estimate dispersion by residual variance
+
 opt <- optimize(disp_score, counts = counts, transform = transform, interval = c(0.00001, 1))
 phi <- opt$minimum
 message(paste("Estimated dispersion - phi: ", phi))
@@ -103,11 +105,13 @@ rescale_data <- function(counts_original, counts_transformed) {
   rescaled$w <- rescaled$w * rescaled$f
   rescaled$c <- rescaled$c * rescaled$f
   return(rescaled)
+
 }
 
 if (rescale == TRUE) {
   corr_counts <- rescale_data(counts_raw, corr_counts)
-}
+} 
+
 
 message("saving...")
 data.table::fwrite(corr_counts, save_path)
@@ -163,6 +167,14 @@ if (plot) {
     ggtitle(paste(chosen_transform, "VST")) +
     xlab("read count") +
     ylab("bin count")
+  
+  m <- merge_bins(counts_raw)
+  p3 <- wf_plot(m) + ggtitle('raw')
+  
+  n <- merge_bins(corr_counts)
+  p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
+
+
 
   m <- merge_bins(counts_raw)
   p3 <- wf_plot(m) + ggtitle("raw")
