@@ -1,6 +1,6 @@
 FROM condaforge/mambaforge:latest
 LABEL io.github.snakemake.containerized="true"
-LABEL io.github.snakemake.conda_env_hash="a40b39fa80f6b26b3e112e901c49d956656e92ac4db1795eec1694ac01b449ca"
+LABEL io.github.snakemake.conda_env_hash="6d44cf938b4f6793ce39246c026c37500f30b8e8c54d626c12ef94957d61ca74"
 
 # Step 1: Retrieve conda environments
 
@@ -30,7 +30,7 @@ ADD https://github.com/snakemake/snakemake-wrappers/raw/v1.7.0/bio/fastqc/enviro
 
 # Conda environment:
 #   source: workflow/envs/ashleys_base.yaml
-#   prefix: /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf
+#   prefix: /conda-envs/d7ae7fcf4adb54129dbf1b1e84ef888a
 #   name: ashleys_base
 #   channels:
 #     - conda-forge
@@ -46,8 +46,10 @@ ADD https://github.com/snakemake/snakemake-wrappers/raw/v1.7.0/bio/fastqc/enviro
 #     - pandas
 #     # PUBLISHDIR
 #     - rsync
-RUN mkdir -p /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf
-COPY workflow/envs/ashleys_base.yaml /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf/environment.yaml
+#     # MULTIQC
+#     - multiqc
+RUN mkdir -p /conda-envs/d7ae7fcf4adb54129dbf1b1e84ef888a
+COPY workflow/envs/ashleys_base.yaml /conda-envs/d7ae7fcf4adb54129dbf1b1e84ef888a/environment.yaml
 
 # Conda environment:
 #   source: workflow/envs/ashleys_rtools.yaml
@@ -109,6 +111,6 @@ COPY workflow/envs/ashleys_rtools.yaml /conda-envs/9b847fc31baae8e01dfb7ce438a56
 
 RUN mamba env create --prefix /conda-envs/5681728a49bd83ceed09ba194330c858 --file /conda-envs/5681728a49bd83ceed09ba194330c858/environment.yaml && \
     mamba env create --prefix /conda-envs/08d4368302a4bdf7eda6b536495efe7d --file /conda-envs/08d4368302a4bdf7eda6b536495efe7d/environment.yaml && \
-    mamba env create --prefix /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf --file /conda-envs/6c6d3e92c1c97170f4d531b908ca85cf/environment.yaml && \
+    mamba env create --prefix /conda-envs/d7ae7fcf4adb54129dbf1b1e84ef888a --file /conda-envs/d7ae7fcf4adb54129dbf1b1e84ef888a/environment.yaml && \
     mamba env create --prefix /conda-envs/9b847fc31baae8e01dfb7ce438a56b71 --file /conda-envs/9b847fc31baae8e01dfb7ce438a56b71/environment.yaml && \
     mamba clean --all -y
