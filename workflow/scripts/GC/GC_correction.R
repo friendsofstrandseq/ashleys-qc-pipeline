@@ -14,6 +14,7 @@ GC_matrix <- data.table::fread(gc_path, header = T)
 
 # reformat GC_matrix
 # find column containing GC counts and rename to 'GC%'
+
 idx <- which(grepl("GC", colnames(GC_matrix), fixed = TRUE))
 colnames(GC_matrix)[[idx]] <- "GC%"
 

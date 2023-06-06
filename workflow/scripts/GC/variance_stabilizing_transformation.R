@@ -66,6 +66,7 @@ transform_data <- function(counts, transform, phi) {
 transform_list <- list("anscombe" = anscombe_transform, "laubscher" = laubscher_transform)
 transform <- transform_list[[chosen_transform]]
 
+
 disp_score <- function(counts, transform, phi, design = NULL) {
   counts$tot_count <- transform(counts$tot_count, phi)
   mat <- to_matrix(counts)
@@ -82,6 +83,7 @@ disp_score <- function(counts, transform, phi, design = NULL) {
 message(paste("Transforming data with", chosen_transform, "VST"))
 
 # estimate dispersion by residual variance
+
 opt <- optimize(disp_score, counts = counts, transform = transform, interval = c(0.00001, 1))
 phi <- opt$minimum
 message(paste("Estimated dispersion - phi: ", phi))
@@ -92,16 +94,24 @@ corr_counts <- data.table::data.table(corr_counts[, c("chrom", "start", "end", "
 
 rescale_data <- function(counts_original, counts_transformed) {
   rescaled <- counts_transformed
-  f <- counts_original$tot_count / rescaled$tot_count
-  rescaled$tot_count <- rescaled$tot_count * f
-  rescaled$w <- rescaled$w * f
-  rescaled$c <- rescaled$c * f
-  return(rescaled)
+  rescaled_med <- aggregate(rescaled$tot_count, list(rescaled$cell), FUN=median) 
+  original_med <- aggregate(counts_original$tot_count, list(counts_original$cell), FUN=median) 
+  m <- merge(x = original_med, y = rescaled_med, by = "Group.1", suffixes = c('_raw', '_norm'))
+  m[['f']] <- m[['x_raw']] / m[['x_norm']]
+  
+  rescaled <- merge(rescaled, m[c('Group.1', 'f')], by.x = 'cell', by.y = 'Group.1')
+  
+  rescaled$tot_count <- rescaled$tot_count * rescaled$f
+  rescaled$w <- rescaled$w * rescaled$f
+  rescaled$c <- rescaled$c * rescaled$f
+  return(rescaled)  
+
 }
 
 if (rescale == TRUE) {
   corr_counts <- rescale_data(counts_raw, corr_counts)
-}
+} 
+
 
 message("saving...")
 data.table::fwrite(corr_counts, save_path)
@@ -157,6 +167,14 @@ if (plot) {
     ggtitle(paste(chosen_transform, "VST")) +
     xlab("read count") +
     ylab("bin count")
+  
+  m <- merge_bins(counts_raw)
+  p3 <- wf_plot(m) + ggtitle('raw')
+  
+  n <- merge_bins(corr_counts)
+  p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
+
+
 
   m <- merge_bins(counts_raw)
   p3 <- wf_plot(m) + ggtitle("raw")
