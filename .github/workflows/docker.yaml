@@ -13,7 +13,7 @@ jobs:
     env:
       IMAGE_NAME: ashleys-qc-pipeline
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
  
       - name: Run read-yaml action
         id: yaml-data
