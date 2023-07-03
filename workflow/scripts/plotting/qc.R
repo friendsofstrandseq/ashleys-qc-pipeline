@@ -227,6 +227,8 @@ for (s in unique(d$sample))
         # print(e)
 
         library(dplyr)
+        # library(stringr)
+
         # e_sum <- e %>%
         #     group_by(chrom) %>%
         #     summarise(total = sum(total))
@@ -242,8 +244,13 @@ for (s in unique(d$sample))
         # print(e_lite, n = 40)
 
         # e_lite <- e
-        e_lite <- filter(e, bin_id == "")
-        print(e_lite)
+        # print(nrow(e))
+        # e_lite <- filter(e, bin_id == "")
+        e_lite <- filter(e, !grepl("bin_", bin_id))
+        # print(nrow(filter(e, bin_id == "")))
+        # print(nrow(filter(e, !grepl("bin_", bin_id))))
+        # e_lite <- filter(e, !grepl("bin_id", bin_id))
+        # print(e_lite)
 
 
 
