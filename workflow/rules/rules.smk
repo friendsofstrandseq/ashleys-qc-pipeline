@@ -200,22 +200,10 @@ rule symlink_bam_ashleys:
 rule generate_features:
     input:
         bam=selected_input_bam,
-        # bam=lambda wc: expand(
-        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
-        #     folder=config["data_location"],
-        #     sample=wc.sample,
-        #     cell=cell_per_sample[str(wc.sample)],
+        # plot=expand(
+        #     "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+        #     plottype=plottype_counts,
         # ),
-        # bai=lambda wc: expand(
-        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
-        #     folder=config["data_location"],
-        #     sample=wc.sample,
-        #     cell=cell_per_sample[str(wc.sample)],
-        # ),
-        plot=expand(
-            "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
-            plottype=plottype_counts,
-        ),
     output:
         "{folder}/{sample}/predictions/ashleys_features.tsv",
     log:
@@ -362,17 +350,15 @@ elif config["use_light_data"] is True:
             "../scripts/utils/dev_all_cells_correct.py"
 
 
-if config["publishdir"] != "":
+if config["publishdir"] != "" and config["genecore"] is True:
 
     rule publishdir_outputs_ashleys:
         input:
             list_publishdir=publishdir_fct(),
         output:
-            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
+            touch("{folder}/config/publishdir_outputs.ok"),
         log:
             "{folder}/log/publishdir_outputs/{sample}.log",
-        params:
-            publishdir=config["publishdir"],
         conda:
             "../envs/ashleys_base.yaml"
         script:
