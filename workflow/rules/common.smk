@@ -450,7 +450,7 @@ def get_final_output():
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/{sample}/config/publishdir_outputs.ok",
+                "{folder}/config/publishdir_outputs.ok",
                 folder=config["data_location"],
                 sample=samples,
             )
