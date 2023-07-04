@@ -15,3 +15,5 @@ dependencies:
   - rsync
   # MULTIQC
   - multiqc
+  # Fix sklearn update
+  - scikit-learn=1.2.2

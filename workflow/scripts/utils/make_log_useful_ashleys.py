@@ -2,7 +2,6 @@ import sys, os
 
 
 def make_log_useful(log_path, status, config):
-
     error_buffer = []
     record = 0
     with open(log_path, "r") as logfile:
@@ -44,10 +43,14 @@ def make_log_useful(log_path, status, config):
         _ = logfile.write("\n===[{}]===\n".format("Workflow information"))
         _ = logfile.write("smk-wf-catalog/ashleys-qc-pipeline v{version}\n".format(version=str(config["version"])))
         _ = logfile.write("Folder to processed : {}\n".format(str(config["data_location"])))
-        _ = logfile.write("Multistep normalisation module : {}\n".format(str(config["library_size_normalisation"])))
+        _ = logfile.write("Multistep normalisation module : {}\n".format(str(config["multistep_normalisation"])))
+        # _ = logfile.write("Multistep normalisation for SV calling : {}\n".format(str(config["multistep_normalisation_for_SV_calling"])))
+        # _ = logfile.write("HGSVC based normalisation for SV calling : {}\n".format(str(config["hgsvc_based_normalisation"])))
         _ = logfile.write("Binning window size : {}\n".format(str(config["window"])))
         _ = logfile.write("List of chromosomes processed : {}\n".format(str(config["chromosomes"])))
         _ = logfile.write("Reference genome selected : {}\n".format(config["reference"]))
+        _ = logfile.write("MultiQC : {}\n".format(config["MultiQC"]))
+        _ = logfile.write("Split PDF QC plot : {}\n".format(config["split_qc_plot"]))
         _ = logfile.write("\n")
 
     return
