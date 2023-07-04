@@ -49,6 +49,13 @@ if config["mosaicatcher_pipeline"] == False:
     onstart:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
         subprocess.Popen(
+            "mkdir -p {folder_path}/config".format(
+                    folder_path=config["data_location"]
+                ),
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
+        subprocess.Popen(
             "rsync --ignore-existing -avzh config/config.yaml {folder_path}/config".format(
                     folder_path=config["data_location"]
                 ),
@@ -63,6 +70,7 @@ if config["mosaicatcher_pipeline"] == False:
 
 
     def onsuccess_fct(log):
+
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
         shell(
             'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {{log}}'.format(
@@ -377,6 +385,7 @@ plottype_counts = (
     if config["multistep_normalisation"] is True
     else config["plottype_counts"][0]
 )
+# print(plottype_counts)
 
 
 def get_final_output():
@@ -441,7 +450,7 @@ def get_final_output():
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/{sample}/config/publishdir_outputs.ok",
+                "{folder}/config/publishdir_outputs.ok",
                 folder=config["data_location"],
                 sample=samples,
             )

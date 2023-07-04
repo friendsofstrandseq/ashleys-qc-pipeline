@@ -43,3 +43,12 @@ if config["list_commands"] is False:
     rule all:
         input:
             get_final_output(),
+
+
+    if config["email"]:
+
+        onsuccess:
+            onsuccess_fct(log)
+
+        onerror:
+            onerror_fct(log)
