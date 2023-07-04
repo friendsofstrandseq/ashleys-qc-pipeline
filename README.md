@@ -208,7 +208,7 @@ The list of parameters is available through the command: `snakemake -c1 --config
 | `reference`               | Reference genome                                                                                    | hg38               |              | hg19, T2T     |
 | `hand_selection`          | Allow to identify manually high-quality strand-seq libraries.                                       | False              | X            |               |
 | `multistep_normalisation` | Enable/Disabl multistep normsaliation including GC correction of Strand-Seq libraries libraries.    | False              |              |               |
-| `FastQC_analysis`         | Enable / Disable FastQC analysis                                                                    | False              |              |               |
+| `MultiQC`                 | Enable / Disable MultiQC analysis (will trigger FastQC, samtools stats & flagstats)                 | False              |              |               |
 | `ashleys_threshold`       | Ashleys-qc threshold for binary classification of low/good quality cells                            | 0.5                |              |               |
 | `window`                  | Window size used for binning by mosaic count (Can be of high importance regarding library coverage) | 200000             |              |               |
 | `chromosomes`             | List of chromosomes to be processed in the pipeline                                                 | chr1..22,chrX      |              |               |
@@ -220,7 +220,7 @@ The list of parameters is available through the command: `snakemake -c1 --config
 | `genecore`               | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                        | Boolean        | False                                         |
 | `genecore_date_folder`   | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                     | String         | ""                                            |
 | `genecore_prefix`        | Genecore prefix name to retrieve the date folder specified                                                                          | String         | "/g/korbel/STOCKS/Data/Assay/sequencing/2023" |
-| `genecore_regex_element` | Regex element used to distinguish cell name from cell number (Ex: "iTRUE                                                            | PE20")         | String                                        | ""  |
+| `genecore_regex_element` | Regex element used to distinguish cell name from cell number (Ex: "PE20 or iTRUE                                                    | PE20")         | String                                        | ""  |
 | `samples_to_process`     | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []                                            |
 
 ## Snakemake arguments
@@ -306,23 +306,11 @@ Obviously, all other [snakemake CLI options](https://snakemake.readthedocs.io/en
 
 ## Output
 
-### FastQC files
-
----
-
-File path: `<FOLDER>/<SAMPLE>/fastqc/<CELL>.[1|2].[html|zip]`
-
----
-
-You will be able to find all QC analysis of raw FastQ files in the path above.
-
-![fastqc](docs/images/fastqc.png)
-
 ### ashleys-qc prediction
 
 ---
 
-File path: `<FOLDER>/<SAMPLE>/predictions/predictions.tsv`
+File path: `<FOLDER>/<SAMPLE>/cell_prediction/labels.tsv`
 
 ---
 
@@ -367,6 +355,7 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 - [x] (EMBL) GeneCore mode of execution: allow selection and execution directly by specifying genecore run folder (2022-11-02-H372MAFX5 for instance) ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
 - [x] Automatic bypass of the positive control in ashleys labels (through z-score distribution analysis) ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
 - [x] Multistep normalisation to replace GC analysis module (library size normalisation, GC correction, Variance Stabilising Transformation) ([2.0.0](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.0.0))
+- [x] Strand-Seq processing based on mm10 assembly ([2.1.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.1.1))
 
 ### Minor features
 
@@ -378,6 +367,7 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 - [x] List of commands available through list_commands parameter ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
 - [x] `FastQC_analysis` boolean `GC_rowcol_analysis` parameters to enable/disable optional modules ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
 - [x] publishdir: If specified, will copy important data (stats, plots, counts file) to a second place ([1.4.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.4.1)
+- [x] MultiQC: If specified, will trigger MultiQC to generate a QC report using FastQC, samtools stats & flagstats ([2.1.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.1.1)
 
 ### Experimental feature: hand-selection of cells via Jupyter notebook
 

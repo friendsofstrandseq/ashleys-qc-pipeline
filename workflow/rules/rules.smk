@@ -200,22 +200,10 @@ rule symlink_bam_ashleys:
 rule generate_features:
     input:
         bam=selected_input_bam,
-        # bam=lambda wc: expand(
-        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam",
-        #     folder=config["data_location"],
-        #     sample=wc.sample,
-        #     cell=cell_per_sample[str(wc.sample)],
+        # plot=expand(
+        #     "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+        #     plottype=plottype_counts,
         # ),
-        # bai=lambda wc: expand(
-        #     "{folder}/{sample}/bam_ashleys/{cell}.sort.mdup.bam.bai",
-        #     folder=config["data_location"],
-        #     sample=wc.sample,
-        #     cell=cell_per_sample[str(wc.sample)],
-        # ),
-        plot=expand(
-            "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
-            plottype=plottype_counts,
-        ),
     output:
         "{folder}/{sample}/predictions/ashleys_features.tsv",
     log:
@@ -368,11 +356,10 @@ if config["publishdir"] != "":
         input:
             list_publishdir=publishdir_fct(),
         output:
-            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
+            touch("{folder}/config/publishdir_outputs.ok"),
+            
         log:
-            "{folder}/log/publishdir_outputs/{sample}.log",
-        params:
-            publishdir=config["publishdir"],
+            "{folder}/log/publishdir_outputs/publishdir_outputs.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:
