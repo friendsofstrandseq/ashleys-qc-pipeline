@@ -359,7 +359,7 @@ if config["publishdir"] != "":
             touch("{folder}/config/publishdir_outputs.ok"),
             
         log:
-            "{folder}/log/publishdir_outputs/{sample}.log",
+            "{folder}/log/publishdir_outputs/publishdir_outputs.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:
