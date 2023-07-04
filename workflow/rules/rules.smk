@@ -350,13 +350,14 @@ elif config["use_light_data"] is True:
             "../scripts/utils/dev_all_cells_correct.py"
 
 
-if config["publishdir"] != "" and config["genecore"] is True:
+if config["publishdir"] != "":
 
     rule publishdir_outputs_ashleys:
         input:
             list_publishdir=publishdir_fct(),
         output:
             touch("{folder}/config/publishdir_outputs.ok"),
+            
         log:
             "{folder}/log/publishdir_outputs/{sample}.log",
         conda:
