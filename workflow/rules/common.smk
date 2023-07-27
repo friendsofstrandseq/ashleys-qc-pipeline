@@ -145,12 +145,7 @@ class HandleInput:
             if (j + 1) % 192 == 0:
                 common_element = findstem(sub_l)
                 l_elems = common_element.split("lane1")
-                # print(sub_l)
-                # print(common_element)
-                # print(l_elems)
-                # print(l_elems[1].split("{regex_element}".format(regex_element=config["genecore_regex_element"]))
                 prefix = l_elems[0]
-                # technician_name = l_elems[0].split("_")[-2]
                 sample = l_elems[1].split(
                     "{regex_element}".format(
                         regex_element=config["genecore_regex_element"]
@@ -161,16 +156,11 @@ class HandleInput:
                         regex_element=config["genecore_regex_element"]
                     )
                 )[1]
-                # pe_index = common_element[-1]
                 sub_l = list()
 
                 d_master[sample]["prefix"] = prefix
-                # d_master[sample]["technician_name"] = technician_name
                 d_master[sample]["index"] = index
                 d_master[sample]["common_element"] = common_element
-        # from pprint import pprint
-        # pprint(d_master)
-        # exit()
         samples_to_process = (
             config["samples_to_process"]
             if len(config["samples_to_process"]) > 0
@@ -290,6 +280,14 @@ class HandleInput:
                 if f.endswith(ext)
             ]
 
+
+            for f in l_files_all:
+                if len(f.split("_")) == 4:
+                    assert (
+                        len(f.split("_")) != 4
+                    ), "Your file name is using 4 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
+
+
             # print(l_files_all)
             # Dataframe creation
             df = pd.DataFrame([{"File": f} for f in l_files_all])
@@ -405,7 +403,7 @@ def get_final_output():
             ),
         )
 
-    if config["mosaicatcher_pipeline"] is False:
+    if config["mosaicatcher_pipeline"] is False or config["ashleys_pipeline_only"] is True:
 
         final_list.extend(
             expand(
@@ -430,7 +428,7 @@ def get_final_output():
 
     for sample in samples:
 
-        if len(cell_per_sample[sample]) == 96:
+        if len(cell_per_sample[sample]) in [96, 384]:
 
             final_list.extend(
                 [
@@ -455,7 +453,7 @@ def get_final_output():
                 sample=samples,
             )
         )
-
+        
     # print(final_list)
     return final_list
 
@@ -509,6 +507,7 @@ def publishdir_fct():
                 sample=samples,
             )
         )
+
 
     return final_list
 
