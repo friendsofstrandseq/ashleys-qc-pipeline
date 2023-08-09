@@ -26,8 +26,6 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             .tolist(),
         output:
             "{folder}/{sample}/fastq/{cell}.{pair}.fastq.gz",
-        # wildcard_constraints:
-        #     cell="^((?!\.sort\.mdup).*)$"
         log:
             "{folder}/log/genecore_symlink/{sample}/{cell}_{pair}.log",
         shell:
@@ -142,28 +140,6 @@ rule mark_duplicates:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
 
-# if config["use_light_data"] == True:
-
-#     rule samtools_idxstats_aggr:
-#         input:
-#             bam=lambda wc: expand(
-#                 "{folder}/{sample}/samtools_idxstats/{cell}.txt",
-#                 folder=config["data_location"],
-#                 sample=wc.sample,
-#                 cell=cell_per_sample[str(wc.sample)],
-#             ),
-#         output:
-#             "{folder}/{sample}/bam_stats/{sample}.txt",
-#         log:
-#             "{folder}/{sample}/log/samtools_idxstats_aggr/{cell}.log",
-#         resources:
-#             mem_mb=get_mem_mb,
-#         conda:
-#             "../envs/ashleys_base.yaml"
-#         script:
-#             ""
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     rule samtools_index:
@@ -200,10 +176,6 @@ rule symlink_bam_ashleys:
 rule generate_features:
     input:
         bam=selected_input_bam,
-        # plot=expand(
-        #     "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
-        #     plottype=plottype_counts,
-        # ),
     output:
         "{folder}/{sample}/predictions/ashleys_features.tsv",
     log:
@@ -357,7 +329,6 @@ if config["publishdir"] != "":
             list_publishdir=publishdir_fct(),
         output:
             touch("{folder}/config/publishdir_outputs.ok"),
-            
         log:
             "{folder}/log/publishdir_outputs/publishdir_outputs.log",
         conda:
