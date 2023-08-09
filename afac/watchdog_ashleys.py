@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 import json
 import pandas as pd
+import threading
 
 
 os.makedirs("watchdog/logs", exist_ok=True)
@@ -180,24 +181,37 @@ class MyHandler(FileSystemEventHandler):
         subprocess.run(["chmod", "-R", "777", f"{data_location}/{date_folder}"])
 
 
-# Create the event handler
-event_handler = MyHandler()
-event_handler.check_unprocessed_folder()
+def main():
+    # Create the event handler
+    event_handler = MyHandler()
 
-# Create an observer
-observer = Observer()
+    # Create an observer
+    observer = Observer()
 
-# Assign the observer to the path and the event handler
-observer.schedule(event_handler, path_to_watch, recursive=False)
+    # Assign the observer to the path and the event handler
+    observer.schedule(event_handler, path_to_watch, recursive=False)
 
-# Start the observer
-observer.start()
+    # Start the observer
+    observer.start()
 
-try:
-    while True:
-        logging.info("Waiting for new plate ...")
-        time.sleep(3600)
-except KeyboardInterrupt:
-    observer.stop()
+    # Start the periodical directory scanning in a separate thread
+    def periodic_scan():
+        while True:
+            event_handler.check_unprocessed_folder()
+            time.sleep(3600)  # Scan the directory every hour
 
-observer.join()
+    scan_thread = threading.Thread(target=periodic_scan)
+    scan_thread.start()
+
+    try:
+        while True:
+            logging.info("Waiting for new plate ...")
+            time.sleep(3600)
+    except KeyboardInterrupt:
+        observer.stop()
+
+    observer.join()
+
+
+if __name__ == "__main__":
+    main()
