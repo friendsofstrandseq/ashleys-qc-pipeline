@@ -5,7 +5,6 @@ import yaml
 import subprocess
 
 if config["mosaicatcher_pipeline"] == False:
-
     exclude = [
         "._.DS_Store",
         ".DS_Store",
@@ -50,27 +49,20 @@ if config["mosaicatcher_pipeline"] == False:
         pipeline_aesthetic_start_ashleys.pipeline_aesthetic_start(config)
         subprocess.Popen(
             "mkdir -p {folder_path}/config".format(
-                    folder_path=config["data_location"]
-                ),
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
+                folder_path=config["data_location"]
+            ),
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
         subprocess.Popen(
             "rsync --ignore-existing -avzh config/config.yaml {folder_path}/config".format(
-                    folder_path=config["data_location"]
-                ),
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
-
-            # for sample in [e for e in os.listdir(config["data_location"]) if e not in exclude]:
-            #     print(sample)
-            #     if len(sample.split("_")) == 4:
-            #         assert len(sample.split("_")) != 4, "Your sample name is using 4 times the '_' character, which is currently not supported by ashleys-qc"
-
+                folder_path=config["data_location"]
+            ),
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
 
     def onsuccess_fct(log):
-
         make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config)
         shell(
             'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {{log}}'.format(
@@ -280,13 +272,11 @@ class HandleInput:
                 if f.endswith(ext)
             ]
 
-
             for f in l_files_all:
                 if len(f.split("_")) == 4:
                     assert (
                         len(f.split("_")) != 4
                     ), "Your file name is using 4 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
-
 
             # print(l_files_all)
             # Dataframe creation
@@ -314,7 +304,6 @@ class HandleInput:
 
 
 def findstem(arr):
-
     # Determine size of the array
     n = len(arr)
 
@@ -327,13 +316,11 @@ def findstem(arr):
 
     for i in range(l):
         for j in range(i + 1, l + 1):
-
             # generating all possible substrings
             # of our reference string arr[0] i.e s
             stem = s[i:j]
             k = 1
             for k in range(1, n):
-
                 # Check if the generated stem is
                 # common to all words
                 if stem not in arr[k]:
@@ -403,8 +390,10 @@ def get_final_output():
             ),
         )
 
-    if config["mosaicatcher_pipeline"] is False or config["ashleys_pipeline_only"] is True:
-
+    if (
+        config["mosaicatcher_pipeline"] is False
+        or config["ashleys_pipeline_only"] is True
+    ):
         final_list.extend(
             expand(
                 "{path}/{sample}/cell_selection/labels.tsv",
@@ -427,9 +416,7 @@ def get_final_output():
     # Plate plots
 
     for sample in samples:
-
         if len(cell_per_sample[sample]) in [96, 384]:
-
             final_list.extend(
                 [
                     sub_e
@@ -453,7 +440,7 @@ def get_final_output():
                 sample=samples,
             )
         )
-        
+
     # print(final_list)
     return final_list
 
@@ -484,7 +471,6 @@ def publishdir_fct():
     )
 
     if config["use_light_data"] is False:
-
         final_list.extend(
             expand(
                 "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
@@ -507,7 +493,6 @@ def publishdir_fct():
                 sample=samples,
             )
         )
-
 
     return final_list
 
