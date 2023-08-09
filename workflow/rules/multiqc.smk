@@ -127,10 +127,8 @@ rule multiqc:
         samtools_idxstats="{folder}/{sample}/multiqc/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok",
         samtools_stats="{folder}/{sample}/multiqc/samtools_stats/config/samtools_stats_aggr_touch.ok",
         samtools_flagstats="{folder}/{sample}/multiqc/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok",
-        # multiqc_input="{folder}/{sample}/multiqc/",
     output:
         report="{folder}/{sample}/multiqc/multiqc_report/multiqc_report.html",
-        # outdir=directory("{folder}/{sample}/multiqc/multiqc_report/"),
         outdir=report(
             directory("{folder}/{sample}/multiqc/multiqc_report"),
             htmlindex="multiqc_report.html",
@@ -140,7 +138,9 @@ rule multiqc:
     log:
         "{folder}/{sample}/log/multiqc/{sample}.log",
     params:
-        multiqc_input = lambda wc, input: "{abs_path}".format(abs_path=config["abs_path"]).join(input.fastqc.split("/")[:-3])
+        multiqc_input=lambda wc, input: "{abs_path}".format(
+            abs_path=config["abs_path"]
+        ).join(input.fastqc.split("/")[:-3]),
     conda:
         "../envs/ashleys_base.yaml"
     shell:

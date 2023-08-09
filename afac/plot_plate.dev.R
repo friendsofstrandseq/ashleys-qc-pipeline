@@ -4,11 +4,13 @@ library(viridis)
 library(dplyr)
 
 ## collect ASHLEYS prediction and count files
-# ashleys_data <- read.table(file = "/scratch/tweber/DATA/TMP/labels384.tsv", sep = "\t", header = TRUE)
-ashleys_data <- read.table(file = snakemake@input[["labels"]], sep = "\t", header = TRUE)
+ashleys_data <- read.table(file = "/scratch/tweber/DATA/TMP/labels384.tsv", sep = "\t", header = TRUE)
 plate_type <- nrow((ashleys_data))
+# ashleys_data = read.table(file = snakemake@input[["labels"]] , sep = '\t', header = TRUE)
 ashleys_data <- dplyr::arrange(ashleys_data, cell)
 colnames(ashleys_data)[1] <- "ashleys_id"
+
+# plate_type <- snakemake@params[["plate_type"]] # assuming that the plate type (96 or 384) is passed in as a parameter
 
 Well_position <- character()
 
@@ -32,8 +34,8 @@ if (plate_type == 96) {
     }
 }
 
-# pdf("TEST_ashleys_plate_predictions.pdf")
-pdf(snakemake@output[["predictions"]])
+pdf("TEST_ashleys_plate_predictions.pdf")
+# pdf(snakemake@output[["predictions"]])
 
 ashleys_data$Well_position <- Well_position
 
@@ -43,13 +45,13 @@ raw_map(
     plate = plate_type
 ) +
     scale_fill_distiller(type = "div", palette = "RdYlGn", direction = 1) +
-    # ggtitle(paste0("Sample: TEST | ASHLEYS binary predictions (cutoff=0.5)"))
-    ggtitle(paste0("Sample: ", snakemake@wildcards[["sample"]], " | ASHLEYS binary predictions (cutoff=", snakemake@config[["ashleys_threshold"]], ")"))
+    ggtitle(paste0("Sample: TEST | ASHLEYS binary predictions (cutoff=0.5)"))
+# ggtitle(paste0("Sample: ", snakemake@wildcards[["sample"]], " | ASHLEYS binary predictions (cutoff=", snakemake@config[["ashleys_threshold"]], ")"))
 
 dev.off()
 
-# pdf("TEST_ashleys_plate_probabilities.pdf")
-pdf(snakemake@output[["probabilities"]])
+pdf("TEST_ashleys_plate_probabilities.pdf")
+# pdf(snakemake@output[["probabilities"]])
 ashleys_data$Well_position <- Well_position
 
 raw_map(
@@ -58,7 +60,7 @@ raw_map(
     plate = plate_type
 ) +
     scale_fill_distiller(type = "div", palette = "RdYlGn", direction = 1) +
-    # ggtitle(paste0("Sample: ", "TEST", " | ASHLEYS probabilities"))
-    ggtitle(paste0("Sample: ", snakemake@wildcards[["sample"]], " | ASHLEYS probabilities"))
+    ggtitle(paste0("Sample: ", "TEST", " | ASHLEYS probabilities"))
+# ggtitle(paste0("Sample: ", snakemake@wildcards[["sample"]], " | ASHLEYS probabilities"))
 
 dev.off()
