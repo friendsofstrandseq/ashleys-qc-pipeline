@@ -4,6 +4,9 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from datetime import datetime
 import logging
+import json
+import pandas as pd
+import threading
 
 
 os.makedirs("watchdog/logs", exist_ok=True)
@@ -22,6 +25,17 @@ logging.basicConfig(
 # Set the path you want to watch
 path_to_watch = sys.argv[1]
 
+data_location = "/scratch/tweber/DATA/MC_DATA/STOCKS"
+publishdir_location = "/g/korbel/WORKFLOW_RESULTS"
+genecore_prefix = path_to_watch
+profile_slurm = ["--profile", "workflow/snakemake_profiles/HPC/slurm_EMBL/"]
+profile_dry_run = ["--profile", "workflow/snakemake_profiles/local/conda/"]
+dry_run_options = ["-c", "1", "-n", "-q"]
+snakemake_binary = "/g/korbel2/weber/miniconda3/envs/snakemake_latest/bin/snakemake"
+
+# plates_processing_status = pd.read_csv("watchdog/processing_status.json", sep="\t")
+# print(plates_processing_status)
+
 
 # Define the event handler
 class MyHandler(FileSystemEventHandler):
@@ -29,6 +43,21 @@ class MyHandler(FileSystemEventHandler):
         if event.is_directory:  # if a directory is created
             logging.info(f"Directory {event.src_path} has been created!")
             self.process_new_directory(event.src_path)
+
+    def check_unprocessed_folder(self):
+        unwanted = ["._.DS_Store", ".DS_Store", "config"]
+        list_runs_processed = sorted([e for e in os.listdir(data_location) if e not in unwanted])
+        total_list_runs = sorted([e for e in os.listdir(path_to_watch) if e not in unwanted])
+        unprocessed_plates = set(total_list_runs).difference(list_runs_processed)
+        for plate in unprocessed_plates:
+            # if plate not in plates_processing_status["plate"].values.tolist():
+            # plates_processing_status_plate_dict = collections.defaultdict(dict)
+            nb_txt_gz_files = len(glob.glob(f"{path_to_watch}/{plate}/*.txt.gz"))
+            if nb_txt_gz_files == 576:
+                print(f"PROCESSING {path_to_watch}/{plate}")
+                self.process_new_directory(f"{path_to_watch}/{plate}")
+            else:
+                print(f"Not possible to process {path_to_watch}/{plate}, containing {nb_txt_gz_files} txt.gz files")
 
     def process_new_directory(self, directory_path):
         """Process the new directory, check for .txt.gz files and execute snakemake command if conditions are met."""
@@ -86,13 +115,7 @@ class MyHandler(FileSystemEventHandler):
 
         # Change directory and run the snakemake command
         date_folder = directory_path.split("/")[-1]
-        data_location = "/scratch/tweber/DATA/MC_DATA/STOCKS"
-        publishdir_location = "/g/korbel/WORKFLOW_RESULTS"
-        genecore_prefix = path_to_watch
-        profile_slurm = ["--profile", "workflow/snakemake_profiles/HPC/slurm_EMBL/"]
-        profile_dry_run = ["--profile", "workflow/snakemake_profiles/local/conda/"]
-        dry_run_options = ["-c", "1", "-n", "-q"]
-        snakemake_binary = "/g/korbel2/weber/miniconda3/envs/snakemake_latest/bin/snakemake"
+
         cmd = [
             f"{snakemake_binary}",
             "--config",
@@ -158,22 +181,37 @@ class MyHandler(FileSystemEventHandler):
         subprocess.run(["chmod", "-R", "777", f"{data_location}/{date_folder}"])
 
 
-# Create the event handler
-event_handler = MyHandler()
+def main():
+    # Create the event handler
+    event_handler = MyHandler()
 
-# Create an observer
-observer = Observer()
+    # Create an observer
+    observer = Observer()
 
-# Assign the observer to the path and the event handler
-observer.schedule(event_handler, path_to_watch, recursive=False)
+    # Assign the observer to the path and the event handler
+    observer.schedule(event_handler, path_to_watch, recursive=False)
 
-# Start the observer
-observer.start()
+    # Start the observer
+    observer.start()
 
-try:
-    while True:
-        time.sleep(3)
-except KeyboardInterrupt:
-    observer.stop()
+    # Start the periodical directory scanning in a separate thread
+    def periodic_scan():
+        while True:
+            event_handler.check_unprocessed_folder()
+            time.sleep(3600)  # Scan the directory every hour
 
-observer.join()
+    scan_thread = threading.Thread(target=periodic_scan)
+    scan_thread.start()
+
+    try:
+        while True:
+            logging.info("Waiting for new plate ...")
+            time.sleep(3600)
+    except KeyboardInterrupt:
+        observer.stop()
+
+    observer.join()
+
+
+if __name__ == "__main__":
+    main()

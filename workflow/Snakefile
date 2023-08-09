@@ -7,7 +7,6 @@ configfile: "config/config.yaml"
 
 
 if config["mosaicatcher_pipeline"] is False:
-
     docker_container = "docker://weber8thomas/ashleys-qc-pipeline:{version}".format(
         version=str(config["version"])
     )
@@ -16,20 +15,10 @@ if config["mosaicatcher_pipeline"] is False:
 
 
 include: "rules/common.smk"
-
-
 include: "rules/aggregate_fct.smk"
-
-
 include: "rules/rules.smk"
-
-
 include: "rules/gc.smk"
-
-
 include: "rules/count.smk"
-
-
 include: "rules/multiqc.smk"
 
 
@@ -43,7 +32,6 @@ if config["list_commands"] is False:
     rule all:
         input:
             get_final_output(),
-
 
     if config["email"]:
 
