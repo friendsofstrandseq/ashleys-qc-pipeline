@@ -2,6 +2,7 @@ import sys, os
 
 
 def make_log_useful(log_path, status, config):
+    log_path_new = "/".join(log_path.split("/")[:-1]) + "/processed_logs_for_mail/" + log_path.split("/")[-1]
     error_buffer = []
     record = 0
     with open(log_path, "r") as logfile:
@@ -24,12 +25,12 @@ def make_log_useful(log_path, status, config):
             else:
                 continue
 
-    with open(log_path, "w") as logfile:
+    with open(log_path_new, "w") as logfile:
         _ = logfile.write("\n".join(error_buffer))
         _ = logfile.write("\n\n")
 
     my_env = dict(os.environ)
-    with open(log_path, "a") as logfile:
+    with open(log_path_new, "a") as logfile:
         _ = logfile.write("=======[{}]=======\n".format(status))
         _ = logfile.write("\n===[{}]===\n".format("Infrastructure information"))
         _ = logfile.write("Host: {}\n".format(my_env.get("HOST", "N/A")))
