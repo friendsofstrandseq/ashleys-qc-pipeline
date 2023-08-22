@@ -136,7 +136,7 @@ class HandleInput:
         d_master = collections.defaultdict(dict)
         sub_l = list()
         for j, e in enumerate(l):
-            print(j,e)
+            # print(j,e)
             sub_l.append(e)
             if (j + 1) % 192 == 0:
                 common_element = findstem(sub_l)
