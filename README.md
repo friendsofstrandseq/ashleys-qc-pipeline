@@ -19,6 +19,14 @@ sequencing data. The starting point are single-cell FASTQ files from Strand-seq 
 3. Sorting, Deduplicating and Indexing of BAM files through [Samtools](http://www.htslib.org/) & [sambaba](https://lomereiter.github.io/sambamba/docs/sambamba-view.html)
 4. Generating features and use [ashleys-qc](https://github.com/friendsofstrandseq/ashleys-qc) model to identify high-quality cells
 
+---
+
+**ℹ️ Important Note**
+
+From 2.2.0, you don't need to clone both [ashleys-qc-pipeline preprocessing module](https://github.com/friendsofstrandseq/ashleys-qc-pipeline) and [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline). By using `ashleys_pipeline_only=True` combined with `ashleys_pipeline=True` in the configuration of MosaiCatcher directly, this will stop the execution after the generation of the files related to ashleys-qc-pipeline. This allow you to use a single pipeline, repository and container and limit the potential conflicts by processing the same folder (data_location) by different repositories and set of files (including the workflow/data/ref_genomes references files).
+
+---
+
 # Quick Start on example data
 
 0. [Optional] Install [Singularity](https://www.sylabs.io/guides/3.0/user-guide/)
@@ -216,11 +224,11 @@ The list of parameters is available through the command: `snakemake -c1 --config
 ### EMBL parameters
 
 | Parameter                | Comment                                                                                                                             | Parameter type | Default                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------- | --- |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------- |
 | `genecore`               | Enable/disable genecore mode to give directly the genecore run folder (genecore_date_folder)                                        | Boolean        | False                                         |
 | `genecore_date_folder`   | Genecore folder name to be process (Ex: "2022-11-02-H372MAFX5")                                                                     | String         | ""                                            |
 | `genecore_prefix`        | Genecore prefix name to retrieve the date folder specified                                                                          | String         | "/g/korbel/STOCKS/Data/Assay/sequencing/2023" |
-| `genecore_regex_element` | Regex element used to distinguish cell name from cell number (Ex: "PE20 or iTRUE                                                    | PE20")         | String                                        | ""  |
+| `genecore_regex_element` | Regex element used to distinguish cell name from cell number (Ex: "PE20 or iTRUE                                                    | PE20")         | String                                        |
 | `samples_to_process`     | List of samples to be processed in the folder (default: all samples ; sample is defined by the name between "\*\_lane1" and "PE20") | List           | []                                            |
 
 ## Snakemake arguments
@@ -362,12 +370,12 @@ Selected libraries BAM files can be retrieved at the path above and can be used 
 - [x] replace `input_bam_location` by `data_location` (harmonization with [mosaicatcher-pipeline](https://github.com/friendsofstrandseq/mosaicatcher-pipeline.git)) ([1.3.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.1))
 - [x] Ashleys custom threshold parameter ([1.3.4](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.4))
 - [x] Aesthetic start + mail logging ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
-- [x] Plate plot ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5)
-- [x] Jupyter Notebook update ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
-- [x] List of commands available through list_commands parameter ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
-- [x] `FastQC_analysis` boolean `GC_rowcol_analysis` parameters to enable/disable optional modules ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6)
-- [x] publishdir: If specified, will copy important data (stats, plots, counts file) to a second place ([1.4.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.4.1)
-- [x] MultiQC: If specified, will trigger MultiQC to generate a QC report using FastQC, samtools stats & flagstats ([2.1.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.1.1)
+- [x] Plate plot ([1.3.5](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.5))
+- [x] Jupyter Notebook update ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
+- [x] List of commands available through list_commands parameter ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
+- [x] `FastQC_analysis` boolean `GC_rowcol_analysis` parameters to enable/disable optional modules ([1.3.6](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.3.6))
+- [x] publishdir: If specified, will copy important data (stats, plots, counts file) to a second place ([1.4.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/1.4.1))
+- [x] MultiQC: If specified, will trigger MultiQC to generate a QC report using FastQC, samtools stats & flagstats ([2.1.1](https://github.com/friendsofstrandseq/ashleys-qc-pipeline/releases/tag/2.1.1))
 
 ### Experimental feature: hand-selection of cells via Jupyter notebook
 

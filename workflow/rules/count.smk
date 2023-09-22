@@ -110,7 +110,13 @@ rule plot_mosaic_counts:
         counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
         info="{folder}/{sample}/counts/{sample}.info_raw",
     output:
-        "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
+        # "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
+        report(
+            "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
+            category="Mosaic Counts",
+            subcategory="{sample}",
+            labels={"Cell": "ALL", "Type": "raw"},
+        ),
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     params:
