@@ -112,11 +112,11 @@ rule plot_mosaic_counts:
     output:
         # "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
         report(
-                "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
-                category="Mosaic Counts",
-                subcategory="{sample}",
-                labels={"Cell": "ALL", "Type": "raw"},
-            ),
+            "{folder}/{sample}/plots/counts/CountComplete.raw.pdf",
+            category="Mosaic Counts",
+            subcategory="{sample}",
+            labels={"Cell": "ALL", "Type": "raw"},
+        ),
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     params:
