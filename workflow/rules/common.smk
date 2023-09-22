@@ -63,9 +63,13 @@ if config["mosaicatcher_pipeline"] == False:
         )
 
 
-def onsuccess_fct(log): 
-    config_metadata = config_definitions = yaml.safe_load(open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r"))
-    log_path_new = make_log_useful_ashleys.make_log_useful(log, "SUCCESS", config, config_metadata)
+def onsuccess_fct(log):
+    config_metadata = config_definitions = yaml.safe_load(
+        open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
+    )
+    log_path_new = make_log_useful_ashleys.make_log_useful(
+        log, "SUCCESS", config, config_metadata
+    )
     shell(
         'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {}'.format(
             config["version"], config["data_location"], config["email"], log_path_new
@@ -74,13 +78,18 @@ def onsuccess_fct(log):
 
 
 def onerror_fct(log):
-    config_metadata = config_definitions = yaml.safe_load(open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r"))
-    log_path_new = make_log_useful_ashleys.make_log_useful(log, "ERROR", config, config_metadata)
+    config_metadata = config_definitions = yaml.safe_load(
+        open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
+    )
+    log_path_new = make_log_useful_ashleys.make_log_useful(
+        log, "ERROR", config, config_metadata
+    )
     shell(
         'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - ERRROR" {} < {}'.format(
             config["version"], config["data_location"], config["email"], log_path_new
         )
     )
+
 
 # Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe
 class HandleInput:
@@ -264,7 +273,11 @@ class HandleInput:
             "strandphaser",
         ]
 
-        for sample in [e for e in os.listdir(thisdir) if e not in exclude and e.endswith(".zip") is False]:
+        for sample in [
+            e
+            for e in os.listdir(thisdir)
+            if e not in exclude and e.endswith(".zip") is False
+        ]:
             # Create a list of  files to process for each sample
             l_files_all = [
                 f

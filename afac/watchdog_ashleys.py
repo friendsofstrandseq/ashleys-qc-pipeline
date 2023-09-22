@@ -25,13 +25,14 @@ logging.basicConfig(
 # Set the path you want to watch
 path_to_watch = sys.argv[1]
 
-data_location = "/scratch/tweber/DATA/MC_DATA/STOCKS"
+data_location = "/scratch/tweber/DATA/MC_DATA/STOCKS_DEV"
 publishdir_location = "/g/korbel/WORKFLOW_RESULTS"
 genecore_prefix = path_to_watch
 profile_slurm = ["--profile", "workflow/snakemake_profiles/HPC/slurm_EMBL/"]
 profile_dry_run = ["--profile", "workflow/snakemake_profiles/local/conda/"]
 dry_run_options = ["-c", "1", "-n", "-q"]
 snakemake_binary = "/g/korbel2/weber/miniconda3/envs/snakemake_latest/bin/snakemake"
+
 
 # plates_processing_status = pd.read_csv("watchdog/processing_status.json", sep="\t")
 # print(plates_processing_status)
@@ -49,11 +50,13 @@ class MyHandler(FileSystemEventHandler):
         list_runs_processed = sorted([e for e in os.listdir(data_location) if e not in unwanted])
         total_list_runs = sorted([e for e in os.listdir(path_to_watch) if e not in unwanted])
         unprocessed_plates = set(total_list_runs).difference(list_runs_processed)
+        # for plate in ["2023-07-10-HLGVJAFX5"]:
         for plate in unprocessed_plates:
             # if plate not in plates_processing_status["plate"].values.tolist():
             # plates_processing_status_plate_dict = collections.defaultdict(dict)
             nb_txt_gz_files = len(glob.glob(f"{path_to_watch}/{plate}/*.txt.gz"))
-            if nb_txt_gz_files == 576:
+            # if nb_txt_gz_files == 576:
+            if (nb_txt_gz_files % 192) == 0:
                 print(f"PROCESSING {path_to_watch}/{plate}")
                 self.process_new_directory(f"{path_to_watch}/{plate}")
             else:
@@ -67,12 +70,12 @@ class MyHandler(FileSystemEventHandler):
         start_time = time.time()
 
         while True:
-            # Count the number of .txt.gz files in the new directory
+            #     # Count the number of .txt.gz files in the new directory
             txt_gz_files = glob.glob(directory_path + "/*.txt.gz")
             num_files = len(txt_gz_files)
 
-            # If the desired number of files is found or timeout is reached, break the loop
-            if num_files == 576 or time.time() - start_time > timeout:
+            #     # If the desired number of files is found or timeout is reached, break the loop
+            if (num_files % 192) != 0 or time.time() - start_time > timeout:
                 break
 
             # Sleep for a while before the next poll
@@ -84,7 +87,7 @@ class MyHandler(FileSystemEventHandler):
     def process_txt_gz_files(self, directory_path, txt_gz_files, num_files):
         """Process the found .txt.gz files and execute snakemake command if conditions are met."""
 
-        if num_files == 576:
+        if (num_files % 192) == 0:
             logging.info(f"The new directory contains exactly 576 .txt.gz files.")
             self.execute_snakemake(directory_path, txt_gz_files)
 
@@ -93,24 +96,46 @@ class MyHandler(FileSystemEventHandler):
 
     def execute_snakemake(self, directory_path, txt_gz_files):
         """Execute the snakemake command based on the found prefixes."""
+        pattern = re.compile(r"_lane1(.*?)(iTRU|PE20)(.*?)([A-H]?)(\d{2})(?:_1_|_2_)")
+        prefixes = list()
 
-        pattern = re.compile(r"(iTRU|PE20)\d{3}")
-        prefixes = set()
-
-        for file_path in txt_gz_files:
+        for file_path in sorted(txt_gz_files):
             match = pattern.search(file_path)
+            # print(file_path, match)
             if match:
-                prefix = match.group()[:4]  # Get the first 4 characters, which is the prefix
-                prefixes.add(prefix)
+                prefix = match.group(2)
+                #    print(sample_name)
+                # prefix = match.group(2) + match.group(4) + match.group(5)  # Concatenate the prefix, optional letter, and two digits
+                prefixes.append(prefix)
+                # indexes.add(index)
+        #        pattern = re.compile(r"(iTRU|PE20)\d{3}")
+        #        prefixes = set()
+        #
+        #        for file_path in txt_gz_files:
+        #            match = pattern.search(file_path)
+        #            print(file_path)
+        #            if match:
+        #                prefix = match.group()[:4]  # Get the first 4 characters, which is the prefix
+        #                prefixes.add(prefix)
 
-        if len(prefixes) > 1:
+        if len(set(prefixes)) > 1:
             logging.info("Multiple different prefixes found: %s", prefixes)
         elif prefixes:
-            self.execute_command(directory_path, prefixes.pop())
+            for j, file_path in enumerate(sorted(txt_gz_files)):
+                if (j + 1) % 192 == 0:
+                    match = pattern.search(file_path)
+                    sample_name = match.group(1)
+                    cell = f"{sample_name}{prefixes[0]}{match.group(3)}{match.group(4)}96"
+                    # print(file_path, j, match, sample_name, cell)
+                    # print([match.group(i) for i in range(6)])
+                    self.execute_command(directory_path, prefixes[0], sample_name)
+
+                    # Debug/dev purpose - target a specific file
+                    # self.execute_command(directory_path, prefixes[0], sample_name, cell)
         else:
             logging.info("No match found in any file.")
 
-    def execute_command(self, directory_path, prefix):
+    def execute_command(self, directory_path, prefix, sample, cell=None):
         """Execute the command."""
 
         # Change directory and run the snakemake command
@@ -123,6 +148,7 @@ class MyHandler(FileSystemEventHandler):
             f"genecore_prefix={genecore_prefix}",
             f"genecore_date_folder={date_folder}",
             f"genecore_regex_element={prefix}",
+            f'samples_to_process=["{sample}"]',
             "multistep_normalisation=True",
             "MultiQC=True",
             "split_qc_plot=False",
@@ -131,6 +157,14 @@ class MyHandler(FileSystemEventHandler):
             f"data_location={data_location}",
             "--nolock",
         ]
+
+        if cell:
+            cmd = cmd + [
+                f"{data_location}/{date_folder}/{sample}/multiqc/fastqc/{cell}_1_fastqc.html",
+                "--rerun-triggers",
+                "mtime",
+                "--force",
+            ]
 
         logging.info("Running command: %s", " ".join(cmd + profile_dry_run + dry_run_options))
 
@@ -153,12 +187,24 @@ class MyHandler(FileSystemEventHandler):
 
         # Check the penultimate line
         if str(process.returncode) == str(0):
-            self.run_second_command(cmd, profile_slurm, data_location, date_folder)
+            self.run_second_command(cmd, profile_slurm, data_location, date_folder, sample, cell)
         else:
             logging.info("\nThe output is not as expected.")
 
-    def run_second_command(self, cmd, profile_slurm, data_location, date_folder):
+    def run_second_command(self, cmd, profile_slurm, data_location, date_folder, sample, cell=None):
         """Run the second command and write the output to a log file."""
+
+        report_location = f"{publishdir_location}/{date_folder}/{sample}/reports/{sample}_ashleys-qc-pipeline_report.zip"
+        report_options = [
+            "--report",
+            f"{report_location}",
+            "--report-stylesheet",
+            "/g/korbel2/weber/workspace/mosaicatcher-update/workflow/report/custom-stylesheet.css",
+        ]
+
+        pipeline = "ashleys-qc-pipeline"
+
+        # print(cmd + profile_slurm + report_options)
 
         logging.info("\nThe output is as expected.")
         logging.info("Running command: %s", " ".join(cmd + profile_slurm))
@@ -171,11 +217,44 @@ class MyHandler(FileSystemEventHandler):
         # Convert it to a string
         current_time = now.strftime("%Y%m%d%H%M%S")
 
-        with open(f"watchdog/logs/per-run/{date_folder}_{current_time}.log", "w") as f:
-            process2 = subprocess.Popen(cmd + profile_slurm, stdout=f, stderr=f, universal_newlines=True)
+        with open(f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}.log", "w") as f:
+            process2 = subprocess.Popen(cmd + profile_dry_run, stdout=f, stderr=f, universal_newlines=True)
+            # process2 = subprocess.Popen(cmd + profile_slurm, stdout=f, stderr=f, universal_newlines=True)
             process2.wait()
 
             logging.info("Return code: %s", process2.returncode)
+
+        logging.info("Generating ashleys report.")
+        os.makedirs(os.path.dirname(report_location), exist_ok=True)
+        # os.makedirs(f"{publishdir_location}/{date_folder}/{sample}/reports/", exist_ok=True)
+        logging.info("Running command: %s", " ".join(cmd + profile_slurm + report_options))
+        # Change the permissions of the new directory
+        # subprocess.run(["chmod", "-R", "777", f"{data_location}/{date_folder}"])
+
+        with open(f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}_report.log", "w") as f:
+            print(cmd + profile_slurm + report_options)
+            process2 = subprocess.Popen(cmd + profile_dry_run + report_options, stdout=f, stderr=f, universal_newlines=True)
+            # process2 = subprocess.Popen(cmd + profile_slurm + report_options, stdout=f, stderr=f, universal_newlines=True)
+            process2.wait()
+
+            logging.info("Return code: %s", process2.returncode)
+
+        # ZIPFILE
+
+        import zipfile
+
+        # Check if the file exists and is a valid zip file
+        if zipfile.is_zipfile(report_location):
+            # Specify the directory where you want to extract the contents
+            # If you want to extract in the same directory as the zip file, just use the parent directory
+            extract_location = f"{publishdir_location}/{date_folder}/{sample}/reports/"
+
+            # Extract the zip file
+            with zipfile.ZipFile(report_location, "r") as zip_ref:
+                zip_ref.extractall(extract_location)
+            print(f"Extracted the archive to {extract_location}")
+        else:
+            print(f"{report_location} is not a valid zip file.")
 
         # Change the permissions of the new directory
         subprocess.run(["chmod", "-R", "777", f"{data_location}/{date_folder}"])
