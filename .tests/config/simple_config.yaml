@@ -1,27 +1,35 @@
-version: 2.2.2
-# Option to display all potential options - listed in config_metadata.yaml
-list_commands: False
-## Data location - MUST BE AN ABSOULTE PATH (due to snakemake-symlink issues) - PLEASE MODIFY IT
-# input_bam_location: ".tests/data_CHR17"
-data_location: ".tests/data_CHR17"
-# Reference genome used by BWA to map FASTQ files
-# reference: sandbox.zenodo.org/record/1074721/files/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-# Enable / Disable download of external files (1000G SNV & Fasta ref genome)
-dl_external_files: False
-# Enable / Disable multistep normalisation
-multistep_normalisation: False
-# Ashleys-qc binary classification threshold
-ashleys_threshold: 0.5
-# Enable / Disable FastQC analysis
-FastQC_analysis: False
-# To be informed of pipeline status
+# --------------------------------------------------------
+# Ashleys-QC pipeline Configuration
+# --------------------------------------------------------
+version: 2.2.3
+
+# Email for notifications about the pipeline's status
 email: ""
 
-############################################################################
-#                          ADVANCED PARAMETERS
-############################################################################
+# List of samples to process if multiple are specified
+samples_to_process: []
 
+# Plate size
+plate_size: 96
+
+# --------------------------------------------------------
+# Data location & I/O
+# --------------------------------------------------------
+
+# Absolute path to the data location (modify as needed)
+data_location: ".tests/data_CHR17"
+
+# Directory to publish important data (e.g., stats, plots, counts). Leave empty if not required.
+publishdir: ""
+
+# --------------------------------------------------------
+# Reference Data Configuration
+# --------------------------------------------------------
+
+# Reference genome used by BWA to map FASTQ files
 reference: "hg38"
+
+# Reference genome files' location
 
 references_data:
   "hg38":
@@ -31,70 +39,69 @@ references_data:
   "T2T":
     reference_fasta: "workflow/data/ref_genomes/T2T.fa"
 
-# Boolean parameters
-## Is the pipeline called used as a submodule in mosaicatcher-pipeline?
-mosaicatcher_pipeline: False
-## Enable/Disable hand selection through Jupyter Notebook
-hand_selection: False
+# List of chromosomes to process
+chromosomes:
+  - chr17
 
-# Window size used by mosaic binning algorithm
+# Specify any chromosomes to exclude from processing
+chromosomes_to_exclude: []
+
+# --------------------------------------------------------
+# Quality Control Configuration
+# --------------------------------------------------------
+
+# Threshold for Ashleys-qc binary classification
+ashleys_threshold: 0.5
+
+# Enable or disable FastQC analysis
+MultiQC: False
+
+# --------------------------------------------------------
+# Counts Configuration
+# --------------------------------------------------------
+
+# Enable or disable multistep normalization analysis
+multistep_normalisation: False
+
+# Advanced parameters for multi-step normalisation
+multistep_normalisation_options:
+  min_reads_bin: 5
+  n_subsample: 1000
+  min_reads_cell: 100000
+
+# Window size used by the mosaic binning algorithm
 window: 200000
 
+# Enable or disable hand selection through the Jupyter Notebook
+hand_selection: False
+
+# --------------------------------------------------------
+# GENECORE Configuration
+# --------------------------------------------------------
+
+genecore: False
+genecore_date_folder: ""
+genecore_prefix: "/g/korbel/STOCKS/Data/Assay/sequencing/2023"
+genecore_regex_element: "PE20"
+
+# --------------------------------------------------------
+# Internal Parameters
+# --------------------------------------------------------
+
+# Is the pipeline used as a submodule in mosaicatcher-pipeline?
+mosaicatcher_pipeline: False
+
+# Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
+use_light_data: False
+
+# For snakemake linting
+abs_path: "/"
+
+# Type of plots for counts
 plottype_counts:
   - "raw"
   - "normalised"
 
-alfred_plots:
-  - "dist"
-  - "devi"
-
-plate_orientation: landscape
-
-# Chromosomes list to process
-chromosomes:
-  - chr1
-  - chr2
-  - chr3
-  - chr4
-  - chr5
-  - chr6
-  - chr7
-  - chr8
-  - chr9
-  - chr10
-  - chr11
-  - chr12
-  - chr13
-  - chr14
-  - chr15
-  - chr16
-  - chr17
-  - chr18
-  - chr19
-  - chr20
-  - chr21
-  - chr22
-  - chrX
-  - chrY
-
-# GENECORE
-genecore: False
-samples_to_process: []
-genecore_date_folder: ""
-genecore_prefix: "/g/korbel/shared/genecore"
-
-##### DEV only
-
-# Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
-use_light_data: True
-
-# If specified, will copy important data (stats, plots, counts file) to a second place
-publishdir: ""
-
-# Multi-step normalisation advanced parameters
-multistep_normalisation_options:
-  min_reads_bin: 5
-  n_subsample: 1000
-  min_reads_cell: 1000
-# Others
-abs_path: "/"
+# Option to display all potential commands (as listed in config_metadata.yaml)
+list_commands: False
+# --------------------------------------------------------
