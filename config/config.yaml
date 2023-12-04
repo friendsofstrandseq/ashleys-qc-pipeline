@@ -1,13 +1,16 @@
 # --------------------------------------------------------
 # Ashleys-QC pipeline Configuration
 # --------------------------------------------------------
-version: 2.2.2
+version: 2.2.3
 
 # Email for notifications about the pipeline's status
 email: ""
 
 # List of samples to process if multiple are specified
 samples_to_process: []
+
+# Plate size
+plate_size: 96
 
 # --------------------------------------------------------
 # Data location & I/O
