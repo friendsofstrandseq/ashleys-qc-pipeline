@@ -62,3 +62,5 @@ raw_map(
     ggtitle(paste0("Sample: ", snakemake@wildcards[["sample"]], " | ASHLEYS probabilities"))
 
 dev.off()
+
+write.table(ashleys_data, file = snakemake@output[["well_table"]], sep = "\t", row.names = FALSE, quote = FALSE)

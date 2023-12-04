@@ -15,6 +15,7 @@ if config["genecore"] is True and config["genecore_date_folder"]:
 
         localrules:
             genecore_symlink,
+            symlink_bam_ashleys,
 
     rule genecore_symlink:
         input:
@@ -29,11 +30,12 @@ if config["genecore"] is True and config["genecore_date_folder"]:
         log:
             "{folder}/log/genecore_symlink/{sample}/{cell}_{pair}.log",
         shell:
-            "ln -s {input} {output}"
+            "ln -f -s {input} {output}"
 
     ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
 
 
+# if config["use_light_data"] is False:
 localrules:
     symlink_bam_ashleys,
 
@@ -134,7 +136,7 @@ rule mark_duplicates:
     conda:
         "../envs/ashleys_base.yaml"
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
         time="10:00:00",
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
@@ -300,6 +302,7 @@ if config["use_light_data"] is False:
                 subcategory="{sample}",
                 labels={"Sample": "{sample}", "Plot Type": "Probabilities"},
             ),
+            well_table="{folder}/{sample}/plots/plate/ashleys_well_table.tsv",
         log:
             "{folder}/log/plot_plate/{sample}.log",
         conda:
@@ -326,12 +329,40 @@ if config["publishdir"] != "":
 
     rule publishdir_outputs_ashleys:
         input:
-            list_publishdir=publishdir_fct(),
+            list_publishdir=publishdir_fct,
         output:
-            touch("{folder}/config/publishdir_outputs.ok"),
+            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
         log:
-            "{folder}/log/publishdir_outputs/publishdir_outputs.log",
+            "{folder}/log/publishdir_outputs/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:
             "../scripts/utils/publishdir.py"
+
+
+rule save_config:
+    input:
+        "config/config.yaml",
+    output:
+        "{folder}/{sample}/config/config_ashleys.yaml",
+    log:
+        "{folder}/log/save_config/{sample}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    resources:
+        mem_mb=get_mem_mb,
+    script:
+        "../scripts/utils/dump_config.py"
+
+
+rule ashleys_final_results:
+    input:
+        get_final_output,
+    output:
+        "{folder}/{sample}/config/ashleys_final_results.ok",
+    log:
+        "{folder}/log/ashleys_final_results/{sample}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    shell:
+        "touch {output}"

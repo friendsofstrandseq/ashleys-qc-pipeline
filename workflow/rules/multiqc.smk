@@ -9,7 +9,7 @@ rule fastqc:
             subcategory="{sample}",
             labels={"Sample": "{sample}", "Cell": "{cell}", "Pair": "{pair}"},
         ),
-        zip="{folder}/{sample}/fastqc/{cell}_{pair}_fastqc.zip",
+        zip="{folder}/{sample}/multiqc/fastqc/{cell}_{pair}_fastqc.zip",
     params:
         "--quiet",
     log:
@@ -137,6 +137,8 @@ rule multiqc:
         ),
     log:
         "{folder}/{sample}/log/multiqc/{sample}.log",
+    resources:
+        mem_mb=get_mem_mb_heavy,
     params:
         multiqc_input=lambda wc, input: "{abs_path}".format(
             abs_path=config["abs_path"]
