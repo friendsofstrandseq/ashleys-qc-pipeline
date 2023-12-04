@@ -125,47 +125,69 @@ class HandleInput:
         Returns:
             _type_: _description_
         """
-        complete_df_list = list()
+        from pprint import pprint
+        from collections import Counter
 
-        # List of folders/files to not consider (restrict to samples only)
-        l = sorted(
-            [
-                e
-                for e in os.listdir(
-                    "{genecore_prefix}/{date_folder}".format(
-                        genecore_prefix=config["genecore_prefix"],
-                        date_folder=config["genecore_date_folder"],
-                    )
-                )
-                if e.endswith(".txt.gz")
-            ]
+        directory_path = f"{config['genecore_prefix']}/{config['genecore_date_folder']}"
+
+        l = sorted([e for e in os.listdir(directory_path) if e.endswith(".txt.gz")])
+
+        complete_df_list = list()
+        # print(thisdir)
+        genecore_prefix = config["genecore_prefix"]
+        date_folder = config["genecore_date_folder"]
+        # print(f"{genecore_prefix}/{date_folder}")
+
+        # Pattern to extract sample name and index
+        pattern = re.compile(r"(.*_lane1)(.*?)(iTRU|PE20)(.*?)(\d{2})(?:_1_|_2_)")
+
+        samples = list()
+        prefixes = list()
+        indexes = list()
+        plate_types = list()
+        d_master = collections.defaultdict(
+            lambda: {
+                "indexes": set(),
+                "file_prefix": "",
+                "plate_type": "",
+                "index_pattern": "",
+            }
         )
 
-        # Create a list of  files to process for each sample
-        d_master = collections.defaultdict(dict)
-        sub_l = list()
-        for j, e in enumerate(l):
-            # print(j,e)
-            sub_l.append(e)
-            if (j + 1) % 192 == 0:
-                common_element = findstem(sub_l)
-                l_elems = common_element.split("lane1")
-                prefix = l_elems[0]
-                sample = l_elems[1].split(
-                    "{regex_element}".format(
-                        regex_element=config["genecore_regex_element"]
-                    )
-                )[0]
-                index = l_elems[1].split(
-                    "{regex_element}".format(
-                        regex_element=config["genecore_regex_element"]
-                    )
-                )[1]
-                sub_l = list()
+        # First pass: Count occurrences of each sample_name
+        file_counts_per_sample = Counter()
+        for file_path in l:
+            match = pattern.search(file_path)
+            if match:
+                sample_name = match.group(2)
+                file_counts_per_sample[sample_name] += 1
 
-                d_master[sample]["prefix"] = prefix
-                d_master[sample]["index"] = index
-                d_master[sample]["common_element"] = common_element
+        # Second pass: Process files and determine plate type per sample
+        for j, file_path in enumerate(sorted(l)):
+            match = pattern.search(file_path)
+            if match:
+                sample_name = match.group(2)
+                index = match.group(4)
+                indexes.append(index)
+                d_master[sample_name]["indexes"].add(index)
+                file_count = file_counts_per_sample[sample_name]
+
+                # Determine plate type using modulo 96 operation
+                if file_count % 96 != 0:
+                    raise ValueError(
+                        f"Invalid file count for sample {sample_name} with file count {file_count}. Must be a multiple of 96."
+                    )
+                plate_type = int(file_count / 2)
+
+                if (j + 1) % file_count == 0:
+                    prefixes.append(match.group(3))
+                    d_master[sample_name]["file_prefix"] = match.group(1)
+                    d_master[sample_name]["index_pattern"] = match.group(3)
+                    plate = directory_path.split("/")[-1]
+                    samples.append(sample_name)
+                    plate_types.append(plate_type)
+                    d_master[sample_name]["plate_type"] = plate_type
+
         samples_to_process = (
             config["samples_to_process"]
             if len(config["samples_to_process"]) > 0
@@ -182,8 +204,8 @@ class HandleInput:
                 "{data_location}/{sample}/fastq/{sample}{regex_element}{index}{cell_nb}.{pair}.fastq.gz",
                 data_location=config["data_location"],
                 sample=sample,
-                regex_element=config["genecore_regex_element"],
-                index=d_master[sample]["index"],
+                regex_element=d_master[sample]["index_pattern"],
+                index=d_master[sample]["indexes"],
                 cell_nb=[str(e).zfill(2) for e in list(range(1, 97))],
                 pair=["1", "2"],
             )
@@ -191,7 +213,8 @@ class HandleInput:
             if sample in samples_to_process
         ]
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-        # pprint(genecore_list)
+        # pprint(d_master)
+
         complete_df_list = list()
 
         for sample in d_master:
@@ -210,11 +233,12 @@ class HandleInput:
                 df["Full_path"] = df[["Folder", "File"]].apply(
                     lambda r: f"{r['Folder']}/{r['File']}.fastq.gz", axis=1
                 )
+
                 df["Genecore_path"] = df["File"].apply(
-                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['prefix']}lane1{r.replace('.', '_')}_sequence.txt.gz"
+                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['file_prefix']}{r.replace('.', '_')}_sequence.txt.gz"
                 )
                 df["Genecore_file"] = df["File"].apply(
-                    lambda r: f"{d_master[sample]['prefix']}lane1{r.replace('.', '_')}"
+                    lambda r: f"{d_master[sample]['file_prefix']}{r.replace('.', '_')}"
                 )
                 df["Genecore_file"] = df["Genecore_file"].apply(
                     lambda r: "_".join(r.split("_")[:-1])
@@ -229,6 +253,7 @@ class HandleInput:
             drop=True
         )
         pd.options.display.max_colwidth = 200
+
         # print(complete_df)
         return complete_df, d_master
 
@@ -314,6 +339,7 @@ class HandleInput:
         complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(
             drop=True
         )
+
         return complete_df
 
 
@@ -390,7 +416,7 @@ plottype_counts = (
 # print(plottype_counts)
 
 
-def get_final_output():
+def get_final_output(wildcards):
     """
     Function called by snakemake rule all to run the pipeline
     """
@@ -403,7 +429,7 @@ def get_final_output():
             expand(
                 "{path}/{sample}/multiqc/multiqc_report/multiqc_report.html",
                 path=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
             ),
         )
 
@@ -415,7 +441,7 @@ def get_final_output():
             expand(
                 "{path}/{sample}/cell_selection/labels.tsv",
                 path=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
             )
         )
 
@@ -425,14 +451,14 @@ def get_final_output():
             expand(
                 "{output_folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
                 output_folder=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
                 plottype_counts=plottype_counts,
             ),
         )
 
     # Plate plots
 
-    for sample in samples:
+    for sample in [wildcards.sample]:
         if len(cell_per_sample[sample]) in [96, 384]:
             final_list.extend(
                 [
@@ -452,17 +478,43 @@ def get_final_output():
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/config/publishdir_outputs.ok",
+                "{folder}/{sample}/config/publishdir_outputs.ok",
                 folder=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
             )
         )
 
-    # print(final_list)
+    # Config section
+
+    final_list.extend(
+        expand(
+            "{folder}/{sample}/config/config_ashleys.yaml",
+            folder=config["data_location"],
+            sample=wildcards.sample,
+        ),
+    )
+
     return final_list
 
 
-def publishdir_fct():
+def get_final_result():
+    """
+    Input function of the pipeline, will retrieve all 'end' outputs
+    """
+    final_list = list()
+
+    final_list.extend(
+        expand(
+            "{folder}/{sample}/config/ashleys_final_results.ok",
+            folder=config["data_location"],
+            sample=samples,
+        )
+    )
+
+    return final_list
+
+
+def publishdir_fct(wildcards):
     """
     Restricted for ASHLEYS at the moment
     Backup files on a secondary location
@@ -472,17 +524,18 @@ def publishdir_fct():
         "{folder}/{sample}/cell_selection/labels.tsv",
         "{folder}/{sample}/counts/{sample}.info_raw",
         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
-        "config/config.yaml",
+        "{folder}/{sample}/config/config_ashleys.yaml",
     ]
     final_list = [
-        expand(e, folder=config["data_location"], sample=samples)
+        expand(e, folder=config["data_location"], sample=wildcards.sample)
         for e in list_files_to_copy
     ]
+    final_list = [sub_e for e in final_list for sub_e in e]
     final_list.extend(
         expand(
             "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
             folder=config["data_location"],
-            sample=samples,
+            sample=wildcards.sample,
             plottype_counts=plottype_counts,
         )
     )
@@ -492,7 +545,7 @@ def publishdir_fct():
             expand(
                 "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
                 folder=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
                 plate_plot=["predictions", "probabilities"],
             )
         )
@@ -500,14 +553,14 @@ def publishdir_fct():
             expand(
                 "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
                 folder=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
             )
         )
         final_list.extend(
             expand(
                 "{folder}/{sample}/config/bypass_cell.txt",
                 folder=config["data_location"],
-                sample=samples,
+                sample=wildcards.sample,
             )
         )
 
