@@ -29,7 +29,7 @@ if config["list_commands"] is False:
 
     rule all:
         input:
-            get_final_output(),
+            get_final_result(),
 
     if config["email"]:
 
