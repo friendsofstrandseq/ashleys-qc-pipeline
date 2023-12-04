@@ -1,8 +1,8 @@
 name: ashleys-qc-pipeline workflow checks
 
 on:
-  schedule:
-    - cron: "0 0 * * 0"
+  # schedule:
+  #   - cron: "0 0 * * 0"
   push:
     branches:
       - "**"
