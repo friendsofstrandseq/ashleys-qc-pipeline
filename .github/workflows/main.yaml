@@ -2,15 +2,11 @@ name: ashleys-qc-pipeline workflow checks
 
 on:
   schedule:
-    # Run every Sunday at 00:00 UTC on the master branch
-    - cron:  '0 0 * * 0'
-      # branches:
-      #   - master
+    - cron: "0 0 * * 0"
   push:
     branches:
-      - '*'
-      - '!master'
-
+      - "*"
+      - "!master"
 
 jobs:
   # WORK
@@ -36,13 +32,9 @@ jobs:
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          # stagein: "mamba env remove -n snakemake && mamba create -y -n snakemake -c conda-forge -c bioconda unzip snakemake pandas pysam tqdm imagemagick && source activate snakemake && ls -l && pwd"
           args: "--lint --config ashleys_pipeline=True"
   Testing_ashleys:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -61,9 +53,6 @@ jobs:
 
   Testing_ashleys_fastqc_enabled:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -82,9 +71,6 @@ jobs:
 
   Testing_ashleys_ms_norm_enabled:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -102,9 +88,6 @@ jobs:
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True --conda-frontend mamba --report report.zip"
   Testing_ashleys_hg38:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -122,9 +105,6 @@ jobs:
           args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_ashleys_hg19:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -142,9 +122,6 @@ jobs:
           args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_ashleys_T2T:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -162,9 +139,6 @@ jobs:
           args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_ashleys_mm10:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -182,9 +156,6 @@ jobs:
           args: "--cores 1 --use-conda --config reference=mm10 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
   Testing_jub_nb:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -202,9 +173,6 @@ jobs:
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba --report report.zip"
   Testing_publishdir:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
@@ -222,9 +190,6 @@ jobs:
           args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba --report report.zip"
   Testing_list_commands:
     runs-on: ubuntu-latest
-    # needs:
-    #   - Linting
-    #   - Formatting
     steps:
       - uses: actions/checkout@v3.3.0
       - name: Testing data
