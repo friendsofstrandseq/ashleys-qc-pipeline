@@ -92,7 +92,7 @@ genecore_regex_element: "PE20"
 mosaicatcher_pipeline: False
 
 # Overwrite ASHLEYS PREDICTIONS for GitHub & smoke dataset purpose
-use_light_data: False
+use_light_data: True
 
 # For snakemake linting
 abs_path: "/"
