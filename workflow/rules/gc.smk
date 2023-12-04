@@ -78,7 +78,7 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
         output:
             "{folder}/{sample}/counts/multistep_normalisation/{sample}.txt.scaled.GC.VST.reformat.gz",
         log:
-            "{folder}/{sample}/log/reformat_ms_norm/{sample}.log"
+            "{folder}/{sample}/log/reformat_ms_norm/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         resources:
