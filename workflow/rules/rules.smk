@@ -137,7 +137,6 @@ rule mark_duplicates:
         "../envs/ashleys_base.yaml"
     resources:
         mem_mb=get_mem_mb_heavy,
-        # partition="bigmem",
         time="10:00:00",
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
