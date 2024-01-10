@@ -469,4 +469,6 @@ snakemake --cores 12 --use-conda --config hand_selection=True data_location=<DAT
 
 # References
 
+> MosaiCatcher v2 publication: Weber Thomas, Marco Raffaele Cosenza, and Jan Korbel. 2023. ‘MosaiCatcher v2: A Single-Cell Structural Variations Detection and Analysis Reference Framework Based on Strand-Seq’. Bioinformatics 39 (11): btad633. https://doi.org/10.1093/bioinformatics/btad633.
+
 > Gros, Christina, Ashley D Sanders, Jan O Korbel, Tobias Marschall, and Peter Ebert. “ASHLEYS: Automated Quality Control for Single-Cell Strand-Seq Data.” Bioinformatics 37, no. 19 (October 1, 2021): 3356–57. https://doi.org/10.1093/bioinformatics/btab221.
