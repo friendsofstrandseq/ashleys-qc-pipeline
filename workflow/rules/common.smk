@@ -497,7 +497,7 @@ def get_final_output(wildcards):
 
     final_list.extend(
         expand(
-            "{folder}/{sample}/config/config_ashleys.yaml.ok",
+            "{folder}/{sample}/config/config_ashleys.yaml",
             folder=config["data_location"],
             sample=wildcards.sample,
         ),
