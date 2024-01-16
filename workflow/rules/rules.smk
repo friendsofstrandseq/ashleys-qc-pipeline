@@ -325,7 +325,7 @@ elif config["use_light_data"] is True:
             "../scripts/utils/dev_all_cells_correct.py"
 
 
-if config["publishdir"] != "":
+if config["publishdir"] != "" and config["mosaicatcher_pipeline"] is False:
 
     rule publishdir_outputs_ashleys:
         input:
