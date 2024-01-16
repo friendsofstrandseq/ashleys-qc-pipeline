@@ -70,6 +70,29 @@ jobs:
         run: |
           snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
+  Testing_ashleys_with_custom_python_singularity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          lfs: true
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Add Conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          conda install -c conda-forge mamba
+      - name: Setup snakemake
+        run: |
+          mamba install -c conda-forge -c bioconda "snakemake==7.32.4" singularity
+      - name: Run workflow
+        run: |
+          snakemake --cores 1 --use-conda --use-singularity --configfile .tests/config/simple_config.yaml -p --verbose --debug --snakefile workflow/Snakefile
+
   # Testing_ashleys_fastqc_enabled:
   #   runs-on: ubuntu-latest
   #   steps:
