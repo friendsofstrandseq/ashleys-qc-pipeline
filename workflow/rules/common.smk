@@ -488,10 +488,10 @@ def get_final_output(wildcards):
 
     final_list.extend(
         expand(
-            "{folder}/{sample}/config/conda_export/{conda}.yaml",
+            "{folder}/{sample}/config/conda_export/{conda_env}.yaml",
             folder=config["data_location"],
             sample=wildcards.sample,
-            conda=["ashleys_base", "ashleys_rtools"],
+            conda_env=["ashleys_base", "ashleys_rtools"],
         ),
     )
 
