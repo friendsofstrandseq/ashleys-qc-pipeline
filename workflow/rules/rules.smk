@@ -61,7 +61,7 @@ rule bwa_index:
     threads: 16
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     wrapper:
         "v1.7.0/bio/bwa/index"
 
@@ -100,7 +100,7 @@ rule bwa_strandseq_to_reference_alignment:
         idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     conda:
         "../envs/ashleys_base.yaml"
     shell:
@@ -119,7 +119,7 @@ rule samtools_sort_bam:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
         mem_mb=get_mem_mb,
-        time="10:00:00",
+        time=600,
     conda:
         "../envs/ashleys_base.yaml"
     shell:
@@ -137,7 +137,7 @@ rule mark_duplicates:
         "../envs/ashleys_base.yaml"
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
@@ -193,7 +193,7 @@ rule generate_features:
         ),
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     shell:
         "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
@@ -212,7 +212,7 @@ rule predict:
         model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
     resources:
         mem_mb=get_mem_mb,
-        time="10:00:00",
+        time=600,
     shell:
         "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
@@ -325,15 +325,15 @@ elif config["use_light_data"] is True:
             "../scripts/utils/dev_all_cells_correct.py"
 
 
-if config["publishdir"] != "" and config["mosaicatcher_pipeline"] is False:
+if config["publishdir"] != "":
 
     rule publishdir_outputs_ashleys:
         input:
             list_publishdir=publishdir_fct,
         output:
-            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
+            touch("{folder}/{sample}/config/publishdir_outputs_ashleys.ok"),
         log:
-            "{folder}/log/publishdir_outputs/{sample}.log",
+            "{folder}/log/publishdir_outputs_ashleys/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:

@@ -478,7 +478,7 @@ def get_final_output(wildcards):
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/{sample}/config/publishdir_outputs.ok",
+                "{folder}/{sample}/config/publishdir_outputs_ashleys.ok",
                 folder=config["data_location"],
                 sample=wildcards.sample,
             )
@@ -525,55 +525,79 @@ def get_final_result():
 
 def publishdir_fct(wildcards):
     """
-    Restricted for ASHLEYS at the moment
-    Backup files on a secondary location
+    Function to generate a list of files and directories for backup.
     """
-    list_files_to_copy = [
-        "{folder}/{sample}/cell_selection/labels_raw.tsv",
-        "{folder}/{sample}/cell_selection/labels.tsv",
-        "{folder}/{sample}/counts/{sample}.info_raw",
-        "{folder}/{sample}/counts/{sample}.txt.raw.gz",
-        "{folder}/{sample}/config/config_ashleys.yaml",
-    ]
-    final_list = [
-        expand(e, folder=config["data_location"], sample=wildcards.sample)
-        for e in list_files_to_copy
-    ]
-    final_list = [sub_e for e in final_list for sub_e in e]
-    final_list.extend(
-        expand(
-            "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
-            folder=config["data_location"],
-            sample=wildcards.sample,
-            plottype_counts=plottype_counts,
-        )
-    )
 
-    if config["use_light_data"] is False:
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-                plate_plot=["predictions", "probabilities"],
-            )
-        )
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-            )
-        )
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/config/bypass_cell.txt",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-            )
-        )
+    print(config)
+
+    list_files_to_copy = [
+        e
+        for e in get_final_output(wildcards)
+        if "publishdir_outputs_ashleys.ok" not in e
+    ]
+
+    # Expand the paths for files
+    expanded_files = [
+        expand(file_path, folder=config["data_location"], sample=wildcards.sample)
+        for file_path in list_files_to_copy
+    ]
+    final_list = [sub_e for e in expanded_files for sub_e in e]
+    # print(final_list)
 
     return final_list
+
+
+# def publishdir_fct(wildcards):
+#     """
+#     Restricted for ASHLEYS at the moment
+#     Backup files on a secondary location
+#     """
+#     list_files_to_copy = [
+#         "{folder}/{sample}/cell_selection/labels_raw.tsv",
+#         "{folder}/{sample}/cell_selection/labels.tsv",
+#         "{folder}/{sample}/counts/{sample}.info_raw",
+#         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
+#         "{folder}/{sample}/config/config_ashleys.yaml",
+#     ]
+#     final_list = [
+#         expand(e, folder=config["data_location"], sample=wildcards.sample)
+#         for e in list_files_to_copy
+#     ]
+#     final_list = [sub_e for e in final_list for sub_e in e]
+#     final_list.extend(
+#         expand(
+#             "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+#             folder=config["data_location"],
+#             sample=wildcards.sample,
+#             plottype_counts=plottype_counts,
+#         )
+#     )
+
+#     if config["use_light_data"] is False:
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#                 plate_plot=["predictions", "probabilities"],
+#             )
+#         )
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#             )
+#         )
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/config/bypass_cell.txt",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#             )
+#         )
+
+#     return final_list
 
 
 def get_mem_mb(wildcards, attempt):
