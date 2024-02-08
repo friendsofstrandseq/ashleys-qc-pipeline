@@ -298,11 +298,17 @@ class HandleInput:
             "strandphaser",
         ]
 
-        for sample in [
+        l_to_process = [
             e
             for e in os.listdir(thisdir)
             if e not in exclude and e.endswith(".zip") is False
-        ]:
+        ]
+        if config["samples_to_process"]:
+            l_to_process = [
+                e for e in l_to_process if e in config["samples_to_process"]
+            ]
+
+        for sample in l_to_process:
             # Create a list of  files to process for each sample
             l_files_all = [
                 f
@@ -313,12 +319,13 @@ class HandleInput:
                 )
                 if f.endswith(ext)
             ]
+            # print(l_files_all)
 
             for f in l_files_all:
                 if len(f.split("_")) == 4:
                     assert (
                         len(f.split("_")) != 4
-                    ), "Your file name is using 4 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
+                    ), "Your file name is using 3 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
 
             # print(l_files_all)
             # Dataframe creation
@@ -528,7 +535,7 @@ def publishdir_fct(wildcards):
     Function to generate a list of files and directories for backup.
     """
 
-    print(config)
+    # print(config)
 
     list_files_to_copy = [
         e
