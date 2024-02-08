@@ -3,12 +3,12 @@ import pandas as pd
 # Read 200kb bins file
 
 binbed = pd.read_csv(
-    snakemake.input.bin_bed,
+    snakemake.input.bin_bed[0],
     # "../../../../mosaicatcher-update/workflow/data/bin_200kb_all.bed",
     sep="\t",
-    names=["chrom", "start", "end", "bin_id"],
+    # names=["chrom", "start", "end", "scalar", "class"],
 )
-binbed["ID"] = (
+binbed["bin_id"] = (
     binbed["chrom"].astype(str)
     + "_"
     + binbed["start"].astype(str)
@@ -16,7 +16,11 @@ binbed["ID"] = (
     + binbed["end"].astype(str)
 )
 
+binbed = binbed.drop(columns=["scalar"])
+
+
 # Turn chrom into categorical
+max_chrom = 23 if snakemake.config["reference"] != "mm10" else 20
 binbed["chrom"] = pd.Categorical(
     binbed["chrom"],
     categories=["chr{}".format(e) for e in range(1, 23)] + ["chrX", "chrY"],
@@ -25,26 +29,7 @@ binbed["chrom"] = pd.Categorical(
 
 # Sort & filter out chrY #TMP / can be changed
 binbed = binbed.sort_values(by=["chrom", "start", "end"]).reset_index(drop=True)
-binbed["w"], binbed["c"], binbed["class"] = 0, 0, None
-
-
-# Determine if using mm10 data and load normalization file if so
-reference = snakemake.config["reference"]
-if reference == "mm10":
-    print(reference)
-    norm_file = "workflow/data/normalization/mm10/HGSVC.200000.txt"
-    norm_df = pd.read_csv(norm_file, sep="\t")
-    norm_df["ID"] = (
-        norm_df["chrom"].astype(str)
-        + "_"
-        + norm_df["start"].astype(str)
-        + "_"
-        + norm_df["end"].astype(str)
-    )
-    norm_df["class"] = norm_df["class"].fillna("None")
-    norm_df["class"] = norm_df["class"].astype(str)
-else:
-    norm_df = pd.DataFrame()
+binbed["w"], binbed["c"] = 0, 0
 
 # Read SV file
 # df = pd.read_csv("../../../../mosaicatcher-update/.tests/data_CHR17/RPE-BM510/counts/RPE-BM510.txt.raw.gz", sep="\t")
@@ -52,7 +37,7 @@ else:
 # sep = "," if "/multistep_normalisation/" in snakemake.input.counts else "\t"
 sep = "\t"
 df = pd.read_csv(snakemake.input.counts, sep=sep, compression="gzip")
-df["ID"] = (
+df["bin_id"] = (
     df["chrom"].astype(str)
     + "_"
     + df["start"].astype(str)
@@ -61,29 +46,38 @@ df["ID"] = (
 )
 df["w"] = df["w"].round(0).astype(int)
 df["c"] = df["c"].round(0).astype(int)
+df["class"] = df["class"].astype(str)
 if sep == ",":
     df["tot_count"] = df["tot_count"].round(0).astype(int)
 
-# Adjust counts based on normalization data if applicable
-if not norm_df.empty:
-    df = df.merge(norm_df[["ID", "class"]], on="ID", how="left")
-    df.loc[df["class_y"] == "None", ["w", "c"]] = 0
-    df.drop(columns=["class_y"], inplace=True)
-    df = df.rename(columns={"class_x": "class"})
-    df["class"] = df["class"].fillna("None")
-    print(df)
 
+# Update 'class' in df using norm_df
+df = df.merge(binbed[["bin_id", "class"]], on="bin_id", how="left")
+df["class"] = df.apply(
+    lambda x: "None" if x["class_y"] != "good" else x["class_x"], axis=1
+)
+
+# set w & c to 0 for None class if None in class_y
+df.loc[df["class_y"] == "None", "w"] = 0
+df.loc[df["class_y"] == "None", "c"] = 0
+
+
+df = df.drop(columns=["class_x", "class_y"])
+# df.loc[df["class"] == "None", "w"] = 0
+# df.loc[df["class"] == "None", "c"] = 0
 
 ## Populate counts df for each cell in order to have all bins represented
 l = list()
 
 # Loop over cells
-for cell in df.cell.unique().tolist():
+for cell in df.cell.unique().tolist()[1:6]:
     # Outer join to retrieve both real count values from specified chromosome and empty bins
     tmp_df = pd.concat(
         [
             binbed.loc[
-                ~binbed["ID"].isin(df.loc[df["cell"] == cell].ID.values.tolist())
+                ~binbed["bin_id"].isin(
+                    df.loc[df["cell"] == cell].bin_id.values.tolist()
+                )
             ],
             df.loc[df["cell"] == cell],
         ]
@@ -96,6 +90,11 @@ for cell in df.cell.unique().tolist():
 
 # Concat list of DF and output
 populated_df = pd.concat(l).sort_values(by=["cell", "chrom", "start"])
+print(populated_df)
+populated_df["start"] = populated_df["start"].astype(int)
+populated_df["end"] = populated_df["end"].astype(int)
+populated_df["w"] = populated_df["w"].astype(int)
+populated_df["c"] = populated_df["c"].astype(int)
 # populated_df.to_csv("test.txt.gz", compression="gzip", sep="\t", index=False)
 populated_df.to_csv(
     snakemake.output.populated_counts, compression="gzip", sep="\t", index=False

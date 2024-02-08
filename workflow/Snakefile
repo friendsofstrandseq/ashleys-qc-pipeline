@@ -18,6 +18,7 @@ include: "rules/rules.smk"
 include: "rules/gc.smk"
 include: "rules/count.smk"
 include: "rules/multiqc.smk"
+include: "rules/utils.smk"
 
 
 if config["mosaicatcher_pipeline"] is False:

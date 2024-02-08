@@ -298,11 +298,17 @@ class HandleInput:
             "strandphaser",
         ]
 
-        for sample in [
+        l_to_process = [
             e
             for e in os.listdir(thisdir)
             if e not in exclude and e.endswith(".zip") is False
-        ]:
+        ]
+        if config["samples_to_process"]:
+            l_to_process = [
+                e for e in l_to_process if e in config["samples_to_process"]
+            ]
+
+        for sample in l_to_process:
             # Create a list of  files to process for each sample
             l_files_all = [
                 f
@@ -313,12 +319,13 @@ class HandleInput:
                 )
                 if f.endswith(ext)
             ]
+            # print(l_files_all)
 
             for f in l_files_all:
                 if len(f.split("_")) == 4:
                     assert (
                         len(f.split("_")) != 4
-                    ), "Your file name is using 4 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
+                    ), "Your file name is using 3 times the '_' character, which is currently not supported by ashleys-qc, please rename your files"
 
             # print(l_files_all)
             # Dataframe creation
@@ -478,13 +485,22 @@ def get_final_output(wildcards):
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/{sample}/config/publishdir_outputs.ok",
+                "{folder}/{sample}/config/publishdir_outputs_ashleys.ok",
                 folder=config["data_location"],
                 sample=wildcards.sample,
             )
         )
 
     # Config section
+
+    final_list.extend(
+        expand(
+            "{folder}/{sample}/config/conda_export/{conda_env}.yaml",
+            folder=config["data_location"],
+            sample=wildcards.sample,
+            conda_env=["ashleys_base", "ashleys_rtools"],
+        ),
+    )
 
     final_list.extend(
         expand(
@@ -516,55 +532,79 @@ def get_final_result():
 
 def publishdir_fct(wildcards):
     """
-    Restricted for ASHLEYS at the moment
-    Backup files on a secondary location
+    Function to generate a list of files and directories for backup.
     """
-    list_files_to_copy = [
-        "{folder}/{sample}/cell_selection/labels_raw.tsv",
-        "{folder}/{sample}/cell_selection/labels.tsv",
-        "{folder}/{sample}/counts/{sample}.info_raw",
-        "{folder}/{sample}/counts/{sample}.txt.raw.gz",
-        "{folder}/{sample}/config/config_ashleys.yaml",
-    ]
-    final_list = [
-        expand(e, folder=config["data_location"], sample=wildcards.sample)
-        for e in list_files_to_copy
-    ]
-    final_list = [sub_e for e in final_list for sub_e in e]
-    final_list.extend(
-        expand(
-            "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
-            folder=config["data_location"],
-            sample=wildcards.sample,
-            plottype_counts=plottype_counts,
-        )
-    )
 
-    if config["use_light_data"] is False:
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-                plate_plot=["predictions", "probabilities"],
-            )
-        )
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-            )
-        )
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/config/bypass_cell.txt",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-            )
-        )
+    # print(config)
+
+    list_files_to_copy = [
+        e
+        for e in get_final_output(wildcards)
+        if "publishdir_outputs_ashleys.ok" not in e
+    ]
+
+    # Expand the paths for files
+    expanded_files = [
+        expand(file_path, folder=config["data_location"], sample=wildcards.sample)
+        for file_path in list_files_to_copy
+    ]
+    final_list = [sub_e for e in expanded_files for sub_e in e]
+    # print(final_list)
 
     return final_list
+
+
+# def publishdir_fct(wildcards):
+#     """
+#     Restricted for ASHLEYS at the moment
+#     Backup files on a secondary location
+#     """
+#     list_files_to_copy = [
+#         "{folder}/{sample}/cell_selection/labels_raw.tsv",
+#         "{folder}/{sample}/cell_selection/labels.tsv",
+#         "{folder}/{sample}/counts/{sample}.info_raw",
+#         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
+#         "{folder}/{sample}/config/config_ashleys.yaml",
+#     ]
+#     final_list = [
+#         expand(e, folder=config["data_location"], sample=wildcards.sample)
+#         for e in list_files_to_copy
+#     ]
+#     final_list = [sub_e for e in final_list for sub_e in e]
+#     final_list.extend(
+#         expand(
+#             "{folder}/{sample}/plots/counts/CountComplete.{plottype_counts}.pdf",
+#             folder=config["data_location"],
+#             sample=wildcards.sample,
+#             plottype_counts=plottype_counts,
+#         )
+#     )
+
+#     if config["use_light_data"] is False:
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/plots/plate/ashleys_plate_{plate_plot}.pdf",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#                 plate_plot=["predictions", "probabilities"],
+#             )
+#         )
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#             )
+#         )
+#         final_list.extend(
+#             expand(
+#                 "{folder}/{sample}/config/bypass_cell.txt",
+#                 folder=config["data_location"],
+#                 sample=wildcards.sample,
+#             )
+#         )
+
+#     return final_list
 
 
 def get_mem_mb(wildcards, attempt):
