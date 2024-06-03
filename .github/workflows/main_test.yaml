@@ -68,7 +68,7 @@ jobs:
           mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
       - name: Run workflow
         run: |
-          snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --default-storage-provider http --debug --snakefile workflow/Snakefile
+          snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   # Testing_ashleys_with_custom_python_singularity:
   #   runs-on: ubuntu-latest
