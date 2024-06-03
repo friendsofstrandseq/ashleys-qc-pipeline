@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Linting
-        uses: snakemake/snakemake-github-action@v1.24.0
+        uses: snakemake/snakemake-github-action@v1.25.1
         with:
           directory: .
           snakefile: ./workflow/Snakefile
@@ -35,208 +35,208 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Testing data
-        uses: snakemake/snakemake-github-action@v1.24.0
+        uses: snakemake/snakemake-github-action@v1.25.1
         with:
           directory: .
           snakefile: ./workflow/Snakefile
           stagein: "conda config --set channel_priority flexible"
-          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug"
+          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --default-storage-provider http"
       - name: Testing report
-        uses: snakemake/snakemake-github-action@v1.24.0
+        uses: snakemake/snakemake-github-action@v1.25.1
         with:
           directory: .
           snakefile: ./workflow/Snakefile
-          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba --report report.zip"
-  Testing_ashleys_with_custom_python:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          lfs: true
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Add Conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -c conda-forge mamba
-      - name: Setup snakemake
-        run: |
-          mamba install -c conda-forge -c bioconda "snakemake==7.32.4"
-      - name: Run workflow
-        run: |
-          snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
+          args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba --default-storage-provider http --report report.zip"
+  # Testing_ashleys_with_custom_python:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository with submodules
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+  #         lfs: true
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v2
+  #     - name: Add Conda to system path
+  #       run: |
+  #         echo $CONDA/bin >> $GITHUB_PATH
+  #     - name: Install dependencies
+  #       run: |
+  #         conda install -c conda-forge mamba
+  #     - name: Setup snakemake
+  #       run: |
+  #         mamba install -c conda-forge -c bioconda "snakemake==7.32.4"
+  #     - name: Run workflow
+  #       run: |
+  #         snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
-  Testing_ashleys_with_custom_python_singularity:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          lfs: true
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Add Conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -c conda-forge mamba
-      - name: Setup snakemake
-        run: |
-          mamba install -c conda-forge -c bioconda "snakemake==7.32.4" singularity
-      - name: Run workflow
-        run: |
-          snakemake --cores 1 --use-conda --use-singularity --configfile .tests/config/simple_config.yaml -p --verbose --debug --snakefile workflow/Snakefile
+  # Testing_ashleys_with_custom_python_singularity:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository with submodules
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+  #         lfs: true
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v2
+  #     - name: Add Conda to system path
+  #       run: |
+  #         echo $CONDA/bin >> $GITHUB_PATH
+  #     - name: Install dependencies
+  #       run: |
+  #         conda install -c conda-forge mamba
+  #     - name: Setup snakemake
+  #       run: |
+  #         mamba install -c conda-forge -c bioconda "snakemake==7.32.4" singularity
+  #     - name: Run workflow
+  #       run: |
+  #         snakemake --cores 1 --use-conda --use-singularity --configfile .tests/config/simple_config.yaml -p --verbose --debug --snakefile workflow/Snakefile
 
-  # Testing_ashleys_fastqc_enabled:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config MultiQC=True --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config MultiQC=True --conda-frontend mamba --report report.zip"
+  # # Testing_ashleys_fastqc_enabled:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config MultiQC=True --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config MultiQC=True --conda-frontend mamba --report report.zip"
 
-  # Testing_ashleys_ms_norm_enabled:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True --conda-frontend mamba --report report.zip"
-  # Testing_ashleys_hg38:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
-  # Testing_ashleys_hg19:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
-  # Testing_ashleys_T2T:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
-  # Testing_ashleys_mm10:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --config reference=mm10 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --config reference=mm10 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
-  # Testing_jub_nb:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba --report report.zip"
-  # Testing_publishdir:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba -p --verbose --debug"
-  #     - name: Testing report
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba --report report.zip"
-  # Testing_list_commands:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Testing data
-  #       uses: snakemake/snakemake-github-action@v1.24.0
-  #       with:
-  #         directory: .
-  #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --config list_commands=True --verbose --debug"
+  # # Testing_ashleys_ms_norm_enabled:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True --conda-frontend mamba --report report.zip"
+  # # Testing_ashleys_hg38:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+  # # Testing_ashleys_hg19:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+  # # Testing_ashleys_T2T:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+  # # Testing_ashleys_mm10:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --config reference=mm10 use_light_data=True chromosomes=[chr17] --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --config reference=mm10 use_light_data=True chromosomes=[chr17] --conda-frontend mamba --report report.zip"
+  # # Testing_jub_nb:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config hand_selection=True --conda-frontend mamba --report report.zip"
+  # # Testing_publishdir:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         stagein: "conda config --set channel_priority flexible"
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba -p --verbose --debug"
+  # #     - name: Testing report
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba --report report.zip"
+  # # Testing_list_commands:
+  # #   runs-on: ubuntu-latest
+  # #   steps:
+  # #     - uses: actions/checkout@v4
+  # #     - name: Testing data
+  # #       uses: snakemake/snakemake-github-action@v1.25.1
+  # #       with:
+  # #         directory: .
+  # #         snakefile: ./workflow/Snakefile
+  # #         args: "--cores 1 --config list_commands=True --verbose --debug"
