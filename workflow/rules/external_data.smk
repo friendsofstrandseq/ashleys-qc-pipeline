@@ -7,7 +7,7 @@ import os
 storage:
     provider="http"
 
-HTTP = HTTPRemoteProvider()
+# HTTP = HTTPRemoteProvider()
 
 
 rule download_hg19_reference:
