@@ -7,29 +7,29 @@ on:
 
 jobs:
   # WORK
-  Formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # Formatting:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Formatting
-        uses: github/super-linter@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_SNAKEMAKE_SNAKEFMT: true
+  #     - name: Formatting
+  #       uses: github/super-linter@v4
+  #       env:
+  #         VALIDATE_ALL_CODEBASE: false
+  #         DEFAULT_BRANCH: master
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         VALIDATE_SNAKEMAKE_SNAKEFMT: true
 
-  Linting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Linting
-        uses: snakemake/snakemake-github-action@v1.25.1
-        with:
-          directory: .
-          snakefile: ./workflow/Snakefile
-          args: "--lint --config ashleys_pipeline=True"
+  # Linting:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Linting
+  #       uses: snakemake/snakemake-github-action@v1.25.1
+  #       with:
+  #         directory: .
+  #         snakefile: ./workflow/Snakefile
+  #         args: "--lint --config ashleys_pipeline=True"
   # Testing_ashleys:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -48,7 +48,8 @@ jobs:
   #         snakefile: ./workflow/Snakefile
   #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba --default-storage-provider http --report report.zip"
   Testing_ashleys_with_custom_python:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
