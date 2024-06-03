@@ -38,6 +38,12 @@ MultiQC:
   options:
     - True
     - False
+bypass_ashleys:
+  desc: "Enable / Disable bypassing Ashleys QC"
+  type: bool
+  required: False
+  default: False
+  category: "Quality Control"
 multistep_normalisation:
   desc: "Enable / Disable multistep normalisation"
   type: bool
