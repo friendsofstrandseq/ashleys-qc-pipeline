@@ -48,14 +48,14 @@ jobs:
   #         snakefile: ./workflow/Snakefile
   #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba --default-storage-provider http --report report.zip"
   Testing_ashleys_with_custom_python:
-    runs-on: self-hosted
-    # runs-on: ubuntu-latest
+    # runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
+          # lfs: true
       - name: Setup Python
         uses: actions/setup-python@v2
       - name: Add Conda to system path
@@ -75,7 +75,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout repository with submodules
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
   #       with:
   #         submodules: recursive
   #         lfs: true
