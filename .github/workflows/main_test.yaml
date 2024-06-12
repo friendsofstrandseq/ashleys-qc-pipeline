@@ -127,7 +127,7 @@ jobs:
           conda install -c conda-forge mamba
       - name: Setup snakemake
         run: |
-          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http snakemake-executor-plugin-slurm
       - name: Run workflow
         run: |
           snakemake --executor slurm --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
