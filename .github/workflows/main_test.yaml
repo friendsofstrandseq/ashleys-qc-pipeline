@@ -130,7 +130,7 @@ jobs:
           mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http snakemake-executor-plugin-slurm
       - name: Run workflow
         run: |
-          snakemake --executor slurm --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
+          snakemake -j 4 --executor slurm --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
 
   # Testing_ashleys_with_custom_python_singularity:
   #   runs-on: ubuntu-latest
