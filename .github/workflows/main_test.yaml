@@ -47,6 +47,30 @@ jobs:
   #         directory: .
   #         snakefile: ./workflow/Snakefile
   #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba --default-storage-provider http --report report.zip"
+  Linting:
+    # runs-on: self-hosted
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          # lfs: true
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Add Conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          conda install -c conda-forge mamba
+      - name: Setup snakemake
+        run: |
+          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+      - name: Run workflow
+        run: |
+          snakemake --lint
+
   Testing_ashleys_with_custom_python:
     # runs-on: self-hosted
     runs-on: ubuntu-latest
@@ -70,6 +94,23 @@ jobs:
       - name: Run workflow
         run: |
           snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
+
+  Setting_slurm_cluster:
+    runs-on: ubuntu-latest
+    # For the action to work, you have to supply a mysql
+    # service as defined below.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - "8888:3306"
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: koesterlab/setup-slurm-action@v1
 
   # Testing_ashleys_with_custom_python_singularity:
   #   runs-on: ubuntu-latest

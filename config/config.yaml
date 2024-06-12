@@ -92,9 +92,6 @@ multistep_normalisation_options:
 # Window size used by the mosaic binning algorithm
 window: 200000
 
-# Enable or disable hand selection through the Jupyter Notebook
-hand_selection: False
-
 # --------------------------------------------------------
 # GENECORE Configuration
 # --------------------------------------------------------
