@@ -93,7 +93,7 @@ jobs:
           mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
       - name: Run workflow
         run: |
-          snakemake --cores 1 --use-conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Setting_slurm_cluster:
     runs-on: ubuntu-latest
@@ -111,6 +111,26 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: koesterlab/setup-slurm-action@v1
+
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          # lfs: true
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Add Conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          conda install -c conda-forge mamba
+      - name: Setup snakemake
+        run: |
+          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+      - name: Run workflow
+        run: |
+          snakemake --executor slurm --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
 
   # Testing_ashleys_with_custom_python_singularity:
   #   runs-on: ubuntu-latest
