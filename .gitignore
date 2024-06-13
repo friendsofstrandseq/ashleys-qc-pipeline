@@ -205,4 +205,4 @@ log.txt
 .tests/data_CHR17/RPE-BM510/merged_bam/
 .tests/data_CHR17_publishdir/
 TEST*
-._*
+._*.vscode/
