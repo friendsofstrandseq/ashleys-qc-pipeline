@@ -3,6 +3,6 @@ default-resources:
   runtime: 30
 
 set-resources:
-  ashleys_bwa_index:
+  bwa_index:
     runtime: 60
     mem_mb: 2000
