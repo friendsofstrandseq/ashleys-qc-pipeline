@@ -131,57 +131,22 @@ ashleys-qc/
 .snakemake/
 .fontconfig/
 .java/
-test*
 
 # Pyre type checker
 .pyre/
 
 
 
-# .tests
-.tests/unit/
-.tests/output/
-.tests/output2/
-.tests/data/
-.tests/data2/
 sandbox.zenodo.org
 sandbox.zenodo.org/
-.tests/external_data/chr21.fna.*
-.tests/external_data/chr17.fa.gz.*
 
-# !.tests/external_data/1000G_chr21.vcf.gz
 
-.tests/data_CHR21/
-.tests/data_CHR17_NEGATIVE_CONTROL_MM10/
-.tests/data_CHR17_*/
-.tests/data_CHR17/RPE-BM510/all/
-.tests/data_CHR17_NEW/
-.tests/data_CHR17/RPE-BM510/bam/
-.tests/data_CHR17/RPE-BM510/alfred/
-.tests/data_CHR17/RPE-BM510/counts/
-.tests/data_CHR17/RPE-BM510/ashleys_merged_bam/
-.tests/data_CHR17/RPE1-WT/
-.tests/data_CHR17/RPE-BM510/._.DS_Store
-.tests/data_CHR17/RPE-BM510/ashleys_counts/
-.tests/data_CHR17/RPE-BM510/*
-.tests/data_CHR17/RPE-BM510/plots/
-.tests/data_CHR17/RPE-BM510/fastqc/
-.tests/data_CHR17/RPE-BM510/predictions/
-.tests/data_CHR17/RPE-BM510/cell_selection/
-.tests/data_CHR17/RPE-BM510/selected/
-.tests/data_CHR17/RPE-BM510/log/
-.tests/data_CHR17/RPE-BM510/config/
-.tests/data_CHR17/log/
-.tests/data_CHR17/config/
-.tests/data_CHR17/config/
-!.tests/data_CHR17/RPE-BM510/fastq/
 !workflow/data/GC/
 !workflow/data/normalization/
 workflow/data/ref_genomes
 workflow/data/segdups/
 workflow/data/arbigent/
 *.html
-# !.tests/data/RPE-BM510/selected/PE*.bam
 logs/
 errors/
 
@@ -193,7 +158,6 @@ workflow/notebooks/CountComplete_*
 .DS_Store
 ._.DS_Store
 
-.tests/._.DS_Store
 
 # Config
 config/samples.tsv
@@ -202,8 +166,6 @@ config/samples.tsv
 .jupyter/
 log.txt
 .vscode/launch.json
-.tests/data_CHR17/RPE-BM510/merged_bam/
-.tests/data_CHR17_publishdir/
 TEST*
 ._*.vscode/
 ..bfg-report/

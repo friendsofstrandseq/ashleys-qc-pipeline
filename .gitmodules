@@ -1,8 +1,12 @@
 [submodule "workflow/snakemake_profiles"]
-path = workflow/snakemake_profiles
-url = https://github.com/weber8thomas/snakemake_profiles
-branch = "main"
+	path = workflow/snakemake_profiles
+	url = https://github.com/weber8thomas/snakemake_profiles
+	branch = "main"
 [submodule "testdata"]
-path = testdata
-url = https://github.com/friendsofstrandseq/mosaicatcher-testdata
-branch = "main"
+	path = testdata
+	url = https://github.com/friendsofstrandseq/mosaicatcher-testdata
+	branch = "main"
+[submodule "workflow/data"]
+	path = workflow/data
+	url = https://github.com/friendsofstrandseq/mosaicatcher-referencedata
+	branch = "main"
