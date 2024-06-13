@@ -6,3 +6,4 @@ set-resources:
   bwa_index:
     runtime: 60
     mem_mb: 2000
+    cpus_per_task: 1
