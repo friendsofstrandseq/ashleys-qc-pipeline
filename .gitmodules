@@ -6,7 +6,7 @@ branch = "main"
 [submodule ".tests"]
 path = .tests
 url = https://github.com/friendsofstrandseq/mosaicatcher-testdata
-branch = "main"
+branch = main
 
 [submodule "workflow/data"]
 path = workflow/data
