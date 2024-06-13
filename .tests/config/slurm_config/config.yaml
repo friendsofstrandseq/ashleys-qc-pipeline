@@ -7,3 +7,9 @@ set-resources:
     runtime: 60
     mem_mb: 2000
     cpus_per_task: 1
+    threads: 1
+  bwa_strandseq_to_reference_alignment:
+    runtime: 60
+    mem_mb: 2000
+    cpus_per_task: 1
+    threads: 1
