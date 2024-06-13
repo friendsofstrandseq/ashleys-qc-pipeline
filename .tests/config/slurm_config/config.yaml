@@ -5,21 +5,21 @@ default-resources:
 set-resources:
   bwa_index:
     runtime: 60
-    mem_mb: 4000
+    mem_mb: 2000
     cpus_per_task: 1
     threads: 1
   bwa_strandseq_to_reference_alignment:
     runtime: 60
-    mem_mb: 4000
+    mem_mb: 2000
     cpus_per_task: 1
     threads: 1
   mark_duplicates:
     runtime: 60
-    mem_mb: 4000
+    mem_mb: 2000
     cpus_per_task: 1
     threads: 1
   generate_features:
     runtime: 60
-    mem_mb: 4000
+    mem_mb: 2000
     cpus_per_task: 1
     threads: 1
