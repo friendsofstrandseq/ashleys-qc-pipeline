@@ -1,0 +1,8 @@
+default-resources:
+  mem_mb: 1000
+  runtime: 30
+
+set-resources:
+  ashleys_bwa_index:
+    runtime: 60
+    mem_mb: 2000
