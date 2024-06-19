@@ -84,6 +84,14 @@ jobs:
         with:
           python-version: '3.12' 
 
+      - name: List contents of .tests
+        run: |
+          tree -h .tests
+
+      - name: List contents of workflow/data
+        run: |
+          tree -h workflow/data
+
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
 
@@ -99,7 +107,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-basic-with-slurm:
@@ -131,6 +139,14 @@ jobs:
       - name: Pull LFS objects in submodules
         run: git submodule foreach --recursive 'git lfs pull'
 
+      - name: List contents of .tests
+        run: |
+          tree -h .tests
+
+      - name: List contents of workflow/data
+        run: |
+          tree -h workflow/data
+
       - name: Setup Python
         uses: actions/setup-python@v5 
         with:
@@ -147,7 +163,7 @@ jobs:
 
       - name: Run workflow on SLURM
         run: |
-          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug  --forceall \
+          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug  \
           --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config_ashleys.yaml -p --snakefile workflow/Snakefile
 
   Testing-with-MultiQC:
@@ -186,7 +202,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall --config MultiQC=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config MultiQC=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-ms-norm:
@@ -225,7 +241,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall --config multistep_normalisation=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config multistep_normalisation=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-hg38:

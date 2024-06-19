@@ -32,7 +32,9 @@ def pipeline_aesthetic_start(config):
                            |___/              |_|     
     """
 
-    wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(version=str(config["version"]))
+    wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(
+        version=str(config["version"])
+    )
     print(sep + fg.GREEN + smk)
     print(fg.ENDC)
     print(fg.YELLOW + wf_name)
@@ -44,11 +46,16 @@ def pipeline_aesthetic_start(config):
     # Input / Output
     print("\033[1m{}\033[0m".format("Input/Output options:"))
     l = [
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Folder to processed", ": " + str(config["data_location"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "Folder to processed", ": " + str(config["data_location"])
+        ),
     ]
     if config["genecore"] is True:
         l.append(
-            f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Genecore Folder to processed", ": " + str(config["genecore_date_folder"]))
+            f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+                "Genecore Folder to processed",
+                ": " + str(config["genecore_date_folder"]),
+            )
         )
     [print(e) for e in l]
 
@@ -56,8 +63,13 @@ def pipeline_aesthetic_start(config):
     # Main options
     print("\033[1m{}\033[0m".format("Main options:"))
     l = [
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Multistep normalisation module", ": " + str(config["multistep_normalisation"])),
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Binning window size", ": " + str(config["window"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "Multistep normalisation module",
+            ": " + str(config["multistep_normalisation"]),
+        ),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "Binning window size", ": " + str(config["window"])
+        ),
     ]
     [print(e) for e in l]
 
@@ -65,7 +77,9 @@ def pipeline_aesthetic_start(config):
     # Behavior options
     print("\033[1m{}\033[0m".format("Behavior options:"))
     l = [
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Genecore mode enabled", ": " + str(config["genecore"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "Genecore mode enabled", ": " + str(config["genecore"])
+        ),
     ]
     [print(e) for e in l]
 
@@ -77,16 +91,25 @@ def pipeline_aesthetic_start(config):
         else ["chr{e}".format(e=str(e)) for e in range(1, 20)] + ["chrX", "chrY"]
     )
     if config["chromosomes"] == chroms:
-        print_chroms = "chr1..22,chrX,chrY" if config["reference"] != "mm10" else "chr1..19,chrX,chrY"
+        print_chroms = (
+            "chr1..22,chrX,chrY"
+            if config["reference"] != "mm10"
+            else "chr1..19,chrX,chrY"
+        )
     else:
         print_chroms = ",".join(config["chromosomes"])
     print("\033[1m{}\033[0m".format("Reference genome & Chromosomes options:"))
     l = [
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("List of chromosomes processed", ": " + print_chroms),
         f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
-            "List of chromosomes to exclude", ": " + ",".join(config["chromosomes_to_exclude"])
+            "List of chromosomes processed", ": " + print_chroms
         ),
-        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Reference genome selected", ": " + str(config["reference"])),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "List of chromosomes to exclude",
+            ": " + ",".join(config["chromosomes_to_exclude"]),
+        ),
+        f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format(
+            "Reference genome selected", ": " + str(config["reference"])
+        ),
         # f"{fg.BLUE}  {{:<50}}{fg.GREEN}{{:<50}}".format("Reference FASTA file", ": " + str(config["references_data"][config["reference"]]["reference_file_location"])),
     ]
     [print(e) for e in l]
@@ -106,7 +129,7 @@ def argparse_help(config):
     smk = """
                      _                        _        
      ___ _ __   __ _| | _____ _ __ ___   __ _| | _____ 
-    / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \\
+    / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \
     \__ \ | | | (_| |   <  __/ | | | | | (_| |   <  __/
     |___/_| |_|\__,_|_|\_\___|_| |_| |_|\__,_|_|\_\___|
     """
@@ -120,37 +143,39 @@ def argparse_help(config):
                            |___/              |_|     
     """
 
-    wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(version=str(config["version"]))
-    print(sep + fg.GREEN + smk)
-    print(fg.ENDC)
-    print(fg.YELLOW + wf_name)
-    print(fg.ENDC)
-    print(fg.MAGENTA + wf_info)
-    print(fg.ENDC)
+    wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(
+        version=str(config["version"])
+    )
+    print(sep + "\033[32m" + smk + "\033[0m")
+    print("\033[33m" + wf_name + "\033[0m")
+    print("\033[35m" + wf_info + "\033[0m")
     print(sep)
 
     config_metadata = yaml.safe_load(open("config/config_metadata.yaml", "r"))
-    # parser = argparse.ArgumentParser(prog="mosaicatcher-pipeline", add_help=False)
-    # group = parser.add_argument_group("--config")
-    print(f"{fg.BLACK}\n\n\033[1mConfig options available (--config):\033[0m\n\n")
-    l1 = [
-        f"{fg.BLACK}\033[1m       {{:<30}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}\033[0m".format(
-            "Option", "Type", "Required", "Default", "Description"
+    config_metadata = dict(
+        sorted(config_metadata.items(), key=lambda item: item[1]["category"])
+    )
+    print("\033[30m\n\n\033[1mConfig options available (--config):\033[0m\n\n")
+
+    header_format = "{:<30} {:<40} {:<10} {:<10} {:<30} {:<30}"
+    print(
+        "\033[1m"
+        + header_format.format(
+            "Category", "Option", "Type", "Required", "Default", "Description"
         )
-    ]
-    l = [
-        f"{fg.BLACK}       {{:<30}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<10}}{fg.BLACK}       {{:<20}}{fg.BLACK}{{:<30}}".format(
-            e,
-            config_metadata[e]["type"],
-            str(config_metadata[e]["required"]),
-            str(config_metadata[e]["default"]),
-            ": " + config_metadata[e]["desc"],
+        + "\033[0m"
+    )
+
+    for e in config_metadata:
+        print(
+            header_format.format(
+                config_metadata[e]["category"],
+                e,
+                config_metadata[e]["type"],
+                str(config_metadata[e]["required"]),
+                str(config_metadata[e]["default"]),
+                config_metadata[e]["desc"],
+            )
         )
-        for e in config_metadata
-    ]
-    [print(e) for e in l1 + l]
+
     print("\n\n")
-    # args = parser.parse_args()
-    # print(pipeline_aesthetic_start.fg.BOLD)
-    # parser.print_help()
-    # print(pipeline_aesthetic_start.fg.ENDC)
