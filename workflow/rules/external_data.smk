@@ -1,15 +1,6 @@
-## Rules dedicated to download index Fasta files
-## ---------------------------------------------------------------
-
-import os
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
-HTTP = HTTPRemoteProvider()
-
-
 rule download_hg19_reference:
     input:
-        HTTP.remote(
+        storage.http(
             "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/analysisSet/hg19.p13.plusMT.no_alt_analysis_set.fa.gz",
             keep_local=True,
         ),
@@ -30,7 +21,7 @@ rule download_hg19_reference:
 
 rule download_hg38_reference:
     input:
-        HTTP.remote(
+        storage.http(
             "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/analysisSet/hg38.analysisSet.fa.gz",
             keep_local=True,
         ),
@@ -51,7 +42,7 @@ rule download_hg38_reference:
 
 rule download_T2T_reference:
     input:
-        HTTP.remote(
+        storage.http(
             "https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0.fa.gz",
             keep_local=True,
         ),
@@ -72,7 +63,7 @@ rule download_T2T_reference:
 
 rule download_mm10_reference:
     input:
-        HTTP.remote(
+        storage.http(
             "https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.fa.gz",
             keep_local=True,
         ),

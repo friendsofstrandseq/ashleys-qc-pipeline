@@ -10,10 +10,10 @@ jobs:
     # runs-on: self-hosted
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository without submodules
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+        # with:
+        #   submodules: false
           # lfs: true
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -34,7 +34,7 @@ jobs:
     # runs-on: self-hosted
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository with submodules and lfs
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -71,7 +71,7 @@ jobs:
 
       - uses: koesterlab/setup-slurm-action@v1
 
-      - name: Checkout repository with submodules
+      - name: Checkout repository with submodules and lfs
         uses: actions/checkout@v4
         with:
           submodules: recursive
