@@ -6,45 +6,45 @@ on:
       - "**"
 
 jobs:
-Linting:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repository with submodules
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'  # Ensures all submodules are checked out
-        lfs: true                # Ensures LFS objects for the main repo are pulled
+  Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'  # Ensures all submodules are checked out
+          lfs: true                # Ensures LFS objects for the main repo are pulled
 
-    - name: Pull LFS objects in submodules
-      run: |
-        git submodule foreach --recursive 'git lfs pull'
+      - name: Pull LFS objects in submodules
+        run: |
+          git submodule foreach --recursive 'git lfs pull'
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
 
-    - name: Add Conda to system path
-      run: |
-        echo $CONDA/bin >> $GITHUB_PATH
+      - name: Add Conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
 
-    - name: Install dependencies
-      run: |
-        conda install -c conda-forge mamba
+      - name: Install dependencies
+        run: |
+          conda install -c conda-forge mamba
 
-    - name: Setup snakemake
-      run: |
-        mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+      - name: Setup snakemake
+        run: |
+          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
 
-    - name: List contents of .tests
-      run: |
-        tree -h .tests
+      - name: List contents of .tests
+        run: |
+          tree -h .tests
 
-    - name: List contents of workflow/data
-      run: |
-        tree -h workflow/data
+      - name: List contents of workflow/data
+        run: |
+          tree -h workflow/data
 
-    - name: Run Snakemake Lint
-      run: |
-        snakemake --lint
+      - name: Run Snakemake Lint
+        run: |
+          snakemake --lint
 
 
   # Testing_ashleys_with_custom_python:
