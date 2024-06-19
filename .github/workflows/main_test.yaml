@@ -25,18 +25,18 @@ jobs:
   Linting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'  # Ensures all submodules are checked out
-          lfs: true                # Ensures LFS objects for the main repo are pulled
+        # with:
+        #   submodules: 'recursive'  # Ensures all submodules are checked out
+        #   lfs: true                # Ensures LFS objects for the main repo are pulled
 
       - name: Pull LFS objects in submodules
         run: |
           git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: |
@@ -78,7 +78,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -95,7 +95,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-basic-with-slurm:
@@ -128,7 +128,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -142,7 +142,7 @@ jobs:
       - name: Run workflow on SLURM
         run: |
           snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug \
-          --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
+          --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config_ashleys.yaml -p --snakefile workflow/Snakefile
 
   Testing-with-MultiQC:
     runs-on: ubuntu-latest
@@ -161,7 +161,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -178,7 +178,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml --config MultiQC=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config MultiQC=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-ms-norm:
@@ -198,7 +198,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -215,7 +215,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml --config multistep_normalisation=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config multistep_normalisation=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-hg38:
@@ -235,7 +235,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -272,7 +272,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -309,7 +309,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -346,7 +346,7 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -377,10 +377,10 @@ jobs:
   #         directory: .
   #         snakefile: ./workflow/Snakefile
   #         stagein: "conda config --set channel_priority flexible"
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba -p --verbose --debug"
+  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config_ashleys.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba -p --verbose --debug"
   #     - name: Testing report
   #       uses: snakemake/snakemake-github-action@v1.24.0
   #       with:
   #         directory: .
   #         snakefile: ./workflow/Snakefile
-  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba --report report.zip"
+  #         args: "--cores 1 --use-conda --configfile .tests/config/simple_config_ashleys.yaml --config publishdir=.tests/data_chr17_publishdir --conda-frontend mamba --report report.zip"
