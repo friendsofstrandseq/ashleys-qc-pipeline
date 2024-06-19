@@ -35,8 +35,18 @@ jobs:
         run: |
           git submodule foreach --recursive 'git lfs pull'
 
+      - name: List contents of .tests
+        run: |
+          tree -h .tests
+
+      - name: List contents of workflow/data
+        run: |
+          tree -h workflow/data
+
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: |
@@ -49,14 +59,6 @@ jobs:
       - name: Setup snakemake
         run: |
           mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
-
-      - name: List contents of .tests
-        run: |
-          tree -h .tests
-
-      - name: List contents of workflow/data
-        run: |
-          tree -h workflow/data
 
       - name: Run Snakemake Lint
         run: |
@@ -79,6 +81,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -95,7 +99,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-basic-with-slurm:
@@ -129,6 +133,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -141,7 +147,7 @@ jobs:
 
       - name: Run workflow on SLURM
         run: |
-          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug \
+          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug  --forceall \
           --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config_ashleys.yaml -p --snakefile workflow/Snakefile
 
   Testing-with-MultiQC:
@@ -162,6 +168,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -178,7 +186,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config MultiQC=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall --config MultiQC=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-ms-norm:
@@ -199,6 +207,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -215,7 +225,7 @@ jobs:
 
       - name: Run workflow
         run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --config multistep_normalisation=True \
+          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config_ashleys.yaml --forceall --config multistep_normalisation=True \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-hg38:
@@ -236,6 +246,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -274,6 +286,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -312,6 +326,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -350,6 +366,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
