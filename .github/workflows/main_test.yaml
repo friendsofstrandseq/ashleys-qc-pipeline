@@ -167,7 +167,7 @@ jobs:
 
       - name: Run workflow on SLURM
         run: |
-          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ --verbose --debug  \
+          snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ \
           --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config_ashleys.yaml -p --snakefile workflow/Snakefile
 
   Testing-with-MultiQC:
