@@ -6,90 +6,107 @@ on:
       - "**"
 
 jobs:
-  Linting:
-    # runs-on: self-hosted
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: true
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Add Conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -c conda-forge mamba
-      - name: Setup snakemake
-        run: |
-          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
-      - name: Run workflow
-        run: |
-          snakemake --lint
+Linting:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'  # Ensures all submodules are checked out
+        lfs: true                # Ensures LFS objects for the main repo are pulled
 
-  Testing_ashleys_with_custom_python:
-    # runs-on: self-hosted
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository with submodules and lfs
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: true
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Add Conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -c conda-forge mamba
-      - name: Setup snakemake
-        run: |
-          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
-      - name: Run workflow
-        run: |
-          snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
+    - name: Pull LFS objects in submodules
+      run: |
+        git submodule foreach --recursive 'git lfs pull'
 
-  Setting_slurm_cluster:
-    runs-on: ubuntu-latest
-    # For the action to work, you have to supply a mysql
-    # service as defined below.
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - "8888:3306"
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    steps:
-      - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v2
 
-      - uses: koesterlab/setup-slurm-action@v1
+    - name: Add Conda to system path
+      run: |
+        echo $CONDA/bin >> $GITHUB_PATH
 
-      - name: Checkout repository with submodules and lfs
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: true
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Add Conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -c conda-forge mamba
-      - name: Setup snakemake
-        run: |
-          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http snakemake-executor-plugin-slurm
-      - name: Run workflow
-        run: |
-          snakemake -j 1 -c 4 --executor slurm --workflow-profile .tests/config/slurm_config/ --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
+    - name: Install dependencies
+      run: |
+        conda install -c conda-forge mamba
+
+    - name: Setup snakemake
+      run: |
+        mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+
+    - name: List contents of .tests
+      run: |
+        tree -h .tests
+
+    - name: List contents of workflow/data
+      run: |
+        tree -h workflow/data
+
+    - name: Run Snakemake Lint
+      run: |
+        snakemake --lint
+
+
+  # Testing_ashleys_with_custom_python:
+  #   # runs-on: self-hosted
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository with submodules and lfs
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #         lfs: true
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v2
+  #     - name: Add Conda to system path
+  #       run: |
+  #         echo $CONDA/bin >> $GITHUB_PATH
+  #     - name: Install dependencies
+  #       run: |
+  #         conda install -c conda-forge mamba
+  #     - name: Setup snakemake
+  #       run: |
+  #         mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+  #     - name: Run workflow
+  #       run: |
+  #         snakemake --cores 1 --software-deployment-method conda --configfile .tests/config/simple_config.yaml --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
+
+  # Setting_slurm_cluster:
+  #   runs-on: ubuntu-latest
+  #   # For the action to work, you have to supply a mysql
+  #   # service as defined below.
+  #   services:
+  #     mysql:
+  #       image: mysql:8.0
+  #       env:
+  #         MYSQL_ROOT_PASSWORD: root
+  #       ports:
+  #         - "8888:3306"
+  #       options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - uses: koesterlab/setup-slurm-action@v1
+
+  #     - name: Checkout repository with submodules and lfs
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #         lfs: true
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v2
+  #     - name: Add Conda to system path
+  #       run: |
+  #         echo $CONDA/bin >> $GITHUB_PATH
+  #     - name: Install dependencies
+  #       run: |
+  #         conda install -c conda-forge mamba
+  #     - name: Setup snakemake
+  #       run: |
+  #         mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http snakemake-executor-plugin-slurm
+  #     - name: Run workflow
+  #       run: |
+  #         snakemake -j 1 -c 4 --executor slurm --workflow-profile .tests/config/slurm_config/ --software-deployment-method conda --conda-frontend mamba --configfile .tests/config/simple_config.yaml -p --snakefile workflow/Snakefile
 
   # WORK
   # Formatting:
