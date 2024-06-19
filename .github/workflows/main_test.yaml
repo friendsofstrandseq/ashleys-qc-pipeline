@@ -10,11 +10,11 @@ jobs:
     # runs-on: self-hosted
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository without submodules
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
-        # with:
-        #   submodules: false
-          # lfs: true
+        with:
+          submodules: true
+          lfs: true
       - name: Setup Python
         uses: actions/setup-python@v2
       - name: Add Conda to system path
