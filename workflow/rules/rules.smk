@@ -61,7 +61,7 @@ rule bwa_index:
     threads: 16
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     wrapper:
         "v1.7.0/bio/bwa/index"
 
@@ -100,7 +100,7 @@ rule bwa_strandseq_to_reference_alignment:
         idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     conda:
         "../envs/ashleys_base.yaml"
     shell:
@@ -119,7 +119,7 @@ rule samtools_sort_bam:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
         mem_mb=get_mem_mb,
-        time="10:00:00",
+        time=600,
     conda:
         "../envs/ashleys_base.yaml"
     shell:
@@ -137,7 +137,7 @@ rule mark_duplicates:
         "../envs/ashleys_base.yaml"
     resources:
         mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
+        time=600,
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
@@ -157,9 +157,6 @@ if config["mosaicatcher_pipeline"] is False:
             "samtools index {input} 2>&1 > {log}"
 
 
-# if config["hand_selection"] is False:
-
-
 rule symlink_bam_ashleys:
     input:
         bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -175,87 +172,108 @@ rule symlink_bam_ashleys:
         "../scripts/utils/symlink_selected_bam.py"
 
 
-rule generate_features:
-    input:
-        bam=selected_input_bam,
-    output:
-        "{folder}/{sample}/predictions/ashleys_features.tsv",
-    log:
-        "{folder}/log/ashleys/{sample}/features.log",
-    conda:
-        "../envs/ashleys_base.yaml"
-    threads: 64
-    params:
-        windows="5000000 2000000 1000000 800000 600000 400000 200000",
-        extension=".sort.mdup.bam",
-        folder=lambda wildcards, input: "{}bam_ashleys".format(
-            input.bam[0].split("bam_ashleys")[0]
-        ),
-    resources:
-        mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
-    shell:
-        "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+if config["bypass_ashleys"] is False:
 
-
-rule predict:
-    input:
-        folder="{folder}/{sample}/predictions/ashleys_features.tsv",
-    output:
-        "{folder}/{sample}/cell_selection/labels_raw.tsv",
-    log:
-        "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
-    conda:
-        "../envs/ashleys_base.yaml"
-    params:
-        model_default="./workflow/ashleys_models/svc_default.pkl",
-        model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
-    resources:
-        mem_mb=get_mem_mb,
-        time="10:00:00",
-    shell:
-        "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
-
-
-if config["hand_selection"] is True:
-
-    localrules:
-        notebook_hand_selection,
-
-    rule notebook_hand_selection:
+    rule generate_features:
         input:
-            pdf=expand(
-                "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
-                plottype=plottype_counts,
-            ),
-            info="{folder}/{sample}/counts/{sample}.info_raw",
-            ashleys_labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
+            bam=selected_input_bam,
         output:
-            folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+            "{folder}/{sample}/predictions/ashleys_features.tsv",
         log:
-            "{folder}/log/hand_selection/{sample}/prediction_probabilities.log",
-        params:
-            cell_per_sample=cell_per_sample,
+            "{folder}/log/ashleys/{sample}/features.log",
         conda:
-            "../envs/ashleys_notebook.yaml"
-        container:
-            None
-        notebook:
-            "../notebooks/hand_selection.py.ipynb"
+            "../envs/ashleys_base.yaml"
+        threads: 64
+        params:
+            windows="5000000 2000000 1000000 800000 600000 400000 200000",
+            extension=".sort.mdup.bam",
+            folder=lambda wildcards, input: "{}bam_ashleys".format(
+                input.bam[0].split("bam_ashleys")[0]
+            ),
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time=600,
+        shell:
+            "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
+
+    rule predict:
+        input:
+            folder="{folder}/{sample}/predictions/ashleys_features.tsv",
+        output:
+            "{folder}/{sample}/cell_selection/labels_raw.tsv",
+        log:
+            "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
+        conda:
+            "../envs/ashleys_base.yaml"
+        params:
+            model_default="./workflow/ashleys_models/svc_default.pkl",
+            model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
+        resources:
+            mem_mb=get_mem_mb,
+            time=600,
+        shell:
+            "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
 else:
 
-    rule copy_labels:
+    rule generate_default_labels:
         input:
-            labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
+            bam=selected_input_bam,
         output:
-            folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+            "{folder}/{sample}/cell_selection/labels_raw.tsv",
         log:
-            "{folder}/log/positive_control_bypass/{sample}.log",
+            "{folder}/log/generate_default_labels/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         shell:
-            "cp {input} {output}"
+            """
+            echo "cell\tprediction\tprobability\tsample" > {output}
+            for bam in {input.bam} ; do
+                # remove path only
+                cell=$(basename $bam)
+                echo -e "$cell\t1\t1\t{wildcards.sample}" >> {output}
+            done
+            """
+
+
+# localrules:
+#     notebook_hand_selection,
+
+# rule notebook_hand_selection:
+#     input:
+#         pdf=expand(
+#             "{{folder}}/{{sample}}/plots/counts/CountComplete.{plottype}.pdf",
+#             plottype=plottype_counts,
+#         ),
+#         info="{folder}/{sample}/counts/{sample}.info_raw",
+#         ashleys_labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
+#     output:
+#         folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+#     log:
+#         "{folder}/log/hand_selection/{sample}/prediction_probabilities.log",
+#     params:
+#         cell_per_sample=cell_per_sample,
+#     conda:
+#         "../envs/ashleys_notebook.yaml"
+#     container:
+#         None
+#     notebook:
+#         "../notebooks/hand_selection.py.ipynb"
+
+# else:
+
+
+rule copy_labels:
+    input:
+        labels="{folder}/{sample}/cell_selection/labels_raw.tsv",
+    output:
+        folder="{folder}/{sample}/cell_selection/labels_notebook.tsv",
+    log:
+        "{folder}/log/positive_control_bypass/{sample}.log",
+    conda:
+        "../envs/ashleys_base.yaml"
+    shell:
+        "cp {input} {output}"
 
 
 if config["use_light_data"] is False:
@@ -331,9 +349,9 @@ if config["publishdir"] != "":
         input:
             list_publishdir=publishdir_fct,
         output:
-            touch("{folder}/{sample}/config/publishdir_outputs.ok"),
+            touch("{folder}/{sample}/config/publishdir_outputs_ashleys.ok"),
         log:
-            "{folder}/log/publishdir_outputs/{sample}.log",
+            "{folder}/log/publishdir_outputs_ashleys/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
         script:
