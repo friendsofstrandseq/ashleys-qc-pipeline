@@ -64,7 +64,7 @@ jobs:
 
   Testing-basic:
     runs-on: ubuntu-latest
-    depends-on: 
+    needs: 
       - Formatting
       - Linting
     steps:
@@ -100,7 +100,7 @@ jobs:
 
 Testing-basic-with-slurm:
   runs-on: ubuntu-latest
-  depends-on: 
+  needs: 
     - Formatting
     - Linting
     - Testing-basic
