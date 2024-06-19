@@ -25,11 +25,11 @@ jobs:
   Linting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
-        # with:
-        #   submodules: 'recursive'  # Ensures all submodules are checked out
-        #   lfs: true                # Ensures LFS objects for the main repo are pulled
+        with:
+          submodules: 'recursive'  # Ensures all submodules are checked out
+          lfs: true                # Ensures LFS objects for the main repo are pulled
 
       - name: Pull LFS objects in submodules
         run: |
@@ -261,6 +261,7 @@ jobs:
     - Formatting
     - Linting
     - Testing-basic
+    - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules and LFS
         uses: actions/checkout@v4
@@ -298,6 +299,7 @@ jobs:
     - Formatting
     - Linting
     - Testing-basic
+    - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules and LFS
         uses: actions/checkout@v4
@@ -335,6 +337,7 @@ jobs:
     - Formatting
     - Linting
     - Testing-basic
+    - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules and LFS
         uses: actions/checkout@v4

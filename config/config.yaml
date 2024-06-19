@@ -14,7 +14,7 @@ samples_to_process: []
 # --------------------------------------------------------
 
 # Absolute path to the data location (modify as needed)
-data_location: ""
+data_location: ".tests/data_CHR17"
 
 # Directory to publish important data (e.g., stats, plots, counts). Leave empty if not required.
 publishdir: ""
