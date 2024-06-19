@@ -4,98 +4,105 @@ email:
   required: False
   default: '""'
   lint_check: False
+  category: "Others"
+
 data_location:
   desc: "Input BAM location"
   type: string
   required: True
   default: '""'
   lint_check: False
+  category: "I/O"
+
 reference:
   desc: "Reference assembly selected"
   type: string
   required: True
   default: hg38
   lint_check: True
-  options:
-    - hg19
-    - hg38
-    - T2T
-hand_selection:
-  desc: "Enable / Disable low-quality libraries hand selection through Jup NB"
-  type: bool
-  required: False
-  default: False
-  lint_check: True
-  options:
-    - True
-    - False
+  category: "Reference genome"
+
 MultiQC:
   desc: "Enable / Disable MultiQC aggregation"
   type: bool
   required: False
   default: False
   lint_check: True
-  options:
-    - True
-    - False
+  category: "Quality Control"
+
+bypass_ashleys:
+  desc: "Enable / Disable bypassing Ashleys QC"
+  type: bool
+  required: False
+  default: False
+  category: "Quality Control"
+
 multistep_normalisation:
   desc: "Enable / Disable multistep normalisation"
   type: bool
   required: False
   default: False
   lint_check: True
-  options:
-    - True
-    - False
+  category: "Normalisation"
+
 ashleys_threshold:
   desc: "Ashleys-qc binary classification threshold"
   type: bool
   required: False
   default: 0.5
   lint_check: False
+  category: "Quality Control"
+
 window:
   desc: "Mosaic bin window size"
   type: int
   required: True
   default: 200000
   lint_check: False
-  options:
-    - 200000
-    - 100000
+  category: "Counts"
+
 chromosomes:
   desc: List of chromosomes to be processed in the pipeline
   type: list
   required: True
   default: "[chr1..22,chrX,chrY]"
+  category: "Reference genome"
+
 chromosomes_to_exclude:
   desc: List of chromosomes to be excluded
   type: list
   required: True
   default: "[]"
+  category: "Reference genome"
+
 genecore:
   desc: Enable / Disable genecore option. Required genecore_date_folder
   type: bool
   required: False
   default: False
   lint_check: False
-  options:
-    - True
-    - False
+  category: "Data processing"
+
 genecore_date_folder:
   desc: Genecore folder to be processed under /g/korbel/shared/genecore
   type: str
   required: False
   default: '""'
   lint_check: False
+  category: "Data processing"
+
 samples_to_process:
   desc: List of samples to be specifically processed in genecore_date_folder
   type: list
   required: True
   default: "[]"
   lint_check: False
+  category: "Data processing"
+
 publishdir:
   desc: If specified, will copy important data to a second place
   type: str
   required: False
   default: ""
   lint_check: False
+  category: "I/O"
