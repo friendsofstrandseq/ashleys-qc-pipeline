@@ -1,6 +1,3 @@
-## Rules dedicated to download index Fasta files
-## ---------------------------------------------------------------
-
 import os
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
