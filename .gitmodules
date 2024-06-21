@@ -1,6 +1,6 @@
 [submodule "workflow/snakemake_profiles"]
 path = workflow/snakemake_profiles
-url = https://github.com/weber8thomas/snakemake_profiles
+url = https://github.com/friendsofstrandseq/mosaicatcher-smk-profiles
 branch = "main"
 
 [submodule ".tests"]

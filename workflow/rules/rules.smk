@@ -72,7 +72,7 @@ if config["mosaicatcher_pipeline"] is False:
 
 else:
 
-    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates 
 
 
 rule bwa_strandseq_to_reference_alignment:

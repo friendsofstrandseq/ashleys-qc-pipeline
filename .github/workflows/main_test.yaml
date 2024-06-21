@@ -58,7 +58,7 @@ jobs:
 
       - name: Setup snakemake
         run: |
-          mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+          mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: Run Snakemake Lint
         run: |
@@ -103,7 +103,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -163,7 +163,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake with SLURM support
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http snakemake-executor-plugin-slurm
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: Run workflow on SLURM
         run: |
@@ -198,7 +198,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -237,7 +237,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -254,6 +254,7 @@ jobs:
     - Formatting
     - Linting
     - Testing-basic
+    - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules and LFS
         uses: actions/checkout@v4
@@ -276,7 +277,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -316,7 +317,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -356,7 +357,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
@@ -396,7 +397,7 @@ jobs:
         run: conda install -c conda-forge mamba
 
       - name: Setup Snakemake
-        run: mamba install -c conda-forge -c bioconda snakemake snakemake-storage-plugin-http
+        run: mamba install -c conda-forge -c bioconda snakemake==7.32.4
 
       - name: List options of workflow
         run: |
