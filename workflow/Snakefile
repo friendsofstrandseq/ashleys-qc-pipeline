@@ -31,10 +31,10 @@ if config["list_commands"] is False:
         input:
             get_final_result(),
 
-    if config["email"]:
 
-        onsuccess:
-            onsuccess_fct(log)
+# if config["email"]:
 
-        onerror:
-            onerror_fct(log)
+# onsuccess:
+#     onsuccess_fct(log)
+# onerror:
+#     onerror_fct(log)

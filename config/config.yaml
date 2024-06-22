@@ -1,7 +1,7 @@
 # --------------------------------------------------------
 # Ashleys-QC pipeline Configuration
 # --------------------------------------------------------
-version: 2.3.0
+version: 2.3.1
 
 # Email for notifications about the pipeline's status
 email: ""

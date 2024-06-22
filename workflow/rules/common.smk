@@ -40,7 +40,7 @@ if config["mosaicatcher_pipeline"] == False:
             "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
         ]
 
-    from scripts.utils import make_log_useful_ashleys, pipeline_aesthetic_start_ashleys
+    from scripts.utils import pipeline_aesthetic_start_ashleys
 
     if config["list_commands"] is True:
         pipeline_aesthetic_start_ashleys.argparse_help(config)
@@ -63,32 +63,32 @@ if config["mosaicatcher_pipeline"] == False:
         )
 
 
-def onsuccess_fct(log):
-    config_metadata = config_definitions = yaml.safe_load(
-        open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
-    )
-    log_path_new = make_log_useful_ashleys.make_log_useful(
-        log, "SUCCESS", config, config_metadata
-    )
-    shell(
-        'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {}'.format(
-            config["version"], config["data_location"], config["email"], log_path_new
-        )
-    )
+# def onsuccess_fct(log):
+#     config_metadata = config_definitions = yaml.safe_load(
+#         open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
+#     )
+#     log_path_new = make_log_useful_ashleys.make_log_useful(
+#         log, "SUCCESS", config, config_metadata
+#     )
+#     shell(
+#         'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - SUCCESS" {} < {}'.format(
+#             config["version"], config["data_location"], config["email"], log_path_new
+#         )
+#     )
 
 
-def onerror_fct(log):
-    config_metadata = config_definitions = yaml.safe_load(
-        open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
-    )
-    log_path_new = make_log_useful_ashleys.make_log_useful(
-        log, "ERROR", config, config_metadata
-    )
-    shell(
-        'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - ERRROR" {} < {}'.format(
-            config["version"], config["data_location"], config["email"], log_path_new
-        )
-    )
+# def onerror_fct(log):
+#     config_metadata = config_definitions = yaml.safe_load(
+#         open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
+#     )
+#     log_path_new = make_log_useful_ashleys.make_log_useful(
+#         log, "ERROR", config, config_metadata
+#     )
+#     shell(
+#         'mail -s "[Snakemake] smk-wf-catalog/ashleys-qc-pipeline v{} - Run on {} - ERRROR" {} < {}'.format(
+#             config["version"], config["data_location"], config["email"], log_path_new
+#         )
+#     )
 
 
 # Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe
