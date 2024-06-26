@@ -6,7 +6,6 @@ on:
       - "**"
 
 jobs:
-
   Formatting:
     runs-on: ubuntu-latest
     steps:
@@ -21,36 +20,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
 
-
   Linting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository without submodules
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'  # Ensures all submodules are checked out
-          lfs: true                # Ensures LFS objects for the main repo are pulled
+        # with:
+        #   submodules: "recursive" # Ensures all submodules are checked out
+        # lfs: true # Ensures LFS objects for the main repo are pulled
 
-      - name: Pull LFS objects in submodules
-        run: |
-          git submodule foreach --recursive 'git lfs pull'
+      # - name: Pull LFS objects in submodules
+      #   run: |
+      #     git submodule foreach --recursive 'git pull origin main'
 
-      - name: List contents of .tests
+      - name: List contents of .tests-mock
         run: |
-          tree -h .tests
-
-      - name: List contents of workflow/data
-        run: |
-          tree -h workflow/data
-
-      - name: List contents of snakemake_profiles
-        run: |
-          tree -h workflow/snakemake_profiles
+          tree -h github-actions-runner/.tests-mock
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: |
@@ -66,27 +56,29 @@ jobs:
 
       - name: Run Snakemake Lint
         run: |
-          snakemake --lint
+          snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 --lint
 
   Testing-basic:
     runs-on: ubuntu-latest
-    # needs: 
+    # needs:
     #   - Formatting
     #   - Linting
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: List contents of .tests
         run: |
@@ -120,7 +112,7 @@ jobs:
 
   # Testing-basic-with-slurm:
   #   runs-on: ubuntu-latest
-  #   needs: 
+  #   needs:
   #     - Formatting
   #     - Linting
   #     - Testing-basic
@@ -156,9 +148,9 @@ jobs:
   #         tree -h workflow/data
 
   #     - name: Setup Python
-  #       uses: actions/setup-python@v5 
+  #       uses: actions/setup-python@v5
   #       with:
-  #         python-version: '3.12' 
+  #         python-version: '3.12'
 
   #     - name: Add Conda to system path
   #       run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -176,24 +168,26 @@ jobs:
 
   Testing-with-MultiQC:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -215,24 +209,26 @@ jobs:
 
   Testing-with-ms-norm:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -254,25 +250,27 @@ jobs:
 
   Testing-with-hg38:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     # - Testing-basic-with-slurm
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -290,29 +288,31 @@ jobs:
       - name: Run workflow
         run: |
           snakemake --cores 1 --use-conda --config reference=hg38 use_light_data=True chromosomes=[chr17] \
-          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile          
+          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-hg19:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     # - Testing-basic-with-slurm
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -330,14 +330,14 @@ jobs:
       - name: Run workflow
         run: |
           snakemake --cores 1 --use-conda --config reference=hg19 use_light_data=True chromosomes=[chr17] \
-          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile          
+          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-T2T:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules and LFS
@@ -350,9 +350,9 @@ jobs:
         run: git submodule foreach --recursive 'git lfs pull'
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -370,29 +370,31 @@ jobs:
       - name: Run workflow
         run: |
           snakemake --cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] \
-          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile  
+          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
   Testing-with-mm10:
     runs-on: ubuntu-latest
-    needs: 
-    - Formatting
-    - Linting
-    - Testing-basic
+    needs:
+      - Formatting
+      - Linting
+      - Testing-basic
     # - Testing-basic-with-slurm
     steps:
-      - name: Checkout repository with submodules and LFS
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
-      - name: Pull LFS objects in submodules
-        run: git submodule foreach --recursive 'git lfs pull'
+      # Update references
+      - name: Git Submodule Update
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: "3.12"
 
       - name: Add Conda to system path
         run: echo "$CONDA/bin" >> $GITHUB_PATH
@@ -410,9 +412,8 @@ jobs:
       - name: Run workflow
         run: |
           snakemake --cores 1 --use-conda --config reference=T2T use_light_data=True chromosomes=[chr17] \
-          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile          
+          --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
 
-          
   # Testing_publishdir:
   #   runs-on: ubuntu-latest
   #   steps:
