@@ -40,6 +40,11 @@ if config["mosaicatcher_pipeline"] == False:
             "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
         ]
 
+    if config["paired_end"] is True:
+        pair = ["1", "2"]
+    else:
+        pair = ["1"]
+
     from scripts.utils import pipeline_aesthetic_start_ashleys
 
     if config["list_commands"] is True:
@@ -207,7 +212,7 @@ class HandleInput:
                 regex_element=d_master[sample]["index_pattern"],
                 index=d_master[sample]["indexes"],
                 cell_nb=[str(e).zfill(2) for e in list(range(1, 97))],
-                pair=["1", "2"],
+                pair=pair,
             )
             for sample in d_master
             if sample in samples_to_process

@@ -72,42 +72,79 @@ if config["mosaicatcher_pipeline"] is False:
 
 else:
 
-    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates 
+    ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
 
 
-rule bwa_strandseq_to_reference_alignment:
-    input:
-        mate1="{folder}/{sample}/fastq/{cell}.1.fastq.gz",
-        mate2="{folder}/{sample}/fastq/{cell}.2.fastq.gz",
-        ref="{ref}".format(
-            ref=config["references_data"][config["reference"]]["reference_fasta"]
-        ),
-        ref_index=multiext(
-            config["references_data"][config["reference"]]["reference_fasta"],
-            ".amb",
-            ".ann",
-            ".bwt",
-            ".pac",
-            ".sa",
-        ),
-    output:
-        bam="{folder}/{sample}/bam/{cell}.bam.raw",
-    log:
-        bwa="{folder}/{sample}/log/{cell}.bwa.log",
-        samtools="{folder}/{sample}/log/{cell}.samtools.log",
-    threads: 6
-    params:
-        idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
-    resources:
-        mem_mb=get_mem_mb_heavy,
-        time=600,
-    conda:
-        "../envs/ashleys_base.yaml"
-    shell:
-        "bwa mem -t {threads}"
-        ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
-        " -v 2 {input.ref} {input.mate1} {input.mate2} 2> {log.bwa} | "
-        " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
+if config["paired_end"] is True:
+
+    rule bwa_strandseq_to_reference_alignment:
+        input:
+            mate1="{folder}/{sample}/fastq/{cell}.1.fastq.gz",
+            mate2="{folder}/{sample}/fastq/{cell}.2.fastq.gz",
+            ref="{ref}".format(
+                ref=config["references_data"][config["reference"]]["reference_fasta"]
+            ),
+            ref_index=multiext(
+                config["references_data"][config["reference"]]["reference_fasta"],
+                ".amb",
+                ".ann",
+                ".bwt",
+                ".pac",
+                ".sa",
+            ),
+        output:
+            bam="{folder}/{sample}/bam/{cell}.bam.raw",
+        log:
+            bwa="{folder}/{sample}/log/{cell}.bwa.log",
+            samtools="{folder}/{sample}/log/{cell}.samtools.log",
+        threads: 6
+        params:
+            idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time=600,
+        conda:
+            "../envs/ashleys_base.yaml"
+        shell:
+            "bwa mem -t {threads}"
+            ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
+            " -v 2 {input.ref} {input.mate1} {input.mate2} 2> {log.bwa} | "
+            " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
+
+else:
+
+    rule bwa_strandseq_to_reference_alignment:
+        input:
+            mate1="{folder}/{sample}/fastq/{cell}.1.fastq.gz",
+            ref="{ref}".format(
+                ref=config["references_data"][config["reference"]]["reference_fasta"]
+            ),
+            ref_index=multiext(
+                config["references_data"][config["reference"]]["reference_fasta"],
+                ".amb",
+                ".ann",
+                ".bwt",
+                ".pac",
+                ".sa",
+            ),
+        output:
+            bam="{folder}/{sample}/bam/{cell}.bam.raw",
+        log:
+            bwa="{folder}/{sample}/log/{cell}.bwa.log",
+            samtools="{folder}/{sample}/log/{cell}.samtools.log",
+        threads: 6
+        params:
+            idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
+        resources:
+            mem_mb=get_mem_mb_heavy,
+            time=600,
+        conda:
+            "../envs/ashleys_base.yaml"
+        shell:
+            "bwa mem -t {threads}"
+            ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
+            " -v 2 {input.ref} {input.mate1} 2> {log.bwa} | "
+            " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
 
 
 rule samtools_sort_bam:
@@ -155,6 +192,20 @@ if config["mosaicatcher_pipeline"] is False:
             "../envs/ashleys_base.yaml"
         shell:
             "samtools index {input} 2>&1 > {log}"
+
+    rule gunzip_fasta:
+        input:
+            ancient("{file}.fa.gz"),
+        output:
+            "{file}.fa",
+        log:
+            "{file}.log",
+        conda:
+            "../envs/ashleys_base.yaml"
+        resources:
+            mem_mb=get_mem_mb_heavy,
+        shell:
+            "gunzip -cd {input} > {output}"
 
 
 rule symlink_bam_ashleys:
