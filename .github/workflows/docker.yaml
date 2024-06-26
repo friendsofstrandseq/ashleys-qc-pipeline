@@ -1,10 +1,25 @@
 name: Build container
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+      tags:
+        description: "Test scenario tags"
+        required: false
+        type: boolean
+      environment:
+        description: "Environment to run tests against"
+        type: environment
+        required: true
 
 jobs:
   build_container:
@@ -14,7 +29,7 @@ jobs:
       IMAGE_NAME: ashleys-qc-pipeline
     steps:
       - uses: actions/checkout@v4.1.7
- 
+
       - name: Run read-yaml action
         id: yaml-data
         uses: jbutcher5/read-yaml@main # You may wish to replace main with a version tag such as '1.6' etc.

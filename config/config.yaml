@@ -1,7 +1,7 @@
 # --------------------------------------------------------
 # Ashleys-QC pipeline Configuration
 # --------------------------------------------------------
-version: 2.3.2
+version: 2.3.3
 
 # Email for notifications about the pipeline's status
 email: ""
@@ -75,6 +75,9 @@ MultiQC: False
 
 # Enable or disable ashleys-qc automatic classification
 bypass_ashleys: False
+
+# Whether to use paired-end data or not
+paired_end: True
 
 # --------------------------------------------------------
 # Counts Configuration
