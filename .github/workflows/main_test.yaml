@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
 
       - name: Formatting using Super-Linter
         uses: github/super-linter@v4
@@ -24,14 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository without submodules
-        uses: actions/checkout@v4
-        # with:
-        #   submodules: "recursive" # Ensures all submodules are checked out
-        # lfs: true # Ensures LFS objects for the main repo are pulled
-
-      # - name: Pull LFS objects in submodules
-      #   run: |
-      #     git submodule foreach --recursive 'git pull origin main'
+        uses: actions/checkout@v4.1.7
 
       - name: List contents of .tests-mock
         run: |
@@ -65,7 +58,7 @@ jobs:
     #   - Linting
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -131,7 +124,7 @@ jobs:
   #     - uses: koesterlab/setup-slurm-action@v1
 
   #     - name: Checkout repository with submodules and LFS
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v4.1.7
   #       with:
   #         submodules: recursive
   #         lfs: true
@@ -174,7 +167,7 @@ jobs:
       - Testing-basic
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -215,7 +208,7 @@ jobs:
       - Testing-basic
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -257,7 +250,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -299,7 +292,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -340,11 +333,10 @@ jobs:
       - Testing-basic
     # - Testing-basic-with-slurm
     steps:
-      - name: Checkout repository with submodules and LFS
-        uses: actions/checkout@v4
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
-          lfs: true
 
       - name: Pull LFS objects in submodules
         run: git submodule foreach --recursive 'git lfs pull'
@@ -381,7 +373,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
         with:
           submodules: recursive
 
@@ -417,7 +409,7 @@ jobs:
   # Testing_publishdir:
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v4.1.7
   #     - name: Testing data
   #       uses: snakemake/snakemake-github-action@v1.24.0
   #       with:
