@@ -61,7 +61,7 @@ rule bwa_index:
     threads: 16
     resources:
         mem_mb=get_mem_mb_heavy,
-        time=600,
+        time="10:00:00",
     wrapper:
         "v1.7.0/bio/bwa/index"
 
@@ -102,7 +102,7 @@ if config["paired_end"] is True:
             idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
         resources:
             mem_mb=get_mem_mb_heavy,
-            time=600,
+            time="1:000:",
         conda:
             "../envs/ashleys_base.yaml"
         shell:
@@ -137,7 +137,7 @@ else:
             idx_prefix=lambda wildcards, input: input.ref_index[0].rsplit(".", 1)[0],
         resources:
             mem_mb=get_mem_mb_heavy,
-            time=600,
+            time="1:000:",
         conda:
             "../envs/ashleys_base.yaml"
         shell:
@@ -156,7 +156,7 @@ rule samtools_sort_bam:
         "{folder}/{sample}/log/samtools_sort/{cell}.log",
     resources:
         mem_mb=get_mem_mb,
-        time=600,
+        time="1:000:",
     conda:
         "../envs/ashleys_base.yaml"
     shell:
@@ -174,7 +174,7 @@ rule mark_duplicates:
         "../envs/ashleys_base.yaml"
     resources:
         mem_mb=get_mem_mb_heavy,
-        time=600,
+        time="1:000:",
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
 
@@ -243,7 +243,7 @@ if config["bypass_ashleys"] is False:
             ),
         resources:
             mem_mb=get_mem_mb_heavy,
-            time=600,
+            time="1:000:",
         shell:
             "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
 
@@ -261,7 +261,7 @@ if config["bypass_ashleys"] is False:
             model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
         resources:
             mem_mb=get_mem_mb,
-            time=600,
+            time="1:000:",
         shell:
             "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
 
