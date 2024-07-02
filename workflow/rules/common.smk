@@ -4,6 +4,12 @@ import collections
 import yaml
 import subprocess
 
+
+if config["paired_end"] is True:
+    pair = ["1", "2"]
+else:
+    pair = ["1"]
+
 if config["mosaicatcher_pipeline"] == False:
     exclude = [
         "._.DS_Store",
@@ -39,11 +45,6 @@ if config["mosaicatcher_pipeline"] == False:
         config["chromosomes"] = [
             "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
         ]
-
-    if config["paired_end"] is True:
-        pair = ["1", "2"]
-    else:
-        pair = ["1"]
 
     from scripts.utils import pipeline_aesthetic_start_ashleys
 
@@ -483,7 +484,7 @@ def get_final_output(wildcards):
     if config["publishdir"] != "":
         final_list.extend(
             expand(
-                "{folder}/{sample}/config/publishdir_outputs.ok",
+                "{folder}/{sample}/config/publishdir_outputs_ashleys.ok",
                 folder=config["data_location"],
                 sample=wildcards.sample,
             )
