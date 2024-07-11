@@ -3,19 +3,14 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - samtools
-  - tabix
-  - bwa
-  - sambamba
-  - mosaicatcher
-  # - alfred
   - ashleys-qc
-  - pandas
-  # PUBLISHDIR
-  - rsync
-  # MULTIQC
+  - bwa
+  - mosaicatcher
   - multiqc
-  # Fix sklearn update
-  - scikit-learn=1.2.2
-  # Fix ashleys GH issue
-  - python=3.10
+  - pandas
+  - python=3.9
+  - rsync
+  - sambamba
+  - samtools
+  - scikit-learn=0.23.2
+  - tabix

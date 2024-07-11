@@ -2,49 +2,23 @@ name: rtools
 channels:
   - conda-forge
   - bioconda
-  - r
-  - anaconda
 dependencies:
-  # - bioconductor-biocparallel
-  # - bioconductor-bsgenome
-  # - bioconductor-bsgenome.hsapiens.ucsc.hg19
-  # - bioconductor-bsgenome.hsapiens.ucsc.hg38
-  # - bioconductor-fastseg
-  # - bioconductor-genomicalignments
+  - bioconductor-edger
   - bioconductor-genomicranges
-  # - bioconductor-rsamtools
-  # - bioconductor-s4vectors
+  - fonts-conda-forge
   - r-assertthat
   - r-base
-  # - r-biocmanager
+  - r-cairo
   - r-cowplot
   - r-data.table
-  # - r-devtools
-  # - r-doparallel
-  # - r-foreach
-  - r-ggplot2
-  # - r-gtools
-  - r-reshape2
-  # - r-zoo
-  # - r-dplyr
-  # - r-mc2d
-  # - r-pheatmap
-  # - bioconductor-complexheatmap
-  # - r-gplots
-  - r-scales
-  - r-rcolorbrewer
-  # - r-stringr
-  - r-cairo
-  - fonts-anaconda
-  # NEW
-  - bioconductor-edger
-  - r-r.utils
-  # PLATE PLOT
   - r-dplyr
-  - r-platetools
-  - r-viridis
-  # GC_correction
-  - r-tidyr
+  - r-ggplot2
   - r-ggpubr
-  # SOLVE R lib issue
+  - r-platetools
+  - r-r.utils
+  - r-rcolorbrewer
+  - r-reshape2
+  - r-scales
   - r-stringi=1.7.12
+  - r-tidyr
+  - r-viridis
