@@ -9,6 +9,7 @@ dependencies:
   - multiqc
   - pandas
   - python=3.10
+  - pysam
   - rsync
   - sambamba
   - samtools
