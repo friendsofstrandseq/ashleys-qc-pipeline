@@ -30,7 +30,7 @@ jobs:
       - Testing-basic
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -71,7 +71,7 @@ jobs:
       - Testing-basic
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -113,7 +113,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -155,7 +155,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -197,7 +197,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -233,7 +233,7 @@ jobs:
     # - Testing-basic-with-slurm
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           submodules: recursive
 
@@ -269,7 +269,7 @@ jobs:
   # Testing_publishdir:
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4.1.7
+  #     - uses: actions/checkout@v4.2.1
   #     - name: Testing data
   #       uses: snakemake/snakemake-github-action@v1.24.0
   #       with:
