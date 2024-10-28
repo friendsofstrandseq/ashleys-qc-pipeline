@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.2
 
       - name: Formatting using Super-Linter
         uses: github/super-linter@v4
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository without submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.2
 
       - name: List contents of .tests-mock
         run: |
@@ -58,7 +58,7 @@ jobs:
     #   - Linting
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
 
@@ -124,7 +124,7 @@ jobs:
   #     - uses: koesterlab/setup-slurm-action@v1
 
   #     - name: Checkout repository with submodules and LFS
-  #       uses: actions/checkout@v4.1.7
+  #       uses: actions/checkout@v4.2.2
   #       with:
   #         submodules: recursive
   #         lfs: true
