@@ -6,7 +6,16 @@ library(dplyr)
 ## collect ASHLEYS prediction and count files
 # ashleys_data <- read.table(file = "/scratch/tweber/DATA/TMP/labels384.tsv", sep = "\t", header = TRUE)
 ashleys_data <- read.table(file = snakemake@input[["labels"]], sep = "\t", header = TRUE)
-plate_type <- nrow((ashleys_data))
+num_samples <- nrow((ashleys_data))
+plate_type <- 0
+if (num_samples <= 96) {
+    plate_type <- 96
+} else if (num_samples <= 384) {
+    plate_type <- 384
+} else {
+    plate_type <- 1536
+}
+
 ashleys_data <- dplyr::arrange(ashleys_data, cell)
 colnames(ashleys_data)[1] <- "ashleys_id"
 
@@ -30,12 +39,12 @@ if (plate_type == 96) {
             Well_position <- c(Well_position, tmp)
         }
     }
-}
+} 
 
 # pdf("TEST_ashleys_plate_predictions.pdf")
 pdf(snakemake@output[["predictions"]])
 
-ashleys_data$Well_position <- Well_position
+ashleys_data$Well_position <- Well_position[1:num_samples]
 
 raw_map(
     data = ashleys_data$prediction,
@@ -50,7 +59,7 @@ dev.off()
 
 # pdf("TEST_ashleys_plate_probabilities.pdf")
 pdf(snakemake@output[["probabilities"]])
-ashleys_data$Well_position <- Well_position
+ashleys_data$Well_position <- Well_position[1:num_samples]
 
 raw_map(
     data = ashleys_data$probability,
