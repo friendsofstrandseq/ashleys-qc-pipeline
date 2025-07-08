@@ -8,8 +8,6 @@
 ## *samtools index: index bam files (only if not loaded as a module into mosaicatcher_pipeline)
 ## generate_features/predict: features creation & prediction using ashleys-qc ML method to detect high/low quality libraries
 ## notebook_hand_selection: fire a jupyter notebook that allow hand selection of low quality cells based on QC plots
-
-
 if config["genecore"] is True and config["genecore_date_folder"]:
     if config["mosaicatcher_pipeline"] is False:
 
@@ -33,13 +31,9 @@ if config["genecore"] is True and config["genecore_date_folder"]:
             "ln -f -s {input} {output}"
 
     ruleorder: genecore_symlink > bwa_strandseq_to_reference_alignment
-
-
 # if config["use_light_data"] is False:
 localrules:
     symlink_bam_ashleys,
-
-
 rule bwa_index:
     input:
         ancient(config["references_data"][config["reference"]]["reference_fasta"]),
@@ -64,8 +58,6 @@ rule bwa_index:
         time="10:00:00",
     wrapper:
         "v1.7.0/bio/bwa/index"
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates > samtools_index
@@ -73,8 +65,6 @@ if config["mosaicatcher_pipeline"] is False:
 else:
 
     ruleorder: bwa_strandseq_to_reference_alignment > samtools_sort_bam > mark_duplicates
-
-
 if config["paired_end"] is True:
 
     rule bwa_strandseq_to_reference_alignment:
@@ -105,6 +95,8 @@ if config["paired_end"] is True:
             time="01:00:00",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         shell:
             "bwa mem -t {threads}"
             ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
@@ -140,13 +132,13 @@ else:
             time="01:00:00",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         shell:
             "bwa mem -t {threads}"
             ' -R "@RG\\tID:{wildcards.cell}\\tPL:Illumina\\tSM:{wildcards.sample}"'
             " -v 2 {input.ref} {input.mate1} 2> {log.bwa} | "
             " samtools view -b /dev/stdin > {output.bam} 2> {log.samtools}"
-
-
 rule samtools_sort_bam:
     input:
         "{folder}/{sample}/bam/{cell}.bam.raw",
@@ -159,10 +151,10 @@ rule samtools_sort_bam:
         time="01:00:00",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     shell:
         "samtools sort -O BAM -o {output} {input} 2>&1 > {log}"
-
-
 rule mark_duplicates:
     input:
         bam="{folder}/{sample}/bam/{cell}.bam.sort",
@@ -172,13 +164,13 @@ rule mark_duplicates:
         "{folder}/{sample}/log/markdup/{cell}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     resources:
         mem_mb=get_mem_mb_heavy,
         time="01:00:00",
     shell:
         "sambamba markdup {input.bam} {output} 2>&1 > {log}"
-
-
 if config["mosaicatcher_pipeline"] is False:
 
     rule samtools_index:
@@ -190,6 +182,8 @@ if config["mosaicatcher_pipeline"] is False:
             "{folder}/{sample}/log/samtools_index/{cell}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         resources:
             mem_mb=get_mem_mb,
             time="02:00:00",
@@ -205,12 +199,12 @@ if config["mosaicatcher_pipeline"] is False:
             "{file}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         resources:
             mem_mb=get_mem_mb_heavy,
         shell:
             "gunzip -cd {input} > {output}"
-
-
 rule symlink_bam_ashleys:
     input:
         bam="{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -222,10 +216,10 @@ rule symlink_bam_ashleys:
         "{folder}/log/symlink_selected_bam/{sample}/{cell}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     script:
         "../scripts/utils/symlink_selected_bam.py"
-
-
 rule generate_features:
     input:
         bam=selected_input_bam,
@@ -235,6 +229,8 @@ rule generate_features:
         "{folder}/log/ashleys/{sample}/features.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     threads: 64
     params:
         windows="5000000 2000000 1000000 800000 600000 400000 200000",
@@ -247,8 +243,6 @@ rule generate_features:
         time="01:00:00",
     shell:
         "ashleys -j {threads} features -f {params.folder} -w {params.windows} -o {output} --recursive_collect -e {params.extension}"
-
-
 rule predict:
     input:
         folder="{folder}/{sample}/predictions/ashleys_features.tsv",
@@ -258,6 +252,8 @@ rule predict:
         "{folder}/log/ashleys/{sample}/prediction_ashleys.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     params:
         model_default="./workflow/ashleys_models/svc_default.pkl",
         model_stringent="./workflow/ashleys_models/svc_stringent.pkl",
@@ -266,8 +262,6 @@ rule predict:
         time="01:00:00",
     shell:
         "ashleys predict -p {input.folder} -o {output} -m {params.model_default}"
-
-
 rule generate_default_labels:
     input:
         bam=selected_input_bam,
@@ -277,6 +271,8 @@ rule generate_default_labels:
         "{folder}/log/generate_default_labels/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     shell:
         """
         echo "cell\tprediction\tprobability\tsample" > {output}
@@ -286,8 +282,6 @@ rule generate_default_labels:
             echo -e "$cell\t1\t1\t{wildcards.sample}" >> {output}
         done
         """
-
-
 if config["use_light_data"] is False:
 
     rule positive_negative_control_bypass:
@@ -301,6 +295,8 @@ if config["use_light_data"] is False:
             "{folder}/log/positive_control_bypass/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         script:
             "../scripts/utils/positive_negative_control_bypass.py"
 
@@ -313,6 +309,8 @@ if config["use_light_data"] is False:
             "{folder}/log/cp_predictions/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         script:
             "../scripts/utils/tune_predictions_based_on_threshold.py"
 
@@ -337,6 +335,8 @@ if config["use_light_data"] is False:
             "{folder}/log/plot_plate/{sample}.log",
         conda:
             "../envs/ashleys_rtools.yaml"
+        container:
+            get_container("ashleys_rtools")
         script:
             "../scripts/plotting/plot_plate.R"
 
@@ -352,10 +352,10 @@ elif config["use_light_data"] is True:
             "{folder}/log/dev_all_cells_correct/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         script:
             "../scripts/utils/dev_all_cells_correct.py"
-
-
 if config["publishdir"] != "":
 
     rule publishdir_outputs_ashleys:
@@ -367,10 +367,10 @@ if config["publishdir"] != "":
             "{folder}/log/publishdir_outputs_ashleys/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+        container:
+            get_container("ashleys_base")
         script:
             "../scripts/utils/publishdir.py"
-
-
 rule save_config:
     input:
         "config/config.yaml",
@@ -380,12 +380,12 @@ rule save_config:
         "{folder}/log/save_config/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     resources:
         mem_mb=get_mem_mb,
     script:
         "../scripts/utils/dump_config.py"
-
-
 rule ashleys_final_results:
     input:
         get_final_output,
@@ -395,5 +395,7 @@ rule ashleys_final_results:
         "{folder}/log/ashleys_final_results/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+    container:
+            get_container("ashleys_base")
     shell:
         "touch {output}"

@@ -7,6 +7,34 @@ import pandas as pd
 import yaml
 
 
+# Container configuration function
+def get_container(env_name):
+    """Get container reference for environment"""
+    from pathlib import Path
+
+    # Use workflow directory relative to current working directory
+    container_config_path = Path("workflow/containers/containers.yaml")
+
+    if not container_config_path.exists():
+        raise FileNotFoundError(
+            f"Container configuration file not found: {container_config_path}"
+        )
+
+    with open(container_config_path, "r") as f:
+        config_data = yaml.safe_load(f)
+
+    if not config_data or "containers" not in config_data:
+        raise KeyError("No 'containers' section found in containers.yaml")
+
+    containers = config_data["containers"]
+    if env_name not in containers:
+        raise KeyError(
+            f"Container '{env_name}' not found in containers.yaml. Available: {list(containers.keys())}"
+        )
+
+    return containers[env_name]
+
+
 if config["paired_end"] is True:
     pair = ["1", "2"]
 else:
@@ -45,7 +73,7 @@ if config["mosaicatcher_pipeline"] == False:
 
     if (config["reference"] == "mm10") or (config["reference"] == "mm39"):
         config["chromosomes"] = [
-            "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
+            f"chr{e}" for e in list(range(1, 20)) + ["X", "Y"]
         ]
 
     from scripts.utils import pipeline_aesthetic_start_ashleys
@@ -83,8 +111,6 @@ if config["mosaicatcher_pipeline"] == False:
 #             config["version"], config["data_location"], config["email"], log_path_new
 #         )
 #     )
-
-
 # def onerror_fct(log):
 #     config_metadata = config_definitions = yaml.safe_load(
 #         open(configfile_location.replace("config.yaml", "config_metadata.yaml"), "r")
@@ -97,8 +123,6 @@ if config["mosaicatcher_pipeline"] == False:
 #             config["version"], config["data_location"], config["email"], log_path_new
 #         )
 #     )
-
-
 # Simple class to retrieve automatically files in the fastq/bam folder and create a config dataframe
 class HandleInput:
     def __init__(
@@ -362,8 +386,6 @@ class HandleInput:
 
 
 # GENECORE
-
-
 def findstem(arr):
     # Determine size of the array
     n = len(arr)
@@ -414,8 +436,6 @@ c = HandleInput(
 df_config_files = c.df_config_files
 if config["genecore"] is True:
     d_master = c.d_master
-
-
 samples = list(sorted(list(df_config_files.Sample.unique().tolist())))
 
 # genecore_mapping = df_config_files.groupby("Genecore_file")["Cell"].unique().apply(lambda r: r[0]).to_dict()
@@ -431,9 +451,9 @@ plottype_counts = (
     if config["multistep_normalisation"] is True
     else config["plottype_counts"][0]
 )
+
+
 # print(plottype_counts)
-
-
 def get_final_output(wildcards):
     """
     Function called by snakemake rule all to run the pipeline

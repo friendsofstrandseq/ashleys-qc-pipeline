@@ -3,8 +3,6 @@
 ## generate_exclude_file_for_mosaic_count: generate a list of chromosomes to exclude except the canonical ones
 ## mosaic_count: mosaic count program to count reads in each bin based on window selected (default: 200kb)
 ## plot_mosaic_counts: plot QC plots based on counts
-
-
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -19,6 +17,9 @@ rule generate_exclude_file_for_mosaic_count:
         "{folder}/log/config/{sample}/exclude_file.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     params:
         chroms=(
             config["chromosomes"]
@@ -49,8 +50,6 @@ rule generate_exclude_file_for_mosaic_count:
         ),
     script:
         "../scripts/utils/generate_exclude_file.py"
-
-
 checkpoint mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -73,6 +72,9 @@ checkpoint mosaic_count:
         "{folder}/log/counts/{sample}/mosaic_count.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     params:
         window=config["window"],
     resources:
@@ -90,8 +92,6 @@ checkpoint mosaic_count:
             {input.bam} \
         > {log} 2>&1
         """
-
-
 rule populate_counts:
     input:
         bin_bed=ancient(select_binbed),
@@ -102,12 +102,13 @@ rule populate_counts:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     resources:
         mem_mb=get_mem_mb,
     script:
         "../scripts/utils/populated_counts_for_qc_plot.py"
-
-
 rule plot_mosaic_counts:
     input:
         counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
@@ -126,6 +127,9 @@ rule plot_mosaic_counts:
         mouse_assembly=True if config["reference"] in ["mm10", "mm39"] else False,
     conda:
         "../envs/ashleys_rtools.yaml"
+
+    container:
+            get_container("ashleys_rtools")
     resources:
         mem_mb=get_mem_mb_heavy,
     shell:

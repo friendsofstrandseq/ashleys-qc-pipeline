@@ -12,8 +12,11 @@ This is ashleys-qc-pipeline, a Snakemake-based bioinformatics pipeline for Quali
 
 ### Running the Pipeline
 ```bash
-# Basic pipeline execution
+# Basic pipeline execution with conda environments
 snakemake --cores 1 --use-conda --configfile config/config.yaml
+
+# Using containers (set use_containers: true in config)
+snakemake --cores 1 --use-singularity --configfile config/config.yaml
 
 # With specific data location
 snakemake --cores 1 --use-conda --config data_location=.tests/data_CHR17
@@ -43,6 +46,19 @@ snakefmt workflow/
 pre-commit install
 pre-commit run --all-files  # Run on all files
 pre-commit run              # Run on staged files only
+```
+
+### Version Management
+```bash
+# Bump version using bump2version
+bump2version patch   # 2.3.5 -> 2.3.6
+bump2version minor   # 2.3.5 -> 2.4.0
+bump2version major   # 2.3.5 -> 3.0.0
+
+# Update container references (after version bump)
+python workflow/scripts/utils/update_container_references.py --version v2.3.6
+python workflow/scripts/utils/update_container_references.py --use-hash  # Use environment hash
+python workflow/scripts/utils/update_container_references.py --commit abc123d  # Use commit hash
 ```
 
 ### HPC Execution
@@ -103,9 +119,15 @@ data_location/
 7. **Plotting**: Generate QC visualizations
 
 ### Environment Management
-- Uses conda environments defined in `workflow/envs/`
-- Main environment: `ashleys_base.yaml`
-- Specialized environments for R tools, plotting, etc.
+- **Dual System**: Supports both conda environments and containers
+- **Conda environments**: defined in `workflow/envs/` with pinned versions
+  - `ashleys_base.yaml`: Main bioinformatics tools (BWA, samtools, etc.)
+  - `ashleys_rtools.yaml`: R tools for plotting and analysis
+- **Containers**: Automatically built from conda environments via GitHub Actions
+  - Stored in GitHub Container Registry (ghcr.io)
+  - Cached builds with hash-based versioning
+  - No multi-architecture support (Linux x86_64 only)
+- **Configuration**: Set `use_containers: true` in config.yaml to use containers
 - Python 3.10 is the standard version
 
 ### Testing Infrastructure
@@ -140,6 +162,22 @@ data_location/
 - `bypass_ashleys`: Skip automatic quality control
 - `multistep_normalisation`: Advanced normalization options
 
+### Container System
+- **Container building**: Automated via `.github/workflows/build-containers.yaml`
+- **Caching**: GitHub Actions cache prevents unnecessary rebuilds
+- **Versioning**:
+  - Version tags: `v2.3.5` (from bump2version)
+  - Environment hash: `env-abc123def456` (SHA256 of conda YAML file)
+  - Commit tags: `1a2b3c4d` (short commit hash)
+  - PR tags: `pr-123` (for pull request builds)
+- **Registry**: GitHub Container Registry (ghcr.io)
+- **Configuration**: Container references stored in `workflow/containers/containers.yaml`
+- **Triggers**:
+  - Git tags (`v*`)
+  - Conda environment file changes (`workflow/envs/**`)
+  - Manual workflow dispatch with force rebuild option
+- **Hash-based change detection**: Only rebuilds when conda environment content changes
+
 ### HPC Profile Usage
 Multiple HPC profiles available in `workflow/snakemake_profiles/HPC/`:
 - `slurm_generic/`: Generic SLURM configuration
@@ -149,6 +187,7 @@ Multiple HPC profiles available in `workflow/snakemake_profiles/HPC/`:
 
 ### Troubleshooting
 - Check log files in output directories
-- Verify conda environment creation
+- Verify conda environment creation or container availability
 - Ensure reference genome files are accessible
 - Test with provided `.tests/` data first
+- For container issues, check GitHub Container Registry permissions

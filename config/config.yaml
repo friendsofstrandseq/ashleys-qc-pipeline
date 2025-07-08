@@ -3,6 +3,7 @@
 # --------------------------------------------------------
 version: 2.3.5
 
+
 # Email for notifications about the pipeline's status
 email: ""
 

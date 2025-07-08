@@ -2,8 +2,6 @@
 # from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 # HTTP = HTTPRemoteProvider()
-
-
 rule download_hg19_reference:
     input:
         storage.http(
@@ -17,6 +15,9 @@ rule download_hg19_reference:
         "workflow/data/ref_genomes/log/hg19.ok",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         """
         directory="workflow/data/ref_genomes/"
@@ -24,8 +25,6 @@ rule download_hg19_reference:
         mv {input} workflow/data/ref_genomes/hg19.fa.gz
         gunzip workflow/data/ref_genomes/hg19.fa.gz
         """
-
-
 rule download_hg38_reference:
     input:
         storage.http(
@@ -39,6 +38,9 @@ rule download_hg38_reference:
         "workflow/data/ref_genomes/log/hg38.ok",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         """
         directory="workflow/data/ref_genomes/"
@@ -46,8 +48,6 @@ rule download_hg38_reference:
         mv {input} workflow/data/ref_genomes/hg38.fa.gz
         gunzip workflow/data/ref_genomes/hg38.fa.gz
         """
-
-
 rule download_T2T_reference:
     input:
         storage.http(
@@ -61,6 +61,9 @@ rule download_T2T_reference:
         "workflow/data/ref_genomes/log/T2T.ok",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         """
         directory="workflow/data/ref_genomes/"
@@ -68,8 +71,6 @@ rule download_T2T_reference:
         mv {input} workflow/data/ref_genomes/T2T.fa.gz
         gunzip workflow/data/ref_genomes/T2T.fa.gz
         """
-
-
 rule download_mm10_reference:
     input:
         storage.http(
@@ -83,6 +84,9 @@ rule download_mm10_reference:
         "workflow/data/ref_genomes/log/mm10.ok",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         """
         directory="workflow/data/ref_genomes/"
@@ -90,8 +94,6 @@ rule download_mm10_reference:
         mv {input} workflow/data/ref_genomes/mm10.fa.gz
         gunzip workflow/data/ref_genomes/mm10.fa.gz
         """
-
-
 rule download_mm39_reference:
     input:
         storage.http(
@@ -105,6 +107,9 @@ rule download_mm39_reference:
         "workflow/data/ref_genomes/log/mm39.ok",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         """
         directory="workflow/data/ref_genomes/"
@@ -112,8 +117,6 @@ rule download_mm39_reference:
         mv {input} workflow/data/ref_genomes/mm39.fa.gz
         gunzip workflow/data/ref_genomes/mm39.fa.gz
         """
-
-
 rule samtools_faindex:
     input:
         ancient("{file}.fa"),
@@ -123,5 +126,8 @@ rule samtools_faindex:
         "{file}.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         "samtools faidx {input}"

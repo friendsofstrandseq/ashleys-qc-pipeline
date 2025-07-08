@@ -21,8 +21,6 @@ def aggregate_correct_cells_bam(wildcards):
             sample=wildcards.sample,
             cell=cell_per_sample[str(wildcards.sample)],
         )
-
-
 def selected_input_bam(wildcards):
     df = pd.read_csv(
         checkpoints.mosaic_count.get(
@@ -41,8 +39,6 @@ def selected_input_bam(wildcards):
         sample=wildcards.sample,
         cell=cell_list,
     )
-
-
 def aggregate_correct_cells_plot(wildcards):
     if config["use_light_data"] is False:
         df = pd.read_csv(
@@ -68,8 +64,6 @@ def aggregate_correct_cells_plot(wildcards):
             cell=cell_per_sample[str(wildcards.sample)],
             alfred_plot=config["alfred_plots"],
         )
-
-
 def select_binbed(wildcards):
     if config["reference"] in ["mm10", "mm39"]:
         return "workflow/data/mm10.bin_200kb_all.bed"
@@ -77,8 +71,6 @@ def select_binbed(wildcards):
         return "workflow/data/bin_200kb_all.bed"
     else:
         raise ValueError("Reference genome not recognized.")
-
-
 def select_ashleys_labels(wildcards):
     # if bypass_ashleys is False > pick labels_ashleys.tsv
     if config["bypass_ashleys"] is False:

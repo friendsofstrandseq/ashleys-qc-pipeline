@@ -38,3 +38,12 @@ repos:
         args: ['--config', 'data_location=.tests/data_CHR17', '--lint']
         pass_filenames: false
         always_run: false
+
+      # Container hash verification
+      - id: check-container-hashes
+        name: check-container-hashes
+        entry: python workflow/scripts/utils/check_container_hashes.py
+        language: python
+        files: ^workflow/envs/.*\.yaml$
+        pass_filenames: false
+        additional_dependencies: [pyyaml]

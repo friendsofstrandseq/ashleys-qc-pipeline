@@ -14,6 +14,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
+
+        container:
+            get_container("ashleys_rtools")
         script:
             "../scripts/GC/library_size_normalisation.R"
 
@@ -46,6 +49,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
+
+        container:
+            get_container("ashleys_rtools")
         script:
             "../scripts/GC/GC_correction.R"
 
@@ -69,6 +75,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             mem_mb=get_mem_mb,
         conda:
             "../envs/ashleys_rtools.yaml"
+
+        container:
+            get_container("ashleys_rtools")
         script:
             "../scripts/GC/variance_stabilizing_transformation.R"
 
@@ -81,6 +90,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             "{folder}/{sample}/log/reformat_ms_norm/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+
+        container:
+            get_container("ashleys_base")
         resources:
             mem_mb=get_mem_mb,
         script:
@@ -96,6 +108,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             "{folder}/log/plot_mosaic_counts/{sample}.log",
         conda:
             "../envs/ashleys_base.yaml"
+
+        container:
+            get_container("ashleys_base")
         resources:
             mem_mb=get_mem_mb,
         script:
@@ -117,6 +132,9 @@ if config["multistep_normalisation"] is True and config["window"] == 200000:
             "{folder}/{sample}/log/plot_mosaic_counts/{sample}.log",
         conda:
             "../envs/ashleys_rtools.yaml"
+
+        container:
+            get_container("ashleys_rtools")
         params:
             mouse_assembly=True if config["reference"] == "mm10" else False,
         resources:

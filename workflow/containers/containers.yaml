@@ -1,0 +1,3 @@
+containers:
+  ashleys_base: ghcr.io/friendsofstrandseq/ashleys-qc-pipeline/envs/ashleys_base:env-654d0b4e167c
+  ashleys_rtools: ghcr.io/friendsofstrandseq/ashleys-qc-pipeline/envs/ashleys_rtools:env-0aa2a23cf7f9

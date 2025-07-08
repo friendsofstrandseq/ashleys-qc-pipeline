@@ -1,0 +1,223 @@
+name: Build and Push Container Images
+
+on:
+  push:
+    tags:
+      - 'v*'
+    paths:
+      - 'workflow/envs/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'workflow/envs/**'
+      - '.github/workflows/build-containers.yaml'
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild all containers'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-containers:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        env_name: [ashleys_base, ashleys_rtools]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract version and commit info
+      id: version
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is_tag=true" >> $GITHUB_OUTPUT
+        else
+          VERSION=$(grep "^version:" config/config.yaml | cut -d' ' -f2)
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "is_tag=false" >> $GITHUB_OUTPUT
+        fi
+
+        COMMIT_SHORT=$(git rev-parse --short HEAD)
+        echo "commit_short=$COMMIT_SHORT" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION, Commit: $COMMIT_SHORT"
+
+    - name: Generate environment file hash
+      id: env_hash
+      run: |
+        ENV_FILE="workflow/envs/${{ matrix.env_name }}.yaml"
+        # Create hash from environment file content
+        HASH=$(sha256sum $ENV_FILE | cut -d' ' -f1 | head -c 12)
+        echo "hash=$HASH" >> $GITHUB_OUTPUT
+        echo "Environment file hash for ${{ matrix.env_name }}: $HASH"
+
+    - name: Check if environment changed
+      id: env_changed
+      run: |
+        ENV_FILE="workflow/envs/${{ matrix.env_name }}.yaml"
+
+        # For workflow_dispatch with force_rebuild
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.force_rebuild }}" == "true" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "Force rebuild requested"
+        # For tag pushes, always build
+        elif [ "${{ steps.version.outputs.is_tag }}" == "true" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "Tag push detected, building containers"
+        # For PRs, check if env file changed
+        elif [ "${{ github.event_name }}" == "pull_request" ]; then
+          if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -q "^${ENV_FILE}$"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Environment file changed in PR"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "Environment file not changed in PR"
+          fi
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check if container exists
+      if: steps.env_changed.outputs.changed == 'true'
+      id: container_exists
+      run: |
+        # Check multiple possible tags
+        HASH_TAG="env-${{ steps.env_hash.outputs.hash }}"
+        VERSION_TAG="${{ steps.version.outputs.version }}"
+
+        # For non-tag builds, check if hash-based container exists
+        if [ "${{ steps.version.outputs.is_tag }}" != "true" ]; then
+          if docker manifest inspect ghcr.io/${{ github.repository }}/envs/${{ matrix.env_name }}:$HASH_TAG >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Container already exists for environment hash: $HASH_TAG"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Container does not exist for hash: $HASH_TAG"
+          fi
+        else
+          # For tag builds, check if version-tagged container exists
+          if docker manifest inspect ghcr.io/${{ github.repository }}/envs/${{ matrix.env_name }}:$VERSION_TAG >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Container already exists for version: $VERSION_TAG"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Container does not exist for version: $VERSION_TAG"
+          fi
+        fi
+
+    - name: Set up Docker Buildx
+      if: steps.env_changed.outputs.changed == 'true' && steps.container_exists.outputs.exists == 'false'
+      uses: docker/setup-buildx-action@v3
+
+    - name: Create Dockerfile
+      if: steps.env_changed.outputs.changed == 'true' && steps.container_exists.outputs.exists == 'false'
+      run: |
+        mkdir -p docker_build_${{ matrix.env_name }}
+        cat > docker_build_${{ matrix.env_name }}/Dockerfile << 'EOF'
+        FROM condaforge/mambaforge:latest
+
+        # Install system dependencies
+        RUN apt-get update && apt-get install -y \
+            build-essential \
+            git \
+            wget \
+            curl \
+            && rm -rf /var/lib/apt/lists/*
+
+        # Copy environment file
+        COPY ${{ matrix.env_name }}.yaml /tmp/environment.yaml
+
+        # Create conda environment
+        RUN mamba env create -f /tmp/environment.yaml && \
+            mamba clean --all -f -y
+
+        # Activate environment in shell
+        RUN echo "source activate ${{ matrix.env_name }}" >> ~/.bashrc
+        ENV PATH /opt/conda/envs/${{ matrix.env_name }}/bin:$PATH
+
+        # Set working directory
+        WORKDIR /workspace
+
+        # Default command
+        CMD ["/bin/bash"]
+        EOF
+
+        # Copy environment file to build context
+        cp workflow/envs/${{ matrix.env_name }}.yaml docker_build_${{ matrix.env_name }}/
+
+    - name: Prepare container tags
+      if: steps.env_changed.outputs.changed == 'true' && steps.container_exists.outputs.exists == 'false'
+      id: tags
+      run: |
+        BASE_IMAGE="ghcr.io/${{ github.repository }}/envs/${{ matrix.env_name }}"
+
+        # Always include hash-based tag
+        TAGS="${BASE_IMAGE}:env-${{ steps.env_hash.outputs.hash }}"
+
+        # Add version tag for releases
+        if [ "${{ steps.version.outputs.is_tag }}" == "true" ]; then
+          TAGS="${TAGS},${BASE_IMAGE}:${{ steps.version.outputs.version }}"
+          TAGS="${TAGS},${BASE_IMAGE}:latest"
+        fi
+
+        # Add commit tag for development
+        TAGS="${TAGS},${BASE_IMAGE}:${{ steps.version.outputs.commit_short }}"
+
+        # For PR builds, add pr tag
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          TAGS="${TAGS},${BASE_IMAGE}:pr-${{ github.event.number }}"
+        fi
+
+        echo "tags=$TAGS" >> $GITHUB_OUTPUT
+        echo "Container tags: $TAGS"
+
+    - name: Build and push Docker image
+      if: steps.env_changed.outputs.changed == 'true' && steps.container_exists.outputs.exists == 'false'
+      uses: docker/build-push-action@v5
+      with:
+        context: docker_build_${{ matrix.env_name }}
+        push: true
+        tags: ${{ steps.tags.outputs.tags }}
+        labels: |
+          org.opencontainers.image.title=ashleys-qc-pipeline-${{ matrix.env_name }}
+          org.opencontainers.image.description=Container for ${{ matrix.env_name }} environment
+          org.opencontainers.image.source=${{ github.repositoryUrl }}
+          org.opencontainers.image.version=${{ steps.version.outputs.version }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.created=${{ steps.date.outputs.date }}
+          pipeline.env.hash=${{ steps.env_hash.outputs.hash }}
+          pipeline.env.name=${{ matrix.env_name }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Clean up build context
+      if: always()
+      run: |
+        rm -rf docker_build_${{ matrix.env_name }}
+
+    - name: Output build results
+      if: steps.env_changed.outputs.changed == 'true'
+      run: |
+        if [ "${{ steps.container_exists.outputs.exists }}" == "true" ]; then
+          echo "✅ Container for ${{ matrix.env_name }} already exists, skipped build"
+        else
+          echo "🔨 Built and pushed container for ${{ matrix.env_name }}"
+          echo "📦 Tags: ${{ steps.tags.outputs.tags }}"
+          echo "🔍 Environment hash: ${{ steps.env_hash.outputs.hash }}"
+        fi

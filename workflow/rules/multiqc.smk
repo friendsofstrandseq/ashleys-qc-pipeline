@@ -19,8 +19,6 @@ rule fastqc:
         mem_mb=get_mem_mb,
     wrapper:
         "v1.7.0/bio/fastqc"
-
-
 rule fastqc_aggregate:
     input:
         lambda wc: expand(
@@ -32,8 +30,6 @@ rule fastqc_aggregate:
         ),
     output:
         touch("{folder}/{sample}/multiqc/fastqc/config/fastqc_output_touch.ok"),
-
-
 rule samtools_idxstats:
     input:
         "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -45,10 +41,11 @@ rule samtools_idxstats:
         mem_mb=get_mem_mb,
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         "samtools idxstats {input} > {output}"
-
-
 rule samtools_idxstats_aggr:
     input:
         lambda wc: expand(
@@ -61,8 +58,6 @@ rule samtools_idxstats_aggr:
         touch(
             "{folder}/{sample}/multiqc/samtools_idxstats/config/samtools_idxstats_aggr_touch.ok"
         ),
-
-
 rule samtools_flagstats:
     input:
         "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -74,10 +69,11 @@ rule samtools_flagstats:
         mem_mb=get_mem_mb,
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         "samtools flagstats {input} > {output}"
-
-
 rule samtools_flagstats_aggr:
     input:
         lambda wc: expand(
@@ -90,8 +86,6 @@ rule samtools_flagstats_aggr:
         touch(
             "{folder}/{sample}/multiqc/samtools_flagstats/config/samtools_flagstats_aggr_touch.ok"
         ),
-
-
 rule samtools_stats:
     input:
         "{folder}/{sample}/bam/{cell}.sort.mdup.bam",
@@ -103,10 +97,11 @@ rule samtools_stats:
         mem_mb=get_mem_mb,
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         "samtools stats {input} > {output}"
-
-
 rule samtools_stats_aggr:
     input:
         lambda wc: expand(
@@ -119,8 +114,6 @@ rule samtools_stats_aggr:
         touch(
             "{folder}/{sample}/multiqc/samtools_stats/config/samtools_stats_aggr_touch.ok"
         ),
-
-
 rule multiqc:
     input:
         fastqc="{folder}/{sample}/multiqc/fastqc/config/fastqc_output_touch.ok",
@@ -145,5 +138,8 @@ rule multiqc:
         ).join(input.fastqc.split("/")[:-3]),
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     shell:
         "multiqc {params.multiqc_input} --outdir {output.outdir}"
