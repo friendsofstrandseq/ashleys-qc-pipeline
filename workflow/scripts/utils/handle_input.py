@@ -1,5 +1,6 @@
+import os
+
 import pandas as pd
-import os, sys
 
 
 class HandleInput:
@@ -25,7 +26,30 @@ class HandleInput:
         folder = "all" if bam is True else "fastq"
         complete_df_list = list()
         # print(thisdir)
-        exclude = ["._.DS_Store", ".DS_Store", "all", "ashleys_counts", "bam", "cell_selection", "config", "counts", "fastq", "fastqc", "haplotag", "log", "merged_bam", "mosaiclassifier", "normalizations", "ploidy", "plots", "predictions", "segmentation", "snv_calls", "stats", "strandphaser" ]
+        exclude = [
+            "._.DS_Store",
+            ".DS_Store",
+            "all",
+            "ashleys_counts",
+            "bam",
+            "cell_selection",
+            "config",
+            "counts",
+            "fastq",
+            "fastqc",
+            "haplotag",
+            "log",
+            "merged_bam",
+            "mosaiclassifier",
+            "normalizations",
+            "ploidy",
+            "plots",
+            "predictions",
+            "segmentation",
+            "snv_calls",
+            "stats",
+            "strandphaser",
+        ]
 
         for sample in [e for e in os.listdir(thisdir) if e not in exclude]:
             # print(thisdir, sample, folder, ext)
@@ -33,7 +57,11 @@ class HandleInput:
             # print("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
             l_files_all = [
                 f
-                for f in os.listdir("{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder))
+                for f in os.listdir(
+                    "{thisdir}/{sample}/{folder}/".format(
+                        thisdir=thisdir, sample=sample, folder=folder
+                    )
+                )
                 if f.endswith(ext)
             ]
             df = pd.DataFrame([{"File": f} for f in l_files_all])
@@ -41,7 +69,9 @@ class HandleInput:
             df["Folder"] = thisdir
             df["Sample"] = sample
             df["Cell"] = df["File"].apply(lambda r: r.split(".")[0])
-            df["Full_path"] = "{thisdir}/{sample}/{folder}/".format(thisdir=thisdir, sample=sample, folder=folder)
+            df["Full_path"] = "{thisdir}/{sample}/{folder}/".format(
+                thisdir=thisdir, sample=sample, folder=folder
+            )
             df["Full_path"] = df["Full_path"] + df["File"] + ext
             # if bam is True:s
             # l_files_selected = [f for f in os.listdir(thisdir + "/" + sample + "/selected/") if f.endswith(".bam")]
@@ -53,7 +83,9 @@ class HandleInput:
             complete_df_list.append(df)
 
         complete_df = pd.concat(complete_df_list)
-        complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(drop=True)
+        complete_df = complete_df.sort_values(by=["Cell", "File"]).reset_index(
+            drop=True
+        )
         # complete_df = complete_df.loc[~complete_df["Cell"].isin(exclude_list)]
         return complete_df
 

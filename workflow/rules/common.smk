@@ -1,8 +1,10 @@
-import pandas as pd
-import os, sys
 import collections
-import yaml
+import os
 import subprocess
+import sys
+
+import pandas as pd
+import yaml
 
 
 if config["paired_end"] is True:
@@ -41,7 +43,7 @@ if config["mosaicatcher_pipeline"] == False:
         chroms = [e for e in chroms_init if e not in config["chromosomes_to_exclude"]]
         config["chromosomes"] = chroms
 
-    if config["reference"] == "mm10":
+    if (config["reference"] == "mm10") or (config["reference"] == "mm39"):
         config["chromosomes"] = [
             "chr" + str(e) for e in list(range(1, 20)) + ["X", "Y"]
         ]
@@ -157,6 +159,7 @@ class HandleInput:
                 "file_prefix": "",
                 "plate_type": "",
                 "index_pattern": "",
+                "cell_ids": set(),
             }
         )
 
@@ -174,14 +177,16 @@ class HandleInput:
             if match:
                 sample_name = match.group(2)
                 index = match.group(4)
+                cell_id = match.group(5)
                 indexes.append(index)
                 d_master[sample_name]["indexes"].add(index)
+                d_master[sample_name]["cell_ids"].add(cell_id)
                 file_count = file_counts_per_sample[sample_name]
 
                 # Determine plate type using modulo 96 operation
-                if file_count % 96 != 0:
+                if file_count % config["default_modulo"] != 0:
                     raise ValueError(
-                        f"Invalid file count for sample {sample_name} with file count {file_count}. Must be a multiple of 96."
+                        f"Invalid file count for sample {sample_name} with file count {file_count}. Must be a multiple of {config['default_modulo']}."
                     )
                 plate_type = int(file_count / 2)
 
@@ -212,14 +217,15 @@ class HandleInput:
                 sample=sample,
                 regex_element=d_master[sample]["index_pattern"],
                 index=d_master[sample]["indexes"],
-                cell_nb=[str(e).zfill(2) for e in list(range(1, 97))],
+                cell_nb=d_master[sample]["cell_ids"],
+                # cell_nb=[str(e).zfill(2) for e in list(range(1, 97))],
                 pair=pair,
             )
             for sample in d_master
             if sample in samples_to_process
         ]
+
         genecore_list = [sub_e for e in genecore_list for sub_e in e]
-        # pprint(d_master)
 
         complete_df_list = list()
 
@@ -241,10 +247,10 @@ class HandleInput:
                 )
 
                 df["Genecore_path"] = df["File"].apply(
-                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['file_prefix']}{r.replace('.', '_')}_sequence.txt.gz"
+                    lambda r: f"{config['genecore_prefix']}/{config['genecore_date_folder']}/{d_master[sample]['file_prefix']} {r.replace('.' , '_')}_sequence.txt.gz"
                 )
                 df["Genecore_file"] = df["File"].apply(
-                    lambda r: f"{d_master[sample]['file_prefix']}{r.replace('.', '_')}"
+                    lambda r: f"{d_master[sample]['file_prefix']} {r.replace('.' , '_')}"
                 )
                 df["Genecore_file"] = df["Genecore_file"].apply(
                     lambda r: "_".join(r.split("_")[:-1])
@@ -260,7 +266,6 @@ class HandleInput:
         )
         pd.options.display.max_colwidth = 200
 
-        # print(complete_df)
         return complete_df, d_master
 
     @staticmethod
@@ -304,11 +309,18 @@ class HandleInput:
             "strandphaser",
         ]
 
+        samples_to_process = None
+        if len(config["samples_to_process"]) > 0:
+            samples_to_process = config["samples_to_process"]
+
         for sample in [
             e
             for e in os.listdir(thisdir)
             if e not in exclude and e.endswith(".zip") is False
         ]:
+            if samples_to_process:
+                if sample not in samples_to_process:
+                    continue
             # Create a list of  files to process for each sample
             l_files_all = [
                 f
@@ -439,6 +451,15 @@ def get_final_output(wildcards):
             ),
         )
 
+    if config["bypass_ashleys"] is True and config["keep_ashleys_predictions"] is True:
+        final_list.extend(
+            expand(
+                "{path}/{sample}/cell_selection/labels_ashleys.tsv",
+                path=config["data_location"],
+                sample=wildcards.sample,
+            )
+        )
+
     if (
         config["mosaicatcher_pipeline"] is False
         or config["ashleys_pipeline_only"] is True
@@ -500,6 +521,10 @@ def get_final_output(wildcards):
         ),
     )
 
+    # from pprint import pprint
+
+    # pprint(final_list)
+
     return final_list
 
 
@@ -526,7 +551,7 @@ def publishdir_fct(wildcards):
     Backup files on a secondary location
     """
     list_files_to_copy = [
-        "{folder}/{sample}/cell_selection/labels_raw.tsv",
+        "{folder}/{sample}/cell_selection/labels_ashleys.tsv",
         "{folder}/{sample}/cell_selection/labels.tsv",
         "{folder}/{sample}/counts/{sample}.info_raw",
         "{folder}/{sample}/counts/{sample}.txt.raw.gz",
@@ -555,13 +580,13 @@ def publishdir_fct(wildcards):
                 plate_plot=["predictions", "probabilities"],
             )
         )
-        final_list.extend(
-            expand(
-                "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
-                folder=config["data_location"],
-                sample=wildcards.sample,
-            )
-        )
+        # final_list.extend(
+        #     expand(
+        #         "{folder}/{sample}/cell_selection/labels_positive_control_corrected.tsv",
+        #         folder=config["data_location"],
+        #         sample=wildcards.sample,
+        #     )
+        # )
         final_list.extend(
             expand(
                 "{folder}/{sample}/config/bypass_cell.txt",

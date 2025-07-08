@@ -20,31 +20,33 @@ rule generate_exclude_file_for_mosaic_count:
     conda:
         "../envs/ashleys_base.yaml"
     params:
-        chroms=config["chromosomes"]
-        if config["reference"] != "mm10"
-        else [
-            "chr1",
-            "chr2",
-            "chr3",
-            "chr4",
-            "chr5",
-            "chr6",
-            "chr7",
-            "chr8",
-            "chr9",
-            "chr10",
-            "chr11",
-            "chr12",
-            "chr13",
-            "chr14",
-            "chr15",
-            "chr16",
-            "chr17",
-            "chr18",
-            "chr19",
-            "chrX",
-            "chrY",
-        ],
+        chroms=(
+            config["chromosomes"]
+            if config["reference"] not in ["mm10", "mm39"]
+            else [
+                "chr1",
+                "chr2",
+                "chr3",
+                "chr4",
+                "chr5",
+                "chr6",
+                "chr7",
+                "chr8",
+                "chr9",
+                "chr10",
+                "chr11",
+                "chr12",
+                "chr13",
+                "chr14",
+                "chr15",
+                "chr16",
+                "chr17",
+                "chr18",
+                "chr19",
+                "chrX",
+                "chrY",
+            ]
+        ),
     script:
         "../scripts/utils/generate_exclude_file.py"
 
@@ -74,7 +76,8 @@ checkpoint mosaic_count:
     params:
         window=config["window"],
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
+        time="24:00:00",
     shell:
         """
         mosaicatcher count \
@@ -120,11 +123,11 @@ rule plot_mosaic_counts:
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     params:
-        mouse_assembly=True if config["reference"] == "mm10" else False,
+        mouse_assembly=True if config["reference"] in ["mm10", "mm39"] else False,
     conda:
         "../envs/ashleys_rtools.yaml"
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
     shell:
         """
         LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output}  > {log} 2>&1

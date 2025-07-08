@@ -1,21 +1,40 @@
-# repos:
-#   - hooks:
-#       - id: trailing-whitespace
-#       - id: check-added-large-files
-#       - id: check-yaml
-#         #  - args:
-#         #    - --branch
-#         #    - master
-#         #    id: no-commit-to-branch
-#     repo: https://github.com/pre-commit/pre-commit-hooks
-#     rev: v3.4.0
-  # - hooks:
+repos:
+  # Basic hooks for common issues
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python code formatting and linting with ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.8
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Snakemake formatting (temporarily disabled due to parsing issues)
+  # - repo: https://github.com/snakemake/snakefmt
+  #   rev: v0.10.0
+  #   hooks:
   #     - id: snakefmt
-  #   repo: https://github.com/snakemake/snakefmt
-  #   rev: 0.4.0
-  # - hooks:
-  #     - id: commitizen
-  #       stages:
-  #         - commit-msg
-  #   repo: https://github.com/commitizen-tools/commitizen
-  #   rev: v2.17.12
+  #       files: \.smk$|^Snakefile$
+
+  # Snakemake linting
+  - repo: local
+    hooks:
+      - id: snakemake-lint
+        name: snakemake-lint
+        entry: /g/korbel2/weber/miniconda3/envs/snakemake-v9/bin/snakemake
+        language: system
+        files: \.smk$|^Snakefile$
+        args: ['--config', 'data_location=.tests/data_CHR17', '--lint']
+        pass_filenames: false
+        always_run: false

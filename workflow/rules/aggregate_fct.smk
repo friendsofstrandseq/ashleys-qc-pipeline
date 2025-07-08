@@ -71,7 +71,26 @@ def aggregate_correct_cells_plot(wildcards):
 
 
 def select_binbed(wildcards):
-    if config["reference"] != "mm10":
+    if config["reference"] in ["mm10", "mm39"]:
+        return "workflow/data/mm10.bin_200kb_all.bed"
+    elif config["reference"] in ["hg38", "hg19", "T2T"]:
         return "workflow/data/bin_200kb_all.bed"
     else:
-        return "workflow/data/mm10.bin_200kb_all.bed"
+        raise ValueError("Reference genome not recognized.")
+
+
+def select_ashleys_labels(wildcards):
+    # if bypass_ashleys is False > pick labels_ashleys.tsv
+    if config["bypass_ashleys"] is False:
+        return expand(
+            "{folder}/{sample}/cell_selection/labels_ashleys.tsv",
+            folder=config["data_location"],
+            sample=wildcards.sample,
+        )
+    else:
+        # if bypass_ashleys is True > pick labels_ashleys_bypass.tsv
+        return expand(
+            "{folder}/{sample}/cell_selection/labels_ashleys_bypass.tsv",
+            folder=config["data_location"],
+            sample=wildcards.sample,
+        )

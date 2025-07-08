@@ -16,20 +16,20 @@ def pipeline_aesthetic_start(config):
     sep = """------------------------------------------------------"""
 
     smk = """
-                     _                        _        
-     ___ _ __   __ _| | _____ _ __ ___   __ _| | _____ 
-    / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \\
-    \__ \ | | | (_| |   <  __/ | | | | | (_| |   <  __/
-    |___/_| |_|\__,_|_|\_\___|_| |_| |_|\__,_|_|\_\___|
+                     _                        _
+     ___ _ __   __ _| | _____ _ __ ___   __ _| | _____
+    / __| '_ \\ / _` | |/ / _ \\ '_ ` _ \\ / _` | |/ / _ \\
+    \\__ \\ | | | (_| |   <  __/ | | | | | (_| |   <  __/
+    |___/_| |_|\\__,_|_|\\_\\___|_| |_| |_|\\__,_|_|\\_\\___|
     """
 
-    wf_name = """                                                   
-              _     _                                                 
-     __ _ ___| |__ | | ___ _   _ ___        __ _  ___ 
+    wf_name = r"""
+              _     _
+     __ _ ___| |__ | | ___ _   _ ___        __ _  ___
     / _` / __| '_ \| |/ _ \ | | / __|_____ / _` |/ __|
    | (_| \__ \ | | | |  __/ |_| \__ \_____| (_| | (__
     \__,_|___/_| |_|_|\___|\__, |___/      \__, |\___|
-                           |___/              |_|     
+                           |___/              |_|
     """
 
     wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(
@@ -87,13 +87,13 @@ def pipeline_aesthetic_start(config):
     # Genome & chrom
     chroms = (
         ["chr{e}".format(e=str(e)) for e in range(1, 23)] + ["chrX", "chrY"]
-        if config["reference"] != "mm10"
+        if config["reference"] not in ["mm10", "mm39"]
         else ["chr{e}".format(e=str(e)) for e in range(1, 20)] + ["chrX", "chrY"]
     )
     if config["chromosomes"] == chroms:
         print_chroms = (
             "chr1..22,chrX,chrY"
-            if config["reference"] != "mm10"
+            if config["reference"] not in ["mm10", "mm39"]
             else "chr1..19,chrX,chrY"
         )
     else:
@@ -117,30 +117,28 @@ def pipeline_aesthetic_start(config):
 
 
 def argparse_help(config):
-    import argparse
     import yaml
-    import sys, os
 
     # config = yaml.safe_load(open("config/config.yaml", "r"))
     # pipeline_aesthetic_start(config)
 
     sep = """------------------------------------------------------"""
 
-    smk = """
-                     _                        _        
-     ___ _ __   __ _| | _____ _ __ ___   __ _| | _____ 
+    smk = r"""
+                     _                        _
+     ___ _ __   __ _| | _____ _ __ ___   __ _| | _____
     / __| '_ \ / _` | |/ / _ \ '_ ` _ \ / _` | |/ / _ \
     \__ \ | | | (_| |   <  __/ | | | | | (_| |   <  __/
     |___/_| |_|\__,_|_|\_\___|_| |_| |_|\__,_|_|\_\___|
     """
 
-    wf_name = """                                                   
-              _     _                                                 
-     __ _ ___| |__ | | ___ _   _ ___        __ _  ___ 
+    wf_name = r"""
+              _     _
+     __ _ ___| |__ | | ___ _   _ ___        __ _  ___
     / _` / __| '_ \| |/ _ \ | | / __|_____ / _` |/ __|
    | (_| \__ \ | | | |  __/ |_| \__ \_____| (_| | (__
     \__,_|___/_| |_|_|\___|\__, |___/      \__, |\___|
-                           |___/              |_|     
+                           |___/              |_|
     """
 
     wf_info = "smk-wf-catalog/ashleys-qc-pipeline v{version}".format(

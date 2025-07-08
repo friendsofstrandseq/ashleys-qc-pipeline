@@ -5,7 +5,7 @@ library(ggplot2)
 args = commandArgs(trailingOnly = T)
 
 filter <- ifelse('filter' %in% args, TRUE, FALSE)
-chosen_transform <- ifelse('anscombe' %in% args, 'anscombe', 
+chosen_transform <- ifelse('anscombe' %in% args, 'anscombe',
                            ifelse('laubschner' %in% args, 'laubschner', 'anscombe'))
 
 # open count file
@@ -48,18 +48,18 @@ to_matrix <- function(counts) {
   mat_tot <- reshape2::dcast(counts, bin ~ cell, value.var = "tot_count")
   rownames(mat_tot) <- mat_tot$bin
   mat_tot <- mat_tot[,2:ncol(mat_tot)]
-  
+
   return(mat_tot)
 }
 
 mat_tot <- to_matrix(counts)
 
 generate_dgelist <- function(mat_tot, filter) {
-  
+
   # create the DGEList object
   # all samples belong to group 1
   y.raw <- DGEList(as.matrix(mat_tot), group = rep(1, ncol(mat_tot)))
-  
+
   # filter out bins with too low counts to be informative
   if (filter) {
     keep.exprs <- edgeR::filterByExpr(y.raw, group=y.raw$samples$group)
@@ -69,25 +69,25 @@ generate_dgelist <- function(mat_tot, filter) {
     y <- y.raw
     message('no filtering')
   }
-  
+
   # calculate library size and composition normalization
   y <- calcNormFactors(y)
-  
+
   return(y)
 }
 
 estimate_dispersion <- function(y) {
-  
+
   # estimate common dispersion
   # default settings for DGEList objects
   message('Estimating common dispersion with edgeR...')
   disp <- estimateDisp(y, design=NULL, prior.df=NULL, trend.method="locfit", tagwise=TRUE,
-                       span=NULL, min.row.sum=5, grid.length=21, grid.range=c(-10,10), robust=FALSE, 
+                       span=NULL, min.row.sum=5, grid.length=21, grid.range=c(-10,10), robust=FALSE,
                        winsor.tail.p=c(0.05,0.1), tol=1e-06)
   phi <- disp$common.dispersion
   message(paste("phi =",phi))
   write(paste(args[1], phi, sep="\t"), './log.txt', append=TRUE)
-  
+
   return(phi)
 }
 
@@ -143,7 +143,7 @@ d[c('chrom', 'start', 'end')] <- bins
 d$start <- as.numeric(d$start)
 d$end <- as.numeric(d$end)
 
-merged.raw <- merge(counts_raw, d[c('chrom', 'start', 'end', 'cell', 'tot_count_corr')], 
+merged.raw <- merge(counts_raw, d[c('chrom', 'start', 'end', 'cell', 'tot_count_corr')],
                     by=c('chrom', 'start', 'end', 'cell'), all.x=T)
 
 fil <- apply(merged.raw, MARGIN = 1, FUN = (function(x) any(is.na(x))))

@@ -1,7 +1,5 @@
 import pandas as pd
 import pysam
-import os, sys
-
 
 # df_config_files = pd.read_csv(, sep="\t")
 

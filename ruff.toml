@@ -1,0 +1,34 @@
+# Ignore F821 (undefined name) for snakemake scripts since snakemake is injected at runtime
+ignore = [
+    "F821",  # Undefined name (for snakemake variable)
+    "E741",  # Ambiguous variable name (common in bioinformatics)
+    "F841",  # Local variable is assigned but never used
+    "E712",  # Comparison to True should be cond is True
+]
+
+# Extend ignore for specific files
+[per-file-ignores]
+"workflow/scripts/**/*.py" = ["F821"]  # Snakemake scripts have injected variables
+"afac/*.py" = ["F841"]  # Allow unused variables in development scripts
+"workflow/scripts/utils/handle_input.py" = ["E501"]  # Long commented lines
+"workflow/scripts/utils/pipeline_aesthetic_start_ashleys.py" = ["E501"]  # Long commented lines
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+
+[lint]
+# Select the lint rules to apply
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+]
+
+# Allow ambiguous variable names for certain patterns
+[lint.pycodestyle]
+max-line-length = 150
+
+[lint.isort]
+force-single-line = true
