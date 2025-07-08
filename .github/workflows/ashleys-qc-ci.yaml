@@ -261,7 +261,7 @@ jobs:
         version: 2.3.5
         email: ""
         samples_to_process: []
-        data_location: ".tests/data_CHR17"
+        data_location: "github-actions-runner/.tests-mock/data_CHR17"
         publishdir: ""
 
         # Reference genome configuration
