@@ -135,9 +135,9 @@ class HandleInput:
         genecore=False,
         genecore_path=str,
     ):
-        if genecore is False:
+        if genecore in [False, "false", "False"]:
             df_config_files = self.handle_input_data(thisdir=input_path, bam=bam)
-        elif genecore is True:
+        elif genecore in [True, "true", "True"]:
             df_config_files, d_master = self.handle_input_data_genecore(
                 thisdir=genecore_path
             )
