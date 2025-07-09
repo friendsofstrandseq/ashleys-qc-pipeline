@@ -349,7 +349,7 @@ jobs:
       - name: "🧪 Run integration test"
         run: |
           echo "Running full integration test..."
-          micromamba run -n snakemake-env snakemake --cores 1 --use-conda --config data_location=github-actions-runner/.tests-mock/data_CHR17 \
+          micromamba run -n snakemake-env snakemake --cores 1 --use-conda --configfile .config/simple_config_ashleys.yaml \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
           echo "✅ Integration test completed successfully!"
         shell: bash -el {0}
