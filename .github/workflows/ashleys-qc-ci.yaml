@@ -41,7 +41,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -76,7 +76,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install Python dependencies
         run: |
@@ -235,7 +235,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -258,6 +258,13 @@ jobs:
           # Convert matrix config to CLI override format
           echo "📋 Configuration overrides for ${{ matrix.name }}:"
           echo "${{ matrix.config }}" | sed 's/^/  /'
+
+      - name: Show current working directory
+        run: |
+          pwd
+          ls -alh .
+          ls -alh .tests
+          ls -alh .tests/config
 
       - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
         run: |
@@ -314,7 +321,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: "📋 Show test environment info"
         run: |
@@ -434,7 +441,7 @@ jobs:
   #     - name: Setup Python
   #       uses: actions/setup-python@v5
   #       with:
-  #         python-version: '3.10'
+  #         python-version: '3.12'
   #     - name: Setup micromamba
   #       uses: mamba-org/setup-micromamba@v1
   #       with:
