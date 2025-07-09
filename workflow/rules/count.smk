@@ -3,8 +3,6 @@
 ## generate_exclude_file_for_mosaic_count: generate a list of chromosomes to exclude except the canonical ones
 ## mosaic_count: mosaic count program to count reads in each bin based on window selected (default: 200kb)
 ## plot_mosaic_counts: plot QC plots based on counts
-
-
 rule generate_exclude_file_for_mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -19,36 +17,39 @@ rule generate_exclude_file_for_mosaic_count:
         "{folder}/log/config/{sample}/exclude_file.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     params:
-        chroms=config["chromosomes"]
-        if config["reference"] != "mm10"
-        else [
-            "chr1",
-            "chr2",
-            "chr3",
-            "chr4",
-            "chr5",
-            "chr6",
-            "chr7",
-            "chr8",
-            "chr9",
-            "chr10",
-            "chr11",
-            "chr12",
-            "chr13",
-            "chr14",
-            "chr15",
-            "chr16",
-            "chr17",
-            "chr18",
-            "chr19",
-            "chrX",
-            "chrY",
-        ],
+        chroms=(
+            config["chromosomes"]
+            if config["reference"] not in ["mm10", "mm39"]
+            else [
+                "chr1",
+                "chr2",
+                "chr3",
+                "chr4",
+                "chr5",
+                "chr6",
+                "chr7",
+                "chr8",
+                "chr9",
+                "chr10",
+                "chr11",
+                "chr12",
+                "chr13",
+                "chr14",
+                "chr15",
+                "chr16",
+                "chr17",
+                "chr18",
+                "chr19",
+                "chrX",
+                "chrY",
+            ]
+        ),
     script:
         "../scripts/utils/generate_exclude_file.py"
-
-
 checkpoint mosaic_count:
     input:
         bam=lambda wc: expand(
@@ -71,10 +72,14 @@ checkpoint mosaic_count:
         "{folder}/log/counts/{sample}/mosaic_count.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     params:
         window=config["window"],
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
+        time="24:00:00",
     shell:
         """
         mosaicatcher count \
@@ -87,8 +92,6 @@ checkpoint mosaic_count:
             {input.bam} \
         > {log} 2>&1
         """
-
-
 rule populate_counts:
     input:
         bin_bed=ancient(select_binbed),
@@ -99,12 +102,13 @@ rule populate_counts:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     conda:
         "../envs/ashleys_base.yaml"
+
+    container:
+            get_container("ashleys_base")
     resources:
         mem_mb=get_mem_mb,
     script:
         "../scripts/utils/populated_counts_for_qc_plot.py"
-
-
 rule plot_mosaic_counts:
     input:
         counts="{folder}/{sample}/counts/{sample}.txt.populated.gz",
@@ -120,11 +124,14 @@ rule plot_mosaic_counts:
     log:
         "{folder}/log/plot_mosaic_counts/{sample}.log",
     params:
-        mouse_assembly=True if config["reference"] == "mm10" else False,
+        mouse_assembly=True if config["reference"] in ["mm10", "mm39"] else False,
     conda:
         "../envs/ashleys_rtools.yaml"
+
+    container:
+            get_container("ashleys_rtools")
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_heavy,
     shell:
         """
         LC_CTYPE=C Rscript workflow/scripts/plotting/qc.R {input.counts} {input.info} {output}  > {log} 2>&1

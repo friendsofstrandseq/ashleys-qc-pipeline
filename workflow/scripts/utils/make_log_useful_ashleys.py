@@ -1,10 +1,16 @@
-import sys, os
+import os
 
 
 def make_log_useful(log_path, status, config, config_definitions):
-    logs_processed_dir = "/".join(log_path.split("/")[:-1]) + "/processed_logs_for_mail/"
+    logs_processed_dir = (
+        "/".join(log_path.split("/")[:-1]) + "/processed_logs_for_mail/"
+    )
     os.makedirs(logs_processed_dir, exist_ok=True)
-    log_path_new = "/".join(log_path.split("/")[:-1]) + "/processed_logs_for_mail/" + log_path.split("/")[-1]
+    log_path_new = (
+        "/".join(log_path.split("/")[:-1])
+        + "/processed_logs_for_mail/"
+        + log_path.split("/")[-1]
+    )
     error_buffer = []
     record = 0
     with open(log_path, "r") as logfile:
@@ -37,7 +43,9 @@ def make_log_useful(log_path, status, config, config_definitions):
         _ = logfile.write("Shell: {}\n".format(my_env.get("SHELL", "N/A")))
         _ = logfile.write("Terminal: {}\n".format(my_env.get("TERM", "N/A")))
         _ = logfile.write("Screen: {}\n".format(my_env.get("STY", "N/A")))
-        _ = logfile.write("Conda ENV: {}\n".format(my_env.get("CONDA_DEFAULT_ENV", "N/A")))
+        _ = logfile.write(
+            "Conda ENV: {}\n".format(my_env.get("CONDA_DEFAULT_ENV", "N/A"))
+        )
 
         # Define the categories
         categories = {
@@ -56,12 +64,19 @@ def make_log_useful(log_path, status, config, config_definitions):
                 "multistep_normalisation_for_SV_calling",
                 "hgsvc_based_normalized_counts",
             ],
-            "Advanced Settings": ["ashleys_threshold", "window", "chromosomes", "chromosomes_to_exclude"],
+            "Advanced Settings": [
+                "ashleys_threshold",
+                "window",
+                "chromosomes",
+                "chromosomes_to_exclude",
+            ],
             "Genecore": ["genecore", "genecore_date_folder", "genecore_prefix"],
             "Downstream Modules": ["arbigent", "arbigent_bed_file", "scNOVA"],
         }
 
-        _ = logfile.write("\n=========================\n===[CONFIG PARAMETERS]===\n=========================\n")
+        _ = logfile.write(
+            "\n=========================\n===[CONFIG PARAMETERS]===\n=========================\n"
+        )
         # Log the configuration
         for category, keys in categories.items():
             _ = logfile.write("\n===[{}]===\n".format(category))

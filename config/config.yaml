@@ -3,6 +3,7 @@
 # --------------------------------------------------------
 version: 2.3.5
 
+
 # Email for notifications about the pipeline's status
 email: ""
 
@@ -32,6 +33,7 @@ references_data:
   "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
   "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
   "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
+  "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
 
 # List of chromosomes to process
 chromosomes:
@@ -75,6 +77,9 @@ MultiQC: False
 
 # Enable or disable ashleys-qc automatic classification
 bypass_ashleys: False
+
+# Keep ashleys predictions for later use
+keep_ashleys_predictions: True
 
 # Whether to use paired-end data or not
 paired_end: True

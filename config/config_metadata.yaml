@@ -37,6 +37,13 @@ bypass_ashleys:
   default: False
   category: "Quality Control"
 
+keep_ashleys_predictions:
+  desc: "Keep ashleys predictions for later use"
+  type: bool
+  required: False
+  default: True
+  category: "Quality Control"
+
 paired_end:
   desc: "Enable / Disable paired-end data"
   type: bool

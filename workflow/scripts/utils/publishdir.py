@@ -1,4 +1,5 @@
-import subprocess, os, sys
+import os
+import subprocess
 
 # input_list = [
 #     "/scratch/tweber/DATA/MC_DATA/STOCKS_DEV/2023-06-23-HGFLGAFX7/IMR90E6E7PD103s1p2x01/cell_selection/labels_raw.tsv",
@@ -59,9 +60,15 @@ for file in list(snakemake.input.list_publishdir):
     os.makedirs(folder_path, exist_ok=True)
 
     # # subprocess.Popen("mkdir -p {folder_path}".format(folder_path=folder_path), shell=True, stdout=subprocess.PIPE)
-    print("rsync --ignore-existing -avzh --progress {file} {folder_path}".format(file=file, folder_path=folder_path))
+    print(
+        "rsync --ignore-existing -avzh --progress {file} {folder_path}".format(
+            file=file, folder_path=folder_path
+        )
+    )
     subprocess.Popen(
-        "rsync --ignore-existing -avzh --progress {file} {folder_path}".format(file=file, folder_path=folder_path),
+        "rsync --ignore-existing -avzh --progress {file} {folder_path}".format(
+            file=file, folder_path=folder_path
+        ),
         shell=True,
         stdout=subprocess.PIPE,
     )

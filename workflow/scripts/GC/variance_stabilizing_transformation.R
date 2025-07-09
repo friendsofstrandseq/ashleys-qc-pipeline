@@ -110,7 +110,7 @@ rescale_data <- function(counts_original, counts_transformed) {
 
 if (rescale == TRUE) {
   corr_counts <- rescale_data(counts_raw, corr_counts)
-} 
+}
 
 
 message("saving...")
@@ -167,10 +167,10 @@ if (plot) {
     ggtitle(paste(chosen_transform, "VST")) +
     xlab("read count") +
     ylab("bin count")
-  
+
   m <- merge_bins(counts_raw)
   p3 <- wf_plot(m) + ggtitle('raw')
-  
+
   n <- merge_bins(corr_counts)
   p4 <- wf_plot(n) + ggtitle(paste(chosen_transform, "VST"))
 

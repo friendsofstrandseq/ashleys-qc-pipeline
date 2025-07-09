@@ -14,4 +14,4 @@ The configuration file looks like the following:
 | BM510x3PE20402.1 | .tests/data_CHR21 | RPE-BM510 | BM510x3PE20402 | .tests/data_CHR21/RPE-BM510/fastq/BM510x3PE20402.1.fastq.gz |
 | BM510x3PE20402.2 | .tests/data_CHR21 | RPE-BM510 | BM510x3PE20402 | .tests/data_CHR21/RPE-BM510/fastq/BM510x3PE20402.2.fastq.gz |
 
-This configuration file is then used to create the dictionnary and lists needed to flag wildcards and identify the samples, the different cells for each of them and the associated files.  
+This configuration file is then used to create the dictionnary and lists needed to flag wildcards and identify the samples, the different cells for each of them and the associated files.

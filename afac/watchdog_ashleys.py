@@ -1,13 +1,15 @@
-import time
-import os, sys, glob, subprocess, re
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from datetime import datetime
+import glob
 import logging
-import json
-import pandas as pd
+import os
+import re
+import subprocess
+import sys
 import threading
+import time
+from datetime import datetime
 
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 os.makedirs("watchdog/logs", exist_ok=True)
 
@@ -16,7 +18,9 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("watchdog/logs/watchdog_ashleys.log"),  # File handler to log to a file
+        logging.FileHandler(
+            "watchdog/logs/watchdog_ashleys.log"
+        ),  # File handler to log to a file
         logging.StreamHandler(),  # Stream handler to log to the console
     ],
 )
@@ -47,8 +51,12 @@ class MyHandler(FileSystemEventHandler):
 
     def check_unprocessed_folder(self):
         unwanted = ["._.DS_Store", ".DS_Store", "config"]
-        list_runs_processed = sorted([e for e in os.listdir(data_location) if e not in unwanted])
-        total_list_runs = sorted([e for e in os.listdir(path_to_watch) if e not in unwanted])
+        list_runs_processed = sorted(
+            [e for e in os.listdir(data_location) if e not in unwanted]
+        )
+        total_list_runs = sorted(
+            [e for e in os.listdir(path_to_watch) if e not in unwanted]
+        )
         unprocessed_plates = set(total_list_runs).difference(list_runs_processed)
         # for plate in ["2023-07-10-HLGVJAFX5"]:
         for plate in unprocessed_plates:
@@ -60,7 +68,9 @@ class MyHandler(FileSystemEventHandler):
                 print(f"PROCESSING {path_to_watch}/{plate}")
                 self.process_new_directory(f"{path_to_watch}/{plate}")
             else:
-                print(f"Not possible to process {path_to_watch}/{plate}, containing {nb_txt_gz_files} txt.gz files")
+                print(
+                    f"Not possible to process {path_to_watch}/{plate}, containing {nb_txt_gz_files} txt.gz files"
+                )
 
     def process_new_directory(self, directory_path):
         """Process the new directory, check for .txt.gz files and execute snakemake command if conditions are met."""
@@ -88,11 +98,13 @@ class MyHandler(FileSystemEventHandler):
         """Process the found .txt.gz files and execute snakemake command if conditions are met."""
 
         if (num_files % 192) == 0:
-            logging.info(f"The new directory contains exactly 576 .txt.gz files.")
+            logging.info("The new directory contains exactly 576 .txt.gz files.")
             self.execute_snakemake(directory_path, txt_gz_files)
 
         else:
-            logging.info(f"The new directory contains {str(num_files)} .txt.gz files, not 576.")
+            logging.info(
+                f"The new directory contains {str(num_files)} .txt.gz files, not 576."
+            )
 
     def execute_snakemake(self, directory_path, txt_gz_files):
         """Execute the snakemake command based on the found prefixes."""
@@ -125,7 +137,9 @@ class MyHandler(FileSystemEventHandler):
                 if (j + 1) % 192 == 0:
                     match = pattern.search(file_path)
                     sample_name = match.group(1)
-                    cell = f"{sample_name}{prefixes[0]}{match.group(3)}{match.group(4)}96"
+                    cell = (
+                        f"{sample_name}{prefixes[0]}{match.group(3)}{match.group(4)}96"
+                    )
                     # print(file_path, j, match, sample_name, cell)
                     # print([match.group(i) for i in range(6)])
                     self.execute_command(directory_path, prefixes[0], sample_name)
@@ -166,10 +180,15 @@ class MyHandler(FileSystemEventHandler):
                 "--force",
             ]
 
-        logging.info("Running command: %s", " ".join(cmd + profile_dry_run + dry_run_options))
+        logging.info(
+            "Running command: %s", " ".join(cmd + profile_dry_run + dry_run_options)
+        )
 
         process = subprocess.Popen(
-            cmd + profile_dry_run + dry_run_options, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
+            cmd + profile_dry_run + dry_run_options,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
         )
 
         # Variable to store the penultimate line
@@ -187,11 +206,15 @@ class MyHandler(FileSystemEventHandler):
 
         # Check the penultimate line
         if str(process.returncode) == str(0):
-            self.run_second_command(cmd, profile_slurm, data_location, date_folder, sample, cell)
+            self.run_second_command(
+                cmd, profile_slurm, data_location, date_folder, sample, cell
+            )
         else:
             logging.info("\nThe output is not as expected.")
 
-    def run_second_command(self, cmd, profile_slurm, data_location, date_folder, sample, cell=None):
+    def run_second_command(
+        self, cmd, profile_slurm, data_location, date_folder, sample, cell=None
+    ):
         """Run the second command and write the output to a log file."""
 
         report_location = f"{publishdir_location}/{date_folder}/{sample}/reports/{sample}_ashleys-qc-pipeline_report.zip"
@@ -217,8 +240,12 @@ class MyHandler(FileSystemEventHandler):
         # Convert it to a string
         current_time = now.strftime("%Y%m%d%H%M%S")
 
-        with open(f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}.log", "w") as f:
-            process2 = subprocess.Popen(cmd + profile_dry_run, stdout=f, stderr=f, universal_newlines=True)
+        with open(
+            f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}.log", "w"
+        ) as f:
+            process2 = subprocess.Popen(
+                cmd + profile_dry_run, stdout=f, stderr=f, universal_newlines=True
+            )
             # process2 = subprocess.Popen(cmd + profile_slurm, stdout=f, stderr=f, universal_newlines=True)
             process2.wait()
 
@@ -227,13 +254,23 @@ class MyHandler(FileSystemEventHandler):
         logging.info("Generating ashleys report.")
         os.makedirs(os.path.dirname(report_location), exist_ok=True)
         # os.makedirs(f"{publishdir_location}/{date_folder}/{sample}/reports/", exist_ok=True)
-        logging.info("Running command: %s", " ".join(cmd + profile_slurm + report_options))
+        logging.info(
+            "Running command: %s", " ".join(cmd + profile_slurm + report_options)
+        )
         # Change the permissions of the new directory
         # subprocess.run(["chmod", "-R", "777", f"{data_location}/{date_folder}"])
 
-        with open(f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}_report.log", "w") as f:
+        with open(
+            f"watchdog/logs/per-run/{date_folder}_{pipeline}_{current_time}_report.log",
+            "w",
+        ) as f:
             print(cmd + profile_slurm + report_options)
-            process2 = subprocess.Popen(cmd + profile_dry_run + report_options, stdout=f, stderr=f, universal_newlines=True)
+            process2 = subprocess.Popen(
+                cmd + profile_dry_run + report_options,
+                stdout=f,
+                stderr=f,
+                universal_newlines=True,
+            )
             # process2 = subprocess.Popen(cmd + profile_slurm + report_options, stdout=f, stderr=f, universal_newlines=True)
             process2.wait()
 
