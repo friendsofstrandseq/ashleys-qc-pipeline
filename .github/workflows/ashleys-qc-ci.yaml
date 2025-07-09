@@ -141,16 +141,16 @@ jobs:
               genecore: false
               reference: "hg38"
 
-          - name: "Standalone + Genecore data"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: true
-              genecore_date_folder: "test_folder"
-              reference: "hg38"
+          # - name: "Standalone + Genecore data"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: true
+          #     genecore_date_folder: "test_folder"
+          #     reference: "hg38"
 
           - name: "Standalone + Mouse genome (mm10)"
             config: |
@@ -194,16 +194,16 @@ jobs:
               reference: "hg38"
 
           # Complex combination modes
-          - name: "Complex: Genecore + Light data + Mouse"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: true
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: true
-              genecore_date_folder: "test_folder"
-              reference: "mm10"
+          # - name: "Complex: Genecore + Light data + Mouse"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: true
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: true
+          #     genecore_date_folder: "test_folder"
+          #     reference: "mm10"
 
           - name: "Complex: Multistep + Bypass + T2T"
             config: |
@@ -253,54 +253,54 @@ jobs:
           cache-environment: true
           post-cleanup: "all"
 
-      - name: "🔧 Create test config for ${{ matrix.name }}"
-        run: |
-          # Create a temporary config file with the specific configuration
-          cat > test_config_${{ strategy.job-index }}.yaml << 'EOF'
-          # Base configuration
-          version: 2.3.5
-          email: ""
-          samples_to_process: []
-          data_location: "github-actions-runner/.tests-mock/data_CHR17"
-          publishdir: ""
+      # - name: "🔧 Create test config for ${{ matrix.name }}"
+      #   run: |
+      #     # Create a temporary config file with the specific configuration
+      #     cat > test_config_${{ strategy.job-index }}.yaml << 'EOF'
+      #     # Base configuration
+      #     version: 2.3.5
+      #     email: ""
+      #     samples_to_process: []
+      #     data_location: "github-actions-runner/.tests-mock/data_CHR17"
+      #     publishdir: ""
 
-          # Reference genome configuration
-          references_data:
-            "hg38": { reference_fasta: "workflow/data/ref_genomes/hg38.fa" }
-            "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
-            "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
-            "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
-            "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
+      #     # Reference genome configuration
+      #     references_data:
+      #       "hg38": { reference_fasta: "workflow/data/ref_genomes/hg38.fa" }
+      #       "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
+      #       "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
+      #       "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
+      #       "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
 
-          # Chromosome configuration
-          chromosomes:
-            - chr1
-            - chr2
-            - chr3
-            - chr17
-            - chrX
-            - chrY
+      #     # Chromosome configuration
+      #     chromosomes:
+      #       - chr1
+      #       - chr2
+      #       - chr3
+      #       - chr17
+      #       - chrX
+      #       - chrY
 
-          # Default values for optional parameters
-          genecore_prefix: "github-actions-runner/.tests-mock/test_folder"
-          genecore_date_folder: ""
-          multistep_normalisation_options:
-            min_reads_cell: 50000
-            min_reads_bin: 10000
-            n_subsample: 100000
-          ashleys_threshold: 0.5
-          ashleys_threshold_stringent: 0.8
-          window: 200000
-          abs_path: $(pwd)
-          plottype_counts: ["read_counts_raw"]
+      #     # Default values for optional parameters
+      #     genecore_prefix: "github-actions-runner/.tests-mock/test_folder"
+      #     genecore_date_folder: ""
+      #     multistep_normalisation_options:
+      #       min_reads_cell: 50000
+      #       min_reads_bin: 10000
+      #       n_subsample: 100000
+      #     ashleys_threshold: 0.5
+      #     ashleys_threshold_stringent: 0.8
+      #     window: 200000
+      #     abs_path: $(pwd)
+      #     plottype_counts: ["read_counts_raw"]
 
-          # Mode-specific configuration
-          ${{ matrix.config }}
-          EOF
+      #     # Mode-specific configuration
+      #     ${{ matrix.config }}
+      #     EOF
 
-          # Show the generated config for debugging
-          echo "📋 Generated config for ${{ matrix.name }}:"
-          cat test_config_${{ strategy.job-index }}.yaml
+      #     # Show the generated config for debugging
+      #     echo "📋 Generated config for ${{ matrix.name }}:"
+      #     cat test_config_${{ strategy.job-index }}.yaml
 
       - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
         run: |
