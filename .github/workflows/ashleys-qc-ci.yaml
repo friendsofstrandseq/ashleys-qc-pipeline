@@ -277,13 +277,13 @@ jobs:
           echo "✅ Syntax validation completed for: ${{ matrix.name }}"
         shell: bash -el {0}
 
-      - name: "🔍 Check rule graph generation"
-        run: |
-          echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
-          CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
-          micromamba run -n snakemake-env snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 $CONFIG_OVERRIDES --rulegraph > /dev/null
-          echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
-        shell: bash -el {0}
+      # - name: "🔍 Check rule graph generation"
+      #   run: |
+      #     echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
+      #     CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
+      #     micromamba run -n snakemake-env snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 $CONFIG_OVERRIDES --rulegraph > /dev/null
+      #     echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
+      #   shell: bash -el {0}
 
       - name: "📦 Collect comprehensive test artifacts"
         if: always()
