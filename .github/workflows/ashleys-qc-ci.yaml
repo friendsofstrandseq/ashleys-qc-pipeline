@@ -259,12 +259,6 @@ jobs:
           echo "📋 Configuration overrides for ${{ matrix.name }}:"
           echo "${{ matrix.config }}" | sed 's/^/  /'
 
-      - name: Show current working directory
-        run: |
-          pwd
-          ls -alh .
-          ls -alh .tests
-          ls -alh .tests/config
 
       - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
         run: |
@@ -272,7 +266,7 @@ jobs:
           # Build config override string from matrix config
           CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
           echo "Config overrides: $CONFIG_OVERRIDES"
-          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --lint
+          micromamba run -n snakemake-env snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 $CONFIG_OVERRIDES --lint
           echo "✅ Lint successful for: ${{ matrix.name }}"
         shell: bash -el {0}
 
@@ -280,7 +274,7 @@ jobs:
         run: |
           echo "🔍 Validating workflow syntax for: ${{ matrix.name }}"
           CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
-          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --dry-run --quiet || true
+          micromamba run -n snakemake-env snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 $CONFIG_OVERRIDES --dry-run --quiet || true
           echo "✅ Syntax validation completed for: ${{ matrix.name }}"
         shell: bash -el {0}
 
@@ -288,7 +282,7 @@ jobs:
         run: |
           echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
           CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
-          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --rulegraph > /dev/null
+          micromamba run -n snakemake-env snakemake --config data_location=github-actions-runner/.tests-mock/data_CHR17 $CONFIG_OVERRIDES --rulegraph > /dev/null
           echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
         shell: bash -el {0}
 
@@ -326,11 +320,8 @@ jobs:
       - name: "📋 Show test environment info"
         run: |
           echo "Test data structure:"
-          tree -h .tests
+          tree -h github-actions-runner/.tests-mock
           echo "
-            Test configuration:"
-                      cat .tests/config/simple_config_ashleys.yaml
-                      echo "
             Workflow data:"
           tree -h workflow/data
 
@@ -359,7 +350,7 @@ jobs:
       - name: "🧪 Run integration test"
         run: |
           echo "Running full integration test..."
-          micromamba run -n snakemake-env snakemake --cores 1 --use-conda --configfile .tests/config/simple_config_ashleys.yaml \
+          micromamba run -n snakemake-env snakemake --cores 1 --use-conda --config data_location=github-actions-runner/.tests-mock/data_CHR17 \
           --conda-frontend mamba -p --verbose --debug --snakefile workflow/Snakefile
           echo "✅ Integration test completed successfully!"
         shell: bash -el {0}
