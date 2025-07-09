@@ -5,7 +5,7 @@ on:
     branches:
       - "**"
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: 'latest'
+          micromamba-version: "latest"
           environment-name: snakemake-env
           create-args: >
             -c conda-forge
@@ -57,7 +57,7 @@ jobs:
           init-shell: >-
             bash
           cache-environment: true
-          post-cleanup: 'all'
+          post-cleanup: "all"
 
       - name: "🔍 Run Snakemake lint check"
         run: |
@@ -229,115 +229,115 @@ jobs:
               list_commands: true
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Setup micromamba
-      uses: mamba-org/setup-micromamba@v1
-      with:
-        micromamba-version: 'latest'
-        environment-name: snakemake-env
-        create-args: >
-          -c conda-forge
-          -c bioconda
-          snakemake
-          snakemake-executor-plugin-slurm
-          snakemake-storage-plugin-http
-        init-shell: >-
-          bash
-        cache-environment: true
-        post-cleanup: 'all'
+      - name: Setup micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          micromamba-version: "latest"
+          environment-name: snakemake-env
+          create-args: >
+            -c conda-forge
+            -c bioconda
+            snakemake
+            snakemake-executor-plugin-slurm
+            snakemake-storage-plugin-http
+          init-shell: >-
+            bash
+          cache-environment: true
+          post-cleanup: "all"
 
-    - name: "🔧 Create test config for ${{ matrix.name }}"
-      run: |
-        # Create a temporary config file with the specific configuration
-        cat > test_config_${{ strategy.job-index }}.yaml << 'EOF'
-        # Base configuration
-        version: 2.3.5
-        email: ""
-        samples_to_process: []
-        data_location: "github-actions-runner/.tests-mock/data_CHR17"
-        publishdir: ""
+      - name: "🔧 Create test config for ${{ matrix.name }}"
+        run: |
+          # Create a temporary config file with the specific configuration
+          cat > test_config_${{ strategy.job-index }}.yaml << 'EOF'
+          # Base configuration
+          version: 2.3.5
+          email: ""
+          samples_to_process: []
+          data_location: "github-actions-runner/.tests-mock/data_CHR17"
+          publishdir: ""
 
-        # Reference genome configuration
-        references_data:
-          "hg38": { reference_fasta: "workflow/data/ref_genomes/hg38.fa" }
-          "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
-          "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
-          "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
-          "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
+          # Reference genome configuration
+          references_data:
+            "hg38": { reference_fasta: "workflow/data/ref_genomes/hg38.fa" }
+            "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
+            "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
+            "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
+            "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
 
-        # Chromosome configuration
-        chromosomes:
-          - chr1
-          - chr2
-          - chr3
-          - chr17
-          - chrX
-          - chrY
+          # Chromosome configuration
+          chromosomes:
+            - chr1
+            - chr2
+            - chr3
+            - chr17
+            - chrX
+            - chrY
 
-        # Default values for optional parameters
-        genecore_prefix: ""
-        genecore_date_folder: ""
-        multistep_normalisation_options:
-          min_reads_cell: 50000
-          min_reads_bin: 10000
-          n_subsample: 100000
-        ashleys_threshold: 0.5
-        ashleys_threshold_stringent: 0.8
-        window: 200000
-        abs_path: $(pwd)
-        plottype_counts: ["read_counts_raw"]
+          # Default values for optional parameters
+          genecore_prefix: ""
+          genecore_date_folder: ""
+          multistep_normalisation_options:
+            min_reads_cell: 50000
+            min_reads_bin: 10000
+            n_subsample: 100000
+          ashleys_threshold: 0.5
+          ashleys_threshold_stringent: 0.8
+          window: 200000
+          abs_path: $(pwd)
+          plottype_counts: ["read_counts_raw"]
 
-        # Mode-specific configuration
-        ${{ matrix.config }}
-        EOF
+          # Mode-specific configuration
+          ${{ matrix.config }}
+          EOF
 
-        # Show the generated config for debugging
-        echo "📋 Generated config for ${{ matrix.name }}:"
-        cat test_config_${{ strategy.job-index }}.yaml
+          # Show the generated config for debugging
+          echo "📋 Generated config for ${{ matrix.name }}:"
+          cat test_config_${{ strategy.job-index }}.yaml
 
-    - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
-      run: |
-        echo "🔍 Linting workflow with configuration: ${{ matrix.name }}"
-        micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --lint
-        echo "✅ Lint successful for: ${{ matrix.name }}"
-      shell: bash -el {0}
+      - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
+        run: |
+          echo "🔍 Linting workflow with configuration: ${{ matrix.name }}"
+          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --lint
+          echo "✅ Lint successful for: ${{ matrix.name }}"
+        shell: bash -el {0}
 
-    - name: "🔍 Validate workflow syntax with ${{ matrix.name }}"
-      run: |
-        echo "🔍 Validating workflow syntax for: ${{ matrix.name }}"
-        micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --dry-run --quiet || true
-        echo "✅ Syntax validation completed for: ${{ matrix.name }}"
-      shell: bash -el {0}
+      - name: "🔍 Validate workflow syntax with ${{ matrix.name }}"
+        run: |
+          echo "🔍 Validating workflow syntax for: ${{ matrix.name }}"
+          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --dry-run --quiet || true
+          echo "✅ Syntax validation completed for: ${{ matrix.name }}"
+        shell: bash -el {0}
 
-    - name: "🔍 Check rule graph generation"
-      run: |
-        echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
-        micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --rulegraph > /dev/null
-        echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
-      shell: bash -el {0}
+      - name: "🔍 Check rule graph generation"
+        run: |
+          echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
+          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --rulegraph > /dev/null
+          echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
+        shell: bash -el {0}
 
-    - name: Cleanup
-      if: always()
-      run: |
-        rm -f test_config_${{ strategy.job-index }}.yaml
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f test_config_${{ strategy.job-index }}.yaml
 
-    - name: "📦 Collect comprehensive test artifacts"
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: comprehensive-test-logs-${{ strategy.job-index }}-${{ matrix.name }}
-        path: |
-          .snakemake/log/
-          *.log
-        retention-days: 30
-        if-no-files-found: ignore
+      - name: "📦 Collect comprehensive test artifacts"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-logs-${{ strategy.job-index }}-${{ matrix.name }}
+          path: |
+            .snakemake/log/
+            *.log
+          retention-days: 30
+          if-no-files-found: ignore
 
   integration-testing:
     name: "Integration Testing"
@@ -364,16 +364,16 @@ jobs:
           echo "Test data structure:"
           tree -h .tests
           echo "
-Test configuration:"
-          cat .tests/config/simple_config_ashleys.yaml
-          echo "
-Workflow data:"
+            Test configuration:"
+                      cat .tests/config/simple_config_ashleys.yaml
+                      echo "
+            Workflow data:"
           tree -h workflow/data
 
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: 'latest'
+          micromamba-version: "latest"
           environment-name: snakemake-env
           create-args: >
             -c conda-forge
@@ -384,7 +384,7 @@ Workflow data:"
           init-shell: >-
             bash
           cache-environment: true
-          post-cleanup: 'all'
+          post-cleanup: "all"
 
       - name: "📋 List workflow command options"
         run: |
@@ -403,46 +403,53 @@ Workflow data:"
   summary:
     name: "CI Summary"
     runs-on: ubuntu-latest
-    needs: [code-quality, workflow-lint, container-validation, comprehensive-workflow-testing, integration-testing]
+    needs:
+      [
+        code-quality,
+        workflow-lint,
+        container-validation,
+        comprehensive-workflow-testing,
+        integration-testing,
+      ]
     if: always()
     steps:
-    - name: "📊 CI Results Summary"
-      run: |
-        echo "🎉 Ashleys-QC Pipeline CI Summary"
-        echo "====================================="
-        echo "📋 Tests completed:"
-        echo "  • Code quality & formatting: ${{ needs.code-quality.result }}"
-        echo "  • Basic workflow linting: ${{ needs.workflow-lint.result }}"
-        echo "  • Container validation: ${{ needs.container-validation.result }}"
-        echo "  • Comprehensive workflow testing: ${{ needs.comprehensive-workflow-testing.result }}"
-        echo "  • Integration testing: ${{ needs.integration-testing.result }}"
-        echo ""
-        echo "🔍 Workflow modes tested:"
-        echo "  • Standalone pipeline variants (paired/single-end, light/full QC)"
-        echo "  • Mosaicatcher integration modes"
-        echo "  • Multiple reference genomes (hg38, hg19, T2T, mm10, mm39)"
-        echo "  • Multistep normalization enabled/disabled"
-        echo "  • Ashleys bypass modes"
-        echo "  • Genecore data handling"
-        echo "  • Complex combination scenarios"
-        echo "  • Edge cases and special configurations"
-        echo ""
-        echo "🐳 Container validation:"
-        echo "  • Container hash consistency verified"
-        echo "  • Container requirements validated across all modes"
-        echo ""
+      - name: "📊 CI Results Summary"
+        run: |
+          echo "🎉 Ashleys-QC Pipeline CI Summary"
+          echo "====================================="
+          echo "📋 Tests completed:"
+          echo "  • Code quality & formatting: ${{ needs.code-quality.result }}"
+          echo "  • Basic workflow linting: ${{ needs.workflow-lint.result }}"
+          echo "  • Container validation: ${{ needs.container-validation.result }}"
+          echo "  • Comprehensive workflow testing: ${{ needs.comprehensive-workflow-testing.result }}"
+          echo "  • Integration testing: ${{ needs.integration-testing.result }}"
+          echo ""
+          echo "🔍 Workflow modes tested:"
+          echo "  • Standalone pipeline variants (paired/single-end, light/full QC)"
+          echo "  • Mosaicatcher integration modes"
+          echo "  • Multiple reference genomes (hg38, hg19, T2T, mm10, mm39)"
+          echo "  • Multistep normalization enabled/disabled"
+          echo "  • Ashleys bypass modes"
+          echo "  • Genecore data handling"
+          echo "  • Complex combination scenarios"
+          echo "  • Edge cases and special configurations"
+          echo ""
+          echo "🐳 Container validation:"
+          echo "  • Container hash consistency verified"
+          echo "  • Container requirements validated across all modes"
+          echo ""
 
-        # Check if any jobs failed
-        if [[ "${{ needs.code-quality.result }}" == "failure" || \
-              "${{ needs.workflow-lint.result }}" == "failure" || \
-              "${{ needs.container-validation.result }}" == "failure" || \
-              "${{ needs.comprehensive-workflow-testing.result }}" == "failure" || \
-              "${{ needs.integration-testing.result }}" == "failure" ]]; then
-          echo "❌ Some CI jobs failed! Check the logs above."
-          exit 1
-        else
-          echo "✅ All CI jobs passed successfully!"
-        fi
+          # Check if any jobs failed
+          if [[ "${{ needs.code-quality.result }}" == "failure" || \
+                "${{ needs.workflow-lint.result }}" == "failure" || \
+                "${{ needs.container-validation.result }}" == "failure" || \
+                "${{ needs.comprehensive-workflow-testing.result }}" == "failure" || \
+                "${{ needs.integration-testing.result }}" == "failure" ]]; then
+            echo "❌ Some CI jobs failed! Check the logs above."
+            exit 1
+          else
+            echo "✅ All CI jobs passed successfully!"
+          fi
 
   # HPC-testing:
   #   name: "HPC/SLURM Testing"
@@ -494,7 +501,14 @@ Workflow data:"
   collect-all-logs:
     name: "📦 Collect All CI Logs"
     runs-on: ubuntu-latest
-    needs: [code-quality, workflow-lint, container-validation, comprehensive-workflow-testing, integration-testing]
+    needs:
+      [
+        code-quality,
+        workflow-lint,
+        container-validation,
+        comprehensive-workflow-testing,
+        integration-testing,
+      ]
     if: always()
     steps:
       - name: "📦 Collect all workflow logs"
