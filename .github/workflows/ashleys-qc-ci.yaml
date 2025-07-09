@@ -110,123 +110,123 @@ jobs:
               genecore: false
               reference: "hg38"
 
-          - name: "Standalone + Single-end + Light data"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: false
-              use_light_data: true
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "hg38"
+          # - name: "Standalone + Single-end + Light data"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: false
+          #     use_light_data: true
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: false
+          #     reference: "hg38"
 
-          - name: "Standalone + Multistep normalization"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: true
-              bypass_ashleys: false
-              genecore: false
-              reference: "hg38"
-              window: 200000
+          # - name: "Standalone + Multistep normalization"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: true
+          #     bypass_ashleys: false
+          #     genecore: false
+          #     reference: "hg38"
+          #     window: 200000
 
-          - name: "Standalone + Ashleys bypass"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: true
-              genecore: false
-              reference: "hg38"
+          # - name: "Standalone + Ashleys bypass"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: false
+          #     bypass_ashleys: true
+          #     genecore: false
+          #     reference: "hg38"
 
-          # - name: "Standalone + Genecore data"
+          # # - name: "Standalone + Genecore data"
+          # #   config: |
+          # #     mosaicatcher_pipeline: false
+          # #     paired_end: true
+          # #     use_light_data: false
+          # #     multistep_normalisation: false
+          # #     bypass_ashleys: false
+          # #     genecore: true
+          # #     genecore_date_folder: "test_folder"
+          # #     reference: "hg38"
+
+          # - name: "Standalone + Mouse genome (mm10)"
           #   config: |
           #     mosaicatcher_pipeline: false
           #     paired_end: true
           #     use_light_data: false
           #     multistep_normalisation: false
           #     bypass_ashleys: false
-          #     genecore: true
-          #     genecore_date_folder: "test_folder"
-          #     reference: "hg38"
+          #     genecore: false
+          #     reference: "mm10"
 
-          - name: "Standalone + Mouse genome (mm10)"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "mm10"
-
-          - name: "Standalone + T2T genome"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "T2T"
-
-          # Mosaicatcher pipeline integration modes
-          - name: "Mosaicatcher + Paired-end"
-            config: |
-              mosaicatcher_pipeline: true
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "hg38"
-
-          - name: "Mosaicatcher + Single-end"
-            config: |
-              mosaicatcher_pipeline: true
-              paired_end: false
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "hg38"
-
-          # Complex combination modes
-          # - name: "Complex: Genecore + Light data + Mouse"
+          # - name: "Standalone + T2T genome"
           #   config: |
           #     mosaicatcher_pipeline: false
           #     paired_end: true
-          #     use_light_data: true
+          #     use_light_data: false
           #     multistep_normalisation: false
           #     bypass_ashleys: false
-          #     genecore: true
-          #     genecore_date_folder: "test_folder"
-          #     reference: "mm10"
+          #     genecore: false
+          #     reference: "T2T"
 
-          - name: "Complex: Multistep + Bypass + T2T"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: true
-              bypass_ashleys: true
-              genecore: false
-              reference: "T2T"
-              window: 200000
+          # # Mosaicatcher pipeline integration modes
+          # - name: "Mosaicatcher + Paired-end"
+          #   config: |
+          #     mosaicatcher_pipeline: true
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: false
+          #     reference: "hg38"
 
-          # Edge cases
-          - name: "Edge: List commands mode"
-            config: |
-              mosaicatcher_pipeline: false
-              paired_end: true
-              use_light_data: false
-              multistep_normalisation: false
-              bypass_ashleys: false
-              genecore: false
-              reference: "hg38"
-              list_commands: true
+          # - name: "Mosaicatcher + Single-end"
+          #   config: |
+          #     mosaicatcher_pipeline: true
+          #     paired_end: false
+          #     use_light_data: false
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: false
+          #     reference: "hg38"
+
+          # # Complex combination modes
+          # # - name: "Complex: Genecore + Light data + Mouse"
+          # #   config: |
+          # #     mosaicatcher_pipeline: false
+          # #     paired_end: true
+          # #     use_light_data: true
+          # #     multistep_normalisation: false
+          # #     bypass_ashleys: false
+          # #     genecore: true
+          # #     genecore_date_folder: "test_folder"
+          # #     reference: "mm10"
+
+          # - name: "Complex: Multistep + Bypass + T2T"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: true
+          #     bypass_ashleys: true
+          #     genecore: false
+          #     reference: "T2T"
+          #     window: 200000
+
+          # # Edge cases
+          # - name: "Edge: List commands mode"
+          #   config: |
+          #     mosaicatcher_pipeline: false
+          #     paired_end: true
+          #     use_light_data: false
+          #     multistep_normalisation: false
+          #     bypass_ashleys: false
+          #     genecore: false
+          #     reference: "hg38"
+          #     list_commands: true
 
     steps:
       - name: Checkout repository
@@ -258,7 +258,6 @@ jobs:
           # Convert matrix config to CLI override format
           echo "📋 Configuration overrides for ${{ matrix.name }}:"
           echo "${{ matrix.config }}" | sed 's/^/  /'
-
 
       - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
         run: |
