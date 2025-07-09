@@ -253,80 +253,37 @@ jobs:
           cache-environment: true
           post-cleanup: "all"
 
-      # - name: "🔧 Create test config for ${{ matrix.name }}"
-      #   run: |
-      #     # Create a temporary config file with the specific configuration
-      #     cat > test_config_${{ strategy.job-index }}.yaml << 'EOF'
-      #     # Base configuration
-      #     version: 2.3.5
-      #     email: ""
-      #     samples_to_process: []
-      #     data_location: "github-actions-runner/.tests-mock/data_CHR17"
-      #     publishdir: ""
-
-      #     # Reference genome configuration
-      #     references_data:
-      #       "hg38": { reference_fasta: "workflow/data/ref_genomes/hg38.fa" }
-      #       "T2T": { reference_fasta: "workflow/data/ref_genomes/T2T.fa" }
-      #       "hg19": { reference_fasta: "workflow/data/ref_genomes/hg19.fa" }
-      #       "mm10": { reference_fasta: "workflow/data/ref_genomes/mm10.fa" }
-      #       "mm39": { reference_fasta: "workflow/data/ref_genomes/mm39.fa" }
-
-      #     # Chromosome configuration
-      #     chromosomes:
-      #       - chr1
-      #       - chr2
-      #       - chr3
-      #       - chr17
-      #       - chrX
-      #       - chrY
-
-      #     # Default values for optional parameters
-      #     genecore_prefix: "github-actions-runner/.tests-mock/test_folder"
-      #     genecore_date_folder: ""
-      #     multistep_normalisation_options:
-      #       min_reads_cell: 50000
-      #       min_reads_bin: 10000
-      #       n_subsample: 100000
-      #     ashleys_threshold: 0.5
-      #     ashleys_threshold_stringent: 0.8
-      #     window: 200000
-      #     abs_path: $(pwd)
-      #     plottype_counts: ["read_counts_raw"]
-
-      #     # Mode-specific configuration
-      #     ${{ matrix.config }}
-      #     EOF
-
-      #     # Show the generated config for debugging
-      #     echo "📋 Generated config for ${{ matrix.name }}:"
-      #     cat test_config_${{ strategy.job-index }}.yaml
+      - name: "🔧 Prepare config overrides for ${{ matrix.name }}"
+        run: |
+          # Convert matrix config to CLI override format
+          echo "📋 Configuration overrides for ${{ matrix.name }}:"
+          echo "${{ matrix.config }}" | sed 's/^/  /'
 
       - name: "🔍 Lint workflow with ${{ matrix.name }} configuration"
         run: |
           echo "🔍 Linting workflow with configuration: ${{ matrix.name }}"
-          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --lint
+          # Build config override string from matrix config
+          CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
+          echo "Config overrides: $CONFIG_OVERRIDES"
+          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --lint
           echo "✅ Lint successful for: ${{ matrix.name }}"
         shell: bash -el {0}
 
       - name: "🔍 Validate workflow syntax with ${{ matrix.name }}"
         run: |
           echo "🔍 Validating workflow syntax for: ${{ matrix.name }}"
-          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --dry-run --quiet || true
+          CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
+          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --dry-run --quiet || true
           echo "✅ Syntax validation completed for: ${{ matrix.name }}"
         shell: bash -el {0}
 
       - name: "🔍 Check rule graph generation"
         run: |
           echo "🔍 Checking rule graph generation for: ${{ matrix.name }}"
-          micromamba run -n snakemake-env snakemake --configfile test_config_${{ strategy.job-index }}.yaml --rulegraph > /dev/null
+          CONFIG_OVERRIDES=$(echo "${{ matrix.config }}" | sed 's/^[[:space:]]*//' | sed 's/:[[:space:]]*/=/' | tr '\n' ' ')
+          micromamba run -n snakemake-env snakemake --configfile .tests/config/simple_config_ashleys.yaml --config $CONFIG_OVERRIDES --rulegraph > /dev/null
           echo "✅ Rule graph generation successful for: ${{ matrix.name }}"
         shell: bash -el {0}
-
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -f test_config_${{ strategy.job-index }}.yaml
 
       - name: "📦 Collect comprehensive test artifacts"
         if: always()
