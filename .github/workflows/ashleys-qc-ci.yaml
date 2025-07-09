@@ -282,7 +282,7 @@ jobs:
             - chrY
 
           # Default values for optional parameters
-          genecore_prefix: ""
+          genecore_prefix: "github-actions-runner/.tests-mock/test_folder"
           genecore_date_folder: ""
           multistep_normalisation_options:
             min_reads_cell: 50000
