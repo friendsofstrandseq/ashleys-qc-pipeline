@@ -328,6 +328,17 @@ jobs:
       run: |
         rm -f test_config_${{ strategy.job-index }}.yaml
 
+    - name: "📦 Collect comprehensive test artifacts"
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: comprehensive-test-logs-${{ strategy.job-index }}-${{ matrix.name }}
+        path: |
+          .snakemake/log/
+          *.log
+        retention-days: 30
+        if-no-files-found: ignore
+
   integration-testing:
     name: "Integration Testing"
     runs-on: ubuntu-latest
@@ -352,9 +363,11 @@ jobs:
         run: |
           echo "Test data structure:"
           tree -h .tests
-          echo "\nTest configuration:"
+          echo "
+Test configuration:"
           cat .tests/config/simple_config_ashleys.yaml
-          echo "\nWorkflow data:"
+          echo "
+Workflow data:"
           tree -h workflow/data
 
       - name: Setup micromamba
@@ -477,3 +490,21 @@ jobs:
   #       run: |
   #         snakemake -j 1 -c 1 --executor slurm --workflow-profile .tests/config/slurm_config/ \
   #         --use-conda --conda-frontend mamba --configfile .tests/config/simple_config_ashleys.yaml -p --snakefile workflow/Snakefile
+
+  collect-all-logs:
+    name: "📦 Collect All CI Logs"
+    runs-on: ubuntu-latest
+    needs: [code-quality, workflow-lint, container-validation, comprehensive-workflow-testing, integration-testing]
+    if: always()
+    steps:
+      - name: "📦 Collect all workflow logs"
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-ci-logs-${{ github.run_id }}
+          path: |
+            .snakemake/log/
+            *.log
+            **/log/
+            **/*.log
+          retention-days: 30
+          if-no-files-found: ignore
